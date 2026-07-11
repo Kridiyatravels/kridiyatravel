@@ -188,7 +188,14 @@
 }
 
 .drawer .nav-logo{ min-width:0; }
-.drawer .nav-logo img{ height:44px; }
+.drawer .nav-logo img,
+.drawer-head > img{
+  display:block;
+  height:44px;
+  max-height:44px;
+  width:auto;
+  object-fit:contain;
+}
 .drawer-close{
   color:#fff;
   font-size:30px;
