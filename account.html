@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Account — Kridiya Travel and Tourism</title>
+<meta name="description" content="Manage your Kridiya Travel profile and view your enquiry history.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/favicon-180.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="account">
+<header id="site-header" class="site-header"></header>
+<main>
+  <section class="section">
+    <div class="container">
+      <h1 style="margin-bottom:1.4rem">My account</h1>
+      <div class="account-grid">
+        <aside class="account-side">
+          <div class="avatar" id="acc-avatar" aria-hidden="true">?</div>
+          <h2 style="font-size:1.2rem;margin-bottom:0.2rem" id="acc-name">—</h2>
+          <p style="margin:0;color:var(--text-muted);font-size:0.9rem;word-break:break-all" id="acc-email">—</p>
+          <p style="margin:0.3rem 0 1.2rem;color:var(--text-muted);font-size:0.82rem" id="acc-since"></p>
+          <a class="btn btn-primary btn-block" href="index.html" style="margin-bottom:0.6rem">New enquiry</a>
+          <button class="btn btn-outline btn-block" id="logout-btn" type="button">Log out</button>
+        </aside>
+
+        <div style="display:grid;gap:1.4rem">
+          <div class="account-main">
+            <h2 style="font-size:1.25rem">My enquiries</h2>
+            <p class="form-note" style="margin-bottom:1rem">Enquiries you send while logged in on this device appear here.</p>
+            <div id="enq-list">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z"/></svg>
+                <p><b>No enquiries yet.</b><br>Search a flight or pick a holiday package — your requests will show up here.</p>
+                <a class="btn btn-primary" href="index.html">Start planning</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="account-main">
+            <h2 style="font-size:1.25rem">Profile</h2>
+            <form id="profile-form" class="form-grid" novalidate>
+              <div class="field-row">
+                <div class="field col-6"><label for="pf-name">FULL NAME</label><input id="pf-name" name="name" required></div>
+                <div class="field col-6"><label for="pf-phone">PHONE / WHATSAPP</label><input id="pf-phone" name="phone" type="tel" required></div>
+              </div>
+              <div><button class="btn btn-primary" type="submit">Save changes</button></div>
+            </form>
+          </div>
+
+          <div class="account-main">
+            <h2 style="font-size:1.25rem">Change password</h2>
+            <form id="password-form" class="form-grid" novalidate>
+              <div class="form-banner error" hidden role="alert"></div>
+              <div class="field-row">
+                <div class="field col-6"><label for="cp-cur">CURRENT PASSWORD</label>
+                  <div class="pw-wrap"><input id="cp-cur" name="current" type="password" autocomplete="current-password" required>
+                  <button type="button" class="pw-toggle" aria-label="Show password">SHOW</button></div></div>
+                <div class="field col-6"><label for="cp-new">NEW PASSWORD</label>
+                  <div class="pw-wrap"><input id="cp-new" name="newpass" type="password" autocomplete="new-password" required minlength="8">
+                  <button type="button" class="pw-toggle" aria-label="Show password">SHOW</button></div>
+                  <span class="sub">Minimum 8 characters with letters and numbers.</span></div>
+              </div>
+              <div><button class="btn btn-primary" type="submit" data-label="Update password">Update password</button></div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script src="js/main.js" defer></script>
+<script src="js/auth.js" defer></script>
+</body>
+</html>
+
+
