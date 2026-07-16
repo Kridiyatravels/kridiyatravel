@@ -1,0 +1,373 @@
+﻿/* ============================================================
+   Kridiya Travel — shared chrome, config & helpers
+   ============================================================ */
+"use strict";
+
+document.documentElement.classList.add("js");
+
+/* ---------- Business config ---------- */
+const KRIDIYA = {
+  brand: "Kridiya Travel",
+  legal: "Kridiya Travel and Tourism FC-LLC",
+  slogan: "Your Journey, Our Passion.",
+  address: "Ras Al Khaimah, United Arab Emirates",
+  phoneDisplay: "+971 50 941 3873",
+  phoneTel: "+971509413873",
+  waNumber: "971509413873",
+  emails: {
+    enquiry: "enquiry@kridiyatravel.com",
+    contact: "contact@kridiyatravel.com",
+    info: "info@kridiyatravel.com"
+  },
+  social: {
+    instagram: "https://www.instagram.com/kridiyatravel",
+    facebook: "https://www.facebook.com/profile.php?id=61592086520680"
+  }
+};
+
+function waLink(message) {
+  return "https://wa.me/" + KRIDIYA.waNumber + (message ? "?text=" + encodeURIComponent(message) : "");
+}
+
+/* ---------- SVG icon paths (24x24 viewBox) ---------- */
+const ICONS = {
+  phone: "M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z",
+  mail: "M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z",
+  pin: "M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z",
+  plane: "M21.5 15.5 13 10.7V4.5C13 3.7 12.3 3 11.5 3S10 3.7 10 4.5v6.2l-8.5 4.8v2l8.5-2.7v5.4L8 21.7V23l3.5-1 3.5 1v-1.3l-2-1.5v-5.4l8.5 2.7v-2z",
+  hotel: "M7 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm12-6h-8v7H5V5H3v14h2v-2h14v2h2v-9a4 4 0 0 0-4-4z",
+  globe: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm7 9h-3a15 15 0 0 0-1.3-5.7A8 8 0 0 1 19 11zM12 4.1c.9 1.2 1.8 3.5 2 6.9h-4c.2-3.4 1.1-5.7 2-6.9zM5 13h3a15 15 0 0 0 1.3 5.7A8 8 0 0 1 5 13zm4.3-2H5a8 8 0 0 1 4.3-5.7A15 15 0 0 0 9.3 11zM12 19.9c-.9-1.2-1.8-3.5-2-6.9h4c-.2 3.4-1.1 5.7-2 6.9zm2.7-1.2A15 15 0 0 0 16 13h3a8 8 0 0 1-4.3 5.7z",
+  suitcase: "M9 6V4c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2h3c1.1 0 2 .9 2 2v11c0 1.1-.9 2-2 2H6c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h3zm2-2v2h2V4h-2zM8 9v9h1.5V9H8zm6.5 0v9H16V9h-1.5z",
+  passport: "M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H6zm6 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm0 1.6c.5.7 1 1.7 1.1 2.4h-2.2c.1-.7.6-1.7 1.1-2.4zM9.7 10c-.2-.6-.1-1 .1-1.5.3-.5.8-.8 1.2-1-.4.8-.7 1.7-.7 2.5h-.6zm4 0c0-.8-.3-1.7-.7-2.5.4.2.9.5 1.2 1 .2.5.3.9.1 1.5h-.6zM9.7 12h.6c0 .8.3 1.7.7 2.5-.4-.2-.9-.5-1.2-1-.2-.5-.3-.9-.1-1.5zm4.6 0h.6c.2.6.1 1-.1 1.5-.3.5-.8.8-1.2 1 .4-.8.7-1.7.7-2.5zM8 17h8v1.5H8V17z",
+  whatsapp: "M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-3-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.2-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s1 2.5 1.1 2.7c.1.2 1.9 3 4.7 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.6-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3z",
+  instagram: "M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.8.2 2.2.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c.1-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 1.8c-3.1 0-3.5 0-4.8.1-1.1.1-1.5.2-1.9.3-.5.2-.8.4-1.1.7-.3.3-.5.6-.7 1.1-.1.4-.3.8-.3 1.9-.1 1.3-.1 1.7-.1 4.8s0 3.5.1 4.8c.1 1.1.2 1.5.3 1.9.2.5.4.8.7 1.1.3.3.6.5 1.1.7.4.1.8.3 1.9.3 1.3.1 1.7.1 4.8.1s3.5 0 4.8-.1c1.1-.1 1.5-.2 1.9-.3.5-.2.8-.4 1.1-.7.3-.3.5-.6.7-1.1.1-.4.3-.8.3-1.9.1-1.3.1-1.7.1-4.8s0-3.5-.1-4.8c-.1-1.1-.2-1.5-.3-1.9-.2-.5-.4-.8-.7-1.1-.3-.3-.6-.5-1.1-.7-.4-.1-.8-.3-1.9-.3-1.3-.1-1.7-.1-4.8-.1zm0 3.1a5 5 0 1 1 0 9.9 5 5 0 0 1 0-9.9zm0 1.8a3.1 3.1 0 1 0 0 6.3 3.1 3.1 0 0 0 0-6.3zm5.1-2.2a1.2 1.2 0 1 1 0 2.3 1.2 1.2 0 0 1 0-2.3z",
+  facebook: "M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z",
+  shield: "M12 1 3 5v6c0 5.6 3.8 10.7 9 12 5.2-1.3 9-6.4 9-12V5l-9-4zm-2 16-4-4 1.4-1.4L10 14.2l6.6-6.6L18 9l-8 8z",
+  clock: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm4.2 14.2L11 13.3V7h1.5v5.4l4.5 2.7-.8 1.1z",
+  tag: "M21.4 11.6 12.4 2.6A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .5.2 1 .6 1.4l9 9c.8.8 2 .8 2.8 0l7-7c.8-.8.8-2 0-2.8zM6.5 8A1.5 1.5 0 1 1 8 6.5 1.5 1.5 0 0 1 6.5 8z",
+  users: "M16 11c1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3 1.3 3 3 3zm-8 0c1.7 0 3-1.3 3-3S9.7 5 8 5 5 6.3 5 8s1.3 3 3 3zm0 2c-2.3 0-7 1.2-7 3.5V19h14v-2.5C15 14.2 10.3 13 8 13zm8 0h-1.1c1.2.8 2.1 1.9 2.1 3.5V19h6v-2.5c0-2.3-4.7-3.5-7-3.5z",
+  swap: "M6.99 11 3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z",
+  calendar: "M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z",
+  menu: "M3 6h18v2H3V6zm0 5h18v2H3v-2zm0 5h18v2H3v-2z",
+  close: "M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4z",
+  star: "M12 17.3 6.2 21l1.6-6.6L2.5 9.9l6.8-.5L12 3l2.7 6.4 6.8.5-5.3 4.5L17.8 21z",
+  check: "M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z",
+  inbox: "M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z",
+  chevronLeft: "M15.4 6 9.4 12l6 6 1.4-1.4L12.2 12l4.6-4.6z",
+  chevronRight: "M8.6 6 14.6 12l-6 6-1.4-1.4L11.8 12 7.2 7.4z",
+  plus: "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z",
+  trash: "M6 7h12l-1 13.1c-.1 1-.9 1.9-2 1.9H9c-1.1 0-1.9-.9-2-1.9zm3-3h6l1 2H8zM4 5h16v2H4z",
+  route: "M4 6a3 3 0 1 1 4.9 2.3l3 3.6L18 9c-.6-.5-1-1.3-1-2.1a3 3 0 1 1 3.9 2.9l-6.6 6.6a1 1 0 0 1-1.4 0L7 10.6 4 14.3V19h13v2H4a2 2 0 0 1-2-2v-5.3a2 2 0 0 1 .4-1.2l3-4A3 3 0 0 1 4 6z"
+};
+
+function icon(name, cls) {
+  return '<svg class="' + (cls || "") + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="' + ICONS[name] + '"/></svg>';
+}
+
+/* ---------- Logo (uploaded KD artwork, shared by header and footer) ---------- */
+function logoHTML(footer) {
+  return (
+    '<a class="logo" href="index.html" aria-label="Kridiya Travel — home">' +
+      '<img class="logo-art" src="assets/logo.png" alt="Kridiya Travel and Tourism" width="1024" height="1024" decoding="async">' +
+    "</a>"
+  );
+}
+
+/* ---------- Site chrome ---------- */
+const NAV_ITEMS = [
+  ["index.html", "Home"],
+  ["flights.html", "Flights"],
+  ["hotels.html", "Hotels"],
+  ["holidays.html", "Holidays"],
+  ["visa.html", "Visa"],
+  ["about.html", "About Us"],
+  ["contact.html", "Contact"]
+];
+
+function currentPage() {
+  const p = location.pathname.split("/").pop();
+  return p === "" ? "index.html" : p;
+}
+
+function renderChrome() {
+  const page = currentPage();
+  const header = document.getElementById("site-header");
+  if (header) {
+    header.innerHTML =
+      '<div class="topbar"><div class="container topbar-inner">' +
+        '<div class="topbar-group">' +
+          '<span class="topbar-item">' + icon("phone") + '<a href="tel:' + KRIDIYA.phoneTel + '">' + KRIDIYA.phoneDisplay + "</a></span>" +
+          '<span class="topbar-item optional">' + icon("mail") + '<a href="mailto:' + KRIDIYA.emails.info + '">' + KRIDIYA.emails.info + "</a></span>" +
+          '<span class="topbar-item optional">' + icon("pin") + "<span>" + KRIDIYA.address + "</span></span>" +
+        "</div>" +
+        '<div class="topbar-social">' +
+          '<a class="icon-instagram" href="' + KRIDIYA.social.instagram + '" target="_blank" rel="noopener" aria-label="Kridiya Travel on Instagram">' + icon("instagram") + "</a>" +
+          '<a class="icon-facebook" href="' + KRIDIYA.social.facebook + '" target="_blank" rel="noopener" aria-label="Kridiya Travel on Facebook">' + icon("facebook") + "</a>" +
+          '<a class="icon-whatsapp" href="' + waLink() + '" target="_blank" rel="noopener" aria-label="Chat with Kridiya Travel on WhatsApp">' + icon("whatsapp") + "</a>" +
+        "</div>" +
+      "</div></div>" +
+      '<div class="container header-inner">' +
+        logoHTML(false) +
+        '<button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="main-nav">' + icon("menu") + "</button>" +
+        '<nav class="main-nav" id="main-nav" aria-label="Main navigation"><ul>' +
+          NAV_ITEMS.map(function (it) {
+            const cur = it[0] === page ? ' aria-current="page"' : "";
+            return '<li><a href="' + it[0] + '"' + cur + ">" + it[1] + "</a></li>";
+          }).join("") +
+        "</ul></nav>" +
+        '<div class="header-actions">' +
+          '<a class="header-call" href="tel:' + KRIDIYA.phoneTel + '">' + icon("phone") +
+            "<span><small>24/7 support</small>" + KRIDIYA.phoneDisplay + "</span></a>" +
+          '<a class="btn btn-primary" href="login.html" id="account-btn">Login</a>' +
+        "</div>" +
+      "</div>" +
+      '<button class="nav-backdrop" aria-hidden="true" tabindex="-1"></button>';
+
+    const nav = header.querySelector(".main-nav");
+    const toggle = header.querySelector(".nav-toggle");
+    const backdrop = header.querySelector(".nav-backdrop");
+    function setNav(open) {
+      nav.classList.toggle("open", open);
+      backdrop.classList.toggle("show", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.innerHTML = icon(open ? "close" : "menu");
+      toggle.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    }
+    toggle.addEventListener("click", function () { setNav(!nav.classList.contains("open")); });
+    backdrop.addEventListener("click", function () { setNav(false); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && nav.classList.contains("open")) setNav(false);
+    });
+
+    // Reflect signed-in state
+    const session = window.KridiyaAuth ? KridiyaAuth.session() : null;
+    if (session) {
+      const btn = document.getElementById("account-btn");
+      btn.textContent = "Hi, " + session.name.split(" ")[0];
+      btn.href = "account.html";
+    }
+  }
+
+  const footer = document.getElementById("site-footer");
+  if (footer) {
+    footer.innerHTML =
+      '<div class="container">' +
+      '<div class="footer-grid">' +
+        '<div class="footer-brand">' + logoHTML(true) +
+          "<p>" + KRIDIYA.legal + " is a licensed travel house in " + KRIDIYA.address +
+          ". Flights, hotels, holidays, visas and Umrah — handled end to end by real travel experts, 24/7.</p>" +
+          '<div class="footer-social">' +
+            '<a class="icon-instagram" href="' + KRIDIYA.social.instagram + '" target="_blank" rel="noopener" aria-label="Instagram">' + icon("instagram") + "</a>" +
+            '<a class="icon-facebook" href="' + KRIDIYA.social.facebook + '" target="_blank" rel="noopener" aria-label="Facebook">' + icon("facebook") + "</a>" +
+            '<a class="icon-whatsapp" href="' + waLink() + '" target="_blank" rel="noopener" aria-label="WhatsApp">' + icon("whatsapp") + "</a>" +
+          "</div>" +
+        "</div>" +
+      "<div><h4>Our Services</h4><ul class=\"footer-links\">" +
+          '<li><a href="flights.html">Flight Booking</a></li>' +
+          '<li><a href="hotels.html">Hotel Booking</a></li>' +
+          '<li><a href="holidays.html">Holiday Packages</a></li>' +
+          '<li><a href="holidays.html#umrah">Umrah Packages</a></li>' +
+          '<li><a href="visa.html">Visa Services</a></li>' +
+          '<li><a href="contact.html">Travel Insurance</a></li>' +
+        "</ul></div>" +
+        "<div><h4>Company</h4><ul class=\"footer-links\">" +
+          '<li><a href="about.html">About Us</a></li>' +
+          '<li><a href="contact.html">Contact Us</a></li>' +
+          '<li><a href="login.html">Customer Login</a></li>' +
+          '<li><a href="register.html">Create Account</a></li>' +
+          '<li><a href="about.html#faq">FAQs</a></li>' +
+        "</ul></div>" +
+        "<div><h4>Get in Touch</h4><ul class=\"footer-contact\">" +
+          "<li>" + icon("pin") + "<span>" + KRIDIYA.legal + "<br>" + KRIDIYA.address + "</span></li>" +
+          "<li>" + icon("phone") + '<a href="tel:' + KRIDIYA.phoneTel + '">' + KRIDIYA.phoneDisplay + "</a></li>" +
+          "<li>" + icon("mail") + '<a href="mailto:' + KRIDIYA.emails.info + '">' + KRIDIYA.emails.info + "</a></li>" +
+        "</ul>" +
+        "<h4>Deals in your inbox</h4>" +
+        '<form class="newsletter-form" id="newsletter-form" method="POST" action="https://formsubmit.co/' + KRIDIYA.emails.info + '">' +
+          '<input type="hidden" name="_subject" value="Newsletter subscription — kridiyatravel.com">' +
+          '<input type="hidden" name="_captcha" value="false">' +
+          '<input type="hidden" name="_template" value="table">' +
+          '<input type="email" name="email" placeholder="Your email address" required aria-label="Email address for newsletter">' +
+          '<button class="btn btn-primary" type="submit">Join</button>' +
+        "</form></div>" +
+      "</div>" +
+      '<div class="footer-routes"><h4>Popular flight routes</h4><p>' +
+        [["DXB", "Dubai", "COK", "Kochi"], ["DXB", "Dubai", "BOM", "Mumbai"], ["DXB", "Dubai", "DEL", "Delhi"],
+         ["SHJ", "Sharjah", "MNL", "Manila"], ["DXB", "Dubai", "KHI", "Karachi"], ["DXB", "Dubai", "DAC", "Dhaka"],
+         ["DXB", "Dubai", "CAI", "Cairo"], ["DXB", "Dubai", "IST", "Istanbul"], ["DXB", "Dubai", "LHR", "London"],
+         ["DXB", "Dubai", "TBS", "Tbilisi"], ["DXB", "Dubai", "BKK", "Bangkok"], ["DXB", "Dubai", "CCJ", "Kozhikode"]]
+        .map(function (r) {
+          return '<a href="flights.html?trip=round&from=' + r[0] + "&fromCity=" + r[1] + "&to=" + r[2] + "&toCity=" + r[3] +
+            '&adults=1&children=0&infants=0&cabin=Economy">' + r[1] + " to " + r[3] + " flights</a>";
+        }).join('<span class="dot" aria-hidden="true"> · </span>') +
+      "</p></div>" +
+      "</div>" +
+      '<div class="footer-bar"><div class="container footer-legal">' +
+        "<span>© " + new Date().getFullYear() + " " + KRIDIYA.legal + ". All rights reserved.</span>" +
+        '<span class="slogan-line">' + KRIDIYA.slogan + "</span>" +
+      "</div></div>";
+    prepareFormSubmit(footer.querySelector("#newsletter-form"));
+  }
+
+  // Floating WhatsApp
+  const wa = document.createElement("a");
+  wa.className = "wa-float";
+  wa.href = waLink("Hello Kridiya Travel! I have a travel enquiry.");
+  wa.target = "_blank";
+  wa.rel = "noopener";
+  wa.setAttribute("aria-label", "Chat with us on WhatsApp");
+  wa.innerHTML = icon("whatsapp") + "<span>WhatsApp us</span>";
+  document.body.appendChild(wa);
+}
+
+/* ---------- Toast ---------- */
+let toastTimer = null;
+function toast(msg) {
+  let el = document.querySelector(".toast");
+  if (!el) {
+    el = document.createElement("div");
+    el.className = "toast";
+    el.setAttribute("role", "status");
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  requestAnimationFrame(function () { el.classList.add("show"); });
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () { el.classList.remove("show"); }, 4200);
+}
+
+/* ---------- FormSubmit plumbing ----------
+   Every enquiry/contact form POSTs to https://formsubmit.co/<inbox>.
+   We add the redirect target at submit time (needs an absolute URL),
+   run validation, and archive a copy into the signed-in user's history. */
+function prepareFormSubmit(form) {
+  if (!form) return;
+  let next = form.querySelector('input[name="_next"]');
+  if (!next) {
+    next = document.createElement("input");
+    next.type = "hidden";
+    next.name = "_next";
+    form.appendChild(next);
+  }
+  form.addEventListener("submit", function (e) {
+    if (!validateForm(form)) { e.preventDefault(); return; }
+    next.value = new URL("thanks.html", location.href).href;
+    const btn = form.querySelector('button[type="submit"]');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Sending…';
+    }
+    archiveEnquiry(form);
+  });
+}
+
+/* ---------- Validation ---------- */
+const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const RE_PHONE = /^\+?[0-9\s\-()]{7,17}$/;
+
+function setFieldError(input, msg) {
+  const field = input.closest(".field");
+  if (!field) return;
+  let err = field.querySelector(".err");
+  if (!err) {
+    err = document.createElement("span");
+    err.className = "err";
+    field.appendChild(err);
+  }
+  if (msg) {
+    field.classList.add("invalid");
+    err.textContent = msg;
+  } else {
+    field.classList.remove("invalid");
+    err.textContent = "";
+  }
+}
+
+function validateForm(form) {
+  let ok = true, first = null;
+  form.querySelectorAll("input[required], select[required], textarea[required]").forEach(function (input) {
+    if (input.type === "hidden") return;
+    let msg = "";
+    const v = input.value.trim();
+    if (!v) msg = "This field is required.";
+    else if (input.type === "email" && !RE_EMAIL.test(v)) msg = "Enter a valid email address.";
+    else if (input.type === "tel" && !RE_PHONE.test(v)) msg = "Enter a valid phone number (e.g. +971 50 941 3873).";
+    setFieldError(input, msg);
+    if (msg) { ok = false; if (!first) first = input; }
+  });
+  if (first) first.focus();
+  return ok;
+}
+
+/* Clear errors as the user types */
+document.addEventListener("input", function (e) {
+  if (e.target.matches(".field input, .field select, .field textarea")) setFieldError(e.target, "");
+});
+
+/* ---------- Enquiry history (per signed-in user) ---------- */
+function archiveEnquiry(form) {
+  try {
+    const session = window.KridiyaAuth ? KridiyaAuth.session() : null;
+    if (!session) return;
+    const type = form.dataset.enquiryType || "Enquiry";
+    const data = new FormData(form);
+    const parts = [];
+    data.forEach(function (v, k) {
+      if (k.startsWith("_") || !String(v).trim()) return;
+      parts.push(k.replace(/_/g, " ") + ": " + v);
+    });
+    const key = "kridiya_enquiries_" + session.email;
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    list.unshift({ type: type, at: new Date().toISOString(), summary: parts.join(" · ") });
+    localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
+  } catch (err) { /* history is best-effort */ }
+}
+
+/* ---------- Reveal-on-scroll (enhance-only; content visible without JS) ---------- */
+function initReveal() {
+  if (!("IntersectionObserver" in window)) return;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll(".reveal").forEach(function (el) { el.classList.add("in"); });
+    return;
+  }
+  const io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+    });
+  }, { rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".reveal").forEach(function (el) { io.observe(el); });
+}
+
+/* ---------- Date helpers ----------
+   Always format dates from local Y/M/D, never toISOString() — that
+   converts to UTC first and silently rolls the date back or forward
+   a day depending on the visitor's timezone offset. */
+function localISO(d) {
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+function todayISO(offsetDays) {
+  const d = new Date();
+  d.setDate(d.getDate() + (offsetDays || 0));
+  return localISO(d);
+}
+function initDateMins() {
+  document.querySelectorAll('input[type="date"][data-min-today]').forEach(function (el) {
+    el.min = todayISO(0);
+    if (!el.value) el.value = todayISO(parseInt(el.dataset.defaultOffset || "3", 10));
+  });
+}
+
+function fmtDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+}
+
+/* ---------- Boot ---------- */
+document.addEventListener("DOMContentLoaded", function () {
+  renderChrome();
+  initDateMins();
+  document.querySelectorAll("form[data-formsubmit]").forEach(prepareFormSubmit);
+  initReveal();
+});
+
