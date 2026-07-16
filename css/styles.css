@@ -154,8 +154,8 @@ a:hover { text-decoration: underline; }
 .btn svg { width: 18px; height: 18px; fill: currentColor; flex: none; }
 .btn { white-space: nowrap; }
 .btn:active { transform: scale(0.97); }
-.btn-primary { background: var(--brand); background-image: none; color: #fff; box-shadow: none; }
-.btn-primary:hover { background: var(--brand-deep); color: #fff; }
+.btn-primary { background: var(--brand-soft); background-image: none; color: var(--brand-deep); box-shadow: none; }
+.btn-primary:hover { background: var(--surface); color: var(--brand-deep); }
 .btn-dark { background: var(--blue-deep); background-image: var(--grad-dark); color: var(--on-dark); }
 .btn-dark:hover { filter: brightness(1.15); }
 .btn-outline { background: transparent; color: var(--blue); box-shadow: none; }
