@@ -68,7 +68,7 @@ function icon(name, cls) {
 function logoHTML(footer) {
   return (
     '<a class="logo" href="index.html" aria-label="Kridiya Travel — home">' +
-      '<img class="logo-art" src="assets/logo.png" alt="Kridiya Travel and Tourism" width="1024" height="1024" decoding="async">' +
+      '<img class="logo-art" src="assets/logo.png" alt="Kridiya Travel and Tourism" width="256" height="256" decoding="async">' +
     "</a>"
   );
 }
