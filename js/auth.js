@@ -497,6 +497,8 @@ window.KridiyaAuth = (function () {
       const listEl = document.getElementById("enq-list");
       try {
         const bookings = await KridiyaAuth.listBookings();
+        const summaryBookings = document.getElementById("summary-bookings");
+        if (summaryBookings) summaryBookings.textContent = String(bookings.length);
         if (bookings.length) {
           listEl.innerHTML = bookings.map(function (booking) {
             const created = new Date(booking.created_at);
@@ -599,6 +601,27 @@ window.KridiyaAuth = (function () {
           banner(form, err.message, "error");
           busy(form, false);
         }
+      });
+    });
+  }
+
+  if (page === "forgot-password") {
+    document.addEventListener("DOMContentLoaded", async function () {
+      const form = document.getElementById("forgot-password-form");
+      try { await KridiyaAuth.client(); } catch (e) {}
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        if (!validateForm(form)) return;
+        banner(form, "");
+        busy(form, true, "Sending...");
+        try {
+          await KridiyaAuth.resetPassword(form.email.value);
+          banner(form, "Password reset email sent. Check your inbox and use the newest link.", "success");
+          form.reset();
+        } catch (err) {
+          banner(form, err.message, "error");
+        }
+        busy(form, false);
       });
     });
   }

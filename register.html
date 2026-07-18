@@ -16,42 +16,53 @@
 <header id="site-header" class="site-header"></header>
 <main>
   <div class="container auth-wrap">
-    <div class="auth-card">
-      <h1>Create your account</h1>
-      <p class="auth-sub">Free forever. Your enquiries in one place, quotes prefilled with your details.</p>
-      <form id="register-form" class="form-grid" novalidate>
-        <div class="form-banner error" hidden role="alert"></div>
-        <div class="field">
-          <label for="rg-name">FULL NAME</label>
-          <input id="rg-name" name="name" autocomplete="name" required placeholder="As on your passport">
-        </div>
-        <div class="field">
-          <label for="rg-email">EMAIL</label>
-          <input id="rg-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
-        </div>
-        <div class="field">
-          <label for="rg-phone">PHONE / WHATSAPP</label>
-          <input id="rg-phone" name="phone" type="tel" autocomplete="tel" required placeholder="+971 50 123 4567">
-        </div>
-        <div class="field">
-          <label for="rg-pass">PASSWORD</label>
-          <div class="pw-wrap">
-            <input id="rg-pass" name="password" type="password" autocomplete="new-password" required
-                   placeholder="At least 8 characters, letters + numbers" minlength="8"
-                   aria-describedby="pw-hint">
-            <button type="button" class="pw-toggle" aria-label="Show password">SHOW</button>
+    <div class="auth-shell">
+      <section class="auth-card">
+        <h1>Create your account</h1>
+        <p class="auth-sub">Use one secure profile for quotes, booking updates, and faster support.</p>
+        <form id="register-form" class="form-grid" novalidate>
+          <div class="form-banner error" hidden role="alert"></div>
+          <div class="field">
+            <label for="rg-name">FULL NAME</label>
+            <input id="rg-name" name="name" autocomplete="name" required placeholder="As on your passport">
           </div>
-          <div class="pw-meter" aria-hidden="true"><i></i></div>
-          <span class="sub" id="pw-hint">Minimum 8 characters with at least one letter and one number.</span>
-        </div>
-        <div class="field">
-          <label for="rg-confirm">CONFIRM PASSWORD</label>
-          <input id="rg-confirm" name="confirm" type="password" autocomplete="new-password" required placeholder="Type it again">
-        </div>
-        <button class="btn btn-primary btn-block btn-lg" type="submit" data-label="Create account">Create account</button>
-        <p class="form-note">By registering, you agree to Kridiya Travel's <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms &amp; Conditions</a>. Your account is secured by Supabase Auth and works across your devices after email confirmation.</p>
-      </form>
-      <p class="auth-alt">Already have an account? <a href="login.html"><b>Log in</b></a></p>
+          <div class="field">
+            <label for="rg-email">EMAIL</label>
+            <input id="rg-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="rg-phone">PHONE / WHATSAPP</label>
+            <input id="rg-phone" name="phone" type="tel" autocomplete="tel" required placeholder="+971 50 123 4567">
+          </div>
+          <div class="field">
+            <label for="rg-pass">PASSWORD</label>
+            <div class="pw-wrap">
+              <input id="rg-pass" name="password" type="password" autocomplete="new-password" required
+                     placeholder="At least 8 characters, letters + numbers" minlength="8"
+                     aria-describedby="pw-hint">
+              <button type="button" class="pw-toggle" aria-label="Show password">SHOW</button>
+            </div>
+            <div class="pw-meter" aria-hidden="true"><i></i></div>
+            <span class="sub" id="pw-hint">Minimum 8 characters with at least one letter and one number.</span>
+          </div>
+          <div class="field">
+            <label for="rg-confirm">CONFIRM PASSWORD</label>
+            <input id="rg-confirm" name="confirm" type="password" autocomplete="new-password" required placeholder="Type it again">
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" type="submit" data-label="Create account">Create account</button>
+          <p class="form-note">By registering, you agree to Kridiya Travel's <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms &amp; Conditions</a>. Your account is secured by Supabase Auth and works across your devices after email confirmation.</p>
+        </form>
+        <p class="auth-alt">Already have an account? <a href="login.html"><b>Log in</b></a></p>
+      </section>
+
+      <aside class="auth-assist">
+        <h2>Account includes</h2>
+        <ul class="auth-checklist">
+          <li><b>Email verification</b><span>Only confirmed email addresses can use the account.</span></li>
+          <li><b>Cross-device access</b><span>Use the same login on mobile, laptop, or tablet.</span></li>
+          <li><b>Travel-ready profile</b><span>Name and WhatsApp are saved for quicker quote handling.</span></li>
+        </ul>
+      </aside>
     </div>
   </div>
 </main>

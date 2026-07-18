@@ -16,27 +16,41 @@
 <header id="site-header" class="site-header"></header>
 <main>
   <div class="container auth-wrap">
-    <div class="auth-card">
-      <h1>Welcome back</h1>
-      <p class="auth-sub">Log in to see your enquiries and get faster quotes.</p>
-      <form id="login-form" class="form-grid" novalidate>
-        <div class="form-banner error" hidden role="alert"></div>
-        <div class="field">
-          <label for="lg-email">EMAIL</label>
-          <input id="lg-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
-        </div>
-        <div class="field">
-          <label for="lg-pass">PASSWORD</label>
-          <div class="pw-wrap">
-            <input id="lg-pass" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
-            <button type="button" class="pw-toggle" aria-label="Show password">SHOW</button>
+    <div class="auth-shell">
+      <section class="auth-card">
+        <h1>Welcome back</h1>
+        <p class="auth-sub">Log in to view your profile, saved details, and booking updates from Kridiya Travel.</p>
+        <form id="login-form" class="form-grid" novalidate>
+          <div class="form-banner error" hidden role="alert"></div>
+          <div class="field">
+            <label for="lg-email">EMAIL</label>
+            <input id="lg-email" name="email" type="email" autocomplete="email" required placeholder="you@example.com">
           </div>
-        </div>
-        <label class="checkbox-row"><input type="checkbox" name="remember" checked disabled> Keep me signed in on this device</label>
-        <button class="btn btn-primary btn-block btn-lg" type="submit" data-label="Log in">Log in</button>
-      </form>
-      <p class="auth-alt">New to Kridiya Travel? <a href="register.html"><b>Create an account</b></a></p>
-      <p class="form-note" style="text-align:center"><button class="link-button" id="reset-password-btn" type="button">Send password reset email</button></p>
+          <div class="field">
+            <label for="lg-pass">PASSWORD</label>
+            <div class="pw-wrap">
+              <input id="lg-pass" name="password" type="password" autocomplete="current-password" required placeholder="Your password">
+              <button type="button" class="pw-toggle" aria-label="Show password">SHOW</button>
+            </div>
+          </div>
+          <div class="auth-form-row">
+            <label class="checkbox-row"><input type="checkbox" name="remember" checked disabled> Keep me signed in</label>
+            <a href="forgot-password.html">Forgot password?</a>
+          </div>
+          <button class="btn btn-primary btn-block btn-lg" type="submit" data-label="Log in">Log in</button>
+        </form>
+        <p class="auth-alt">New to Kridiya Travel? <a href="register.html"><b>Create an account</b></a></p>
+      </section>
+
+      <aside class="auth-assist">
+        <h2>Why sign in?</h2>
+        <ul class="auth-checklist">
+          <li><b>Faster enquiries</b><span>Your profile details can prefill quote requests.</span></li>
+          <li><b>Booking visibility</b><span>Confirmed trips and staff updates appear in your account.</span></li>
+          <li><b>Secure recovery</b><span>Password reset links are sent to your verified email.</span></li>
+        </ul>
+        <a class="btn btn-outline btn-block" href="https://wa.me/971509413873" target="_blank" rel="noopener">Need help? WhatsApp us</a>
+      </aside>
     </div>
   </div>
 </main>

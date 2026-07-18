@@ -17,32 +17,70 @@
 <main>
   <section class="section">
     <div class="container">
-      <h1 style="margin-bottom:1.4rem">My account</h1>
+      <div class="account-head">
+        <div>
+          <h1>My account</h1>
+          <p>Manage your Kridiya Travel profile, booking updates, and account security.</p>
+        </div>
+        <a class="btn btn-primary" href="index.html">New enquiry</a>
+      </div>
       <div class="account-grid">
         <aside class="account-side">
           <div class="avatar" id="acc-avatar" aria-hidden="true">?</div>
           <h2 style="font-size:1.2rem;margin-bottom:0.2rem" id="acc-name">—</h2>
           <p style="margin:0;color:var(--text-muted);font-size:0.9rem;word-break:break-all" id="acc-email">—</p>
           <p style="margin:0.3rem 0 1.2rem;color:var(--text-muted);font-size:0.82rem" id="acc-since"></p>
+          <div class="account-status-list" aria-label="Account status">
+            <div><span></span><b>Secure Supabase login</b></div>
+            <div><span></span><b>Email recovery enabled</b></div>
+            <div><span></span><b>Profile syncs across devices</b></div>
+          </div>
           <a class="btn btn-primary btn-block" href="index.html" style="margin-bottom:0.6rem">New enquiry</a>
           <button class="btn btn-outline btn-block" id="logout-btn" type="button">Log out</button>
         </aside>
 
         <div style="display:grid;gap:1.4rem">
           <div class="account-main">
-            <h2 style="font-size:1.25rem">My bookings and enquiries</h2>
-            <p class="form-note" style="margin-bottom:1rem">Confirmed bookings and staff-added enquiries linked to your account appear here.</p>
+            <div class="account-section-head">
+              <div>
+                <h2>Overview</h2>
+                <p>Your live account status at a glance.</p>
+              </div>
+            </div>
+            <div class="account-summary">
+              <div><span id="summary-bookings">0</span><b>Bookings</b><small>Visible in account</small></div>
+              <div><span id="summary-profile">Ready</span><b>Profile</b><small>Name and WhatsApp saved</small></div>
+              <div><span id="summary-security">On</span><b>Security</b><small>Email reset enabled</small></div>
+            </div>
+          </div>
+
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>My bookings and enquiries</h2>
+                <p>Confirmed bookings and staff-added enquiries linked to your account appear here.</p>
+              </div>
+              <a href="contact.html">Need a booking added?</a>
+            </div>
             <div id="enq-list">
               <div class="empty-state">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z"/></svg>
-                <p><b>No enquiries yet.</b><br>Search a flight or pick a holiday package — your requests will show up here.</p>
-                <a class="btn btn-primary" href="index.html">Start planning</a>
+                <p><b>No bookings linked yet.</b><br>Send an enquiry or ask staff to attach an existing booking to your account.</p>
+                <div class="empty-actions">
+                  <a class="btn btn-primary" href="index.html">Start planning</a>
+                  <a class="btn btn-outline" href="https://wa.me/971509413873" target="_blank" rel="noopener">WhatsApp support</a>
+                </div>
               </div>
             </div>
           </div>
 
           <div class="account-main">
-            <h2 style="font-size:1.25rem">Profile</h2>
+            <div class="account-section-head">
+              <div>
+                <h2>Profile</h2>
+                <p>Keep this updated so quotes and booking follow-ups reach the right person.</p>
+              </div>
+            </div>
             <form id="profile-form" class="form-grid" novalidate>
               <div class="field-row">
                 <div class="field col-6"><label for="pf-name">FULL NAME</label><input id="pf-name" name="name" required></div>
@@ -53,7 +91,13 @@
           </div>
 
           <div class="account-main">
-            <h2 style="font-size:1.25rem">Change password</h2>
+            <div class="account-section-head">
+              <div>
+                <h2>Security</h2>
+                <p>Change your password here, or use email reset if you are signed out.</p>
+              </div>
+              <a href="forgot-password.html">Forgot password?</a>
+            </div>
             <form id="password-form" class="form-grid" novalidate>
               <div class="form-banner error" hidden role="alert"></div>
               <div class="field-row">
@@ -67,6 +111,20 @@
               </div>
               <div><button class="btn btn-primary" type="submit" data-label="Update password">Update password</button></div>
             </form>
+          </div>
+
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Support</h2>
+                <p>For urgent travel changes, WhatsApp is still the fastest route.</p>
+              </div>
+            </div>
+            <div class="account-actions">
+              <a class="btn btn-primary" href="https://wa.me/971509413873" target="_blank" rel="noopener">WhatsApp support</a>
+              <a class="btn btn-outline" href="mailto:info@kridiyatravel.com">Email Kridiya</a>
+              <a class="btn btn-outline" href="privacy.html">Privacy settings</a>
+            </div>
           </div>
         </div>
       </div>
