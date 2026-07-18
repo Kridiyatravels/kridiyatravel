@@ -516,6 +516,21 @@ function initSearchWidget(root, activeTab) {
     });
   }
 
+  /* Umrah */
+  const uf = root.querySelector('form[data-tab-form="umrah"]');
+  if (uf) {
+    initDatePickers(uf);
+    applyDateDefaults(uf);
+    uf.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!validateForm(uf)) return;
+      const p = new URLSearchParams({ dest: uf.dest.value, city: uf.city.value, nights: uf.nights.value });
+      const d = getDateFieldValue(uf, "umdate");
+      if (d) p.set("umdate", d);
+      location.href = "umrah.html?" + p.toString() + "#enquire";
+    });
+  }
+
   /* Cruise */
   const cf = root.querySelector('form[data-tab-form="cruise"]');
   if (cf) {
@@ -551,6 +566,7 @@ const WIDGET_TABS = [
   ["flights", "Flights", "plane"],
   ["hotels", "Hotels", "hotel"],
   ["holidays", "Holidays", "suitcase"],
+  ["umrah", "Umrah", "kaaba"],
   ["cruise", "Cruise", "ship"],
   ["visa", "Visa", "passport"]
 ];
@@ -624,7 +640,7 @@ function holidaysPanelHTML() {
         '<div class="field seg-5"><label for="hd-dest">DESTINATION</label>' +
           '<select id="hd-dest" name="dest" required>' +
             "<option value=\"\">Choose a destination…</option>" +
-            ["Dubai & UAE Staycation", "Umrah Package", "Georgia (Tbilisi)", "Azerbaijan (Baku)", "Thailand", "Bali, Indonesia", "Maldives", "Turkey (Istanbul)", "Europe (Schengen)", "Kerala, India", "Kashmir, India", "Sri Lanka", "Egypt (Cairo)", "Other — tell us!"].map(function (d) { return "<option>" + d + "</option>"; }).join("") +
+            ["Dubai & UAE Staycation", "Georgia (Tbilisi)", "Azerbaijan (Baku)", "Thailand", "Bali, Indonesia", "Maldives", "Turkey (Istanbul)", "Europe (Schengen)", "Kerala, India", "Kashmir, India", "Sri Lanka", "Egypt (Cairo)", "Other — tell us!"].map(function (d) { return "<option>" + d + "</option>"; }).join("") +
           "</select></div>" +
         '<div class="field seg-4"><label for="hd-month">TRAVEL MONTH</label>' +
           '<input id="hd-month" name="month" type="month" required></div>' +
@@ -633,6 +649,28 @@ function holidaysPanelHTML() {
       "</div>" +
       '<div class="widget-actions">' +
         '<button class="btn btn-primary btn-lg" type="submit">' + icon("suitcase") + "Find Packages</button></div>" +
+    "</form></div>"
+  );
+}
+
+function umrahPanelHTML() {
+  return (
+    '<div class="widget-panel" data-tab="umrah" role="tabpanel" hidden>' +
+    '<form data-tab-form="umrah" novalidate>' +
+      '<div class="seg-row">' +
+        '<div class="field seg-4"><label for="um-dest">UMRAH PACKAGE</label>' +
+          '<select id="um-dest" name="dest" required>' +
+            "<option value=\"\">Choose a package…</option>" +
+            ["Economy Umrah by Bus (6 Nights)", "5 Nights Umrah by Air", "7 Nights Umrah — Makkah & Madinah", "Premium Umrah — 5★ near Haram", "Ramadan Umrah Special (10 Nights)", "Family & Group Umrah", "Other — tell us!"].map(function (d) { return "<option>" + d + "</option>"; }).join("") +
+          "</select></div>" +
+        '<div class="field seg-3"><label for="um-city">DEPARTURE CITY</label>' +
+          '<select id="um-city" name="city"><option>Dubai</option><option>Sharjah</option><option>Abu Dhabi</option><option>Ras Al Khaimah</option><option>Other UAE city</option></select></div>' +
+        dateFieldHTML("um-date", "umdate", "PREFERRED DATE", { defaultOffset: 30, placeholder: "Add date" }).replace('class="field date-field"', 'class="field date-field seg-3"') +
+        '<div class="field seg-2"><label for="um-nights">NIGHTS</label>' +
+          '<select id="um-nights" name="nights"><option>5–6</option><option selected>7</option><option>10</option><option>14+</option></select></div>' +
+      "</div>" +
+      '<div class="widget-actions">' +
+        '<button class="btn btn-primary btn-lg" type="submit">' + icon("kaaba") + "Find Umrah Packages</button></div>" +
     "</form></div>"
   );
 }
@@ -679,7 +717,7 @@ function visaPanelHTML() {
   );
 }
 
-const PANEL_BUILDERS = { flights: flightsPanelHTML, hotels: hotelsPanelHTML, holidays: holidaysPanelHTML, cruise: cruisePanelHTML, visa: visaPanelHTML };
+const PANEL_BUILDERS = { flights: flightsPanelHTML, hotels: hotelsPanelHTML, holidays: holidaysPanelHTML, umrah: umrahPanelHTML, cruise: cruisePanelHTML, visa: visaPanelHTML };
 
 /* only: pass a single tab key ("flights"/"hotels"/"holidays"/"visa") to render
    just that vertical's form with no tab switcher — used on the dedicated pages

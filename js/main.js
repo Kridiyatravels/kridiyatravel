@@ -58,7 +58,8 @@ const ICONS = {
   plus: "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z",
   trash: "M6 7h12l-1 13.1c-.1 1-.9 1.9-2 1.9H9c-1.1 0-1.9-.9-2-1.9zm3-3h6l1 2H8zM4 5h16v2H4z",
   route: "M4 6a3 3 0 1 1 4.9 2.3l3 3.6L18 9c-.6-.5-1-1.3-1-2.1a3 3 0 1 1 3.9 2.9l-6.6 6.6a1 1 0 0 1-1.4 0L7 10.6 4 14.3V19h13v2H4a2 2 0 0 1-2-2v-5.3a2 2 0 0 1 .4-1.2l3-4A3 3 0 0 1 4 6z",
-  ship: "M20 21c-1.4 0-2.8-.5-4-1.3-2.4 1.7-5.6 1.7-8 0-1.2.8-2.6 1.3-4 1.3H2v2h2c1.4 0 2.7-.3 4-1 2.5 1.3 5.5 1.3 8 0 1.3.7 2.6 1 4 1h2v-2h-2zM4 11l1.3.4L4 12l-.3-.2-.6 2.1c0 .2 0 .5.1.7L4 15c1.6 0 3-.9 4-2 1 1.1 2.4 2 4 2s3-.9 4-2c1 1.1 2.4 2 4 2l.8-.5c.1-.2.2-.5.1-.7l-1.9-6.7c-.1-.3-.3-.5-.6-.6L20 6.6V4c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v.6L4 11zM6 6h12v3.9L12 8 6 9.9V6z"
+  ship: "M20 21c-1.4 0-2.8-.5-4-1.3-2.4 1.7-5.6 1.7-8 0-1.2.8-2.6 1.3-4 1.3H2v2h2c1.4 0 2.7-.3 4-1 2.5 1.3 5.5 1.3 8 0 1.3.7 2.6 1 4 1h2v-2h-2zM4 11l1.3.4L4 12l-.3-.2-.6 2.1c0 .2 0 .5.1.7L4 15c1.6 0 3-.9 4-2 1 1.1 2.4 2 4 2s3-.9 4-2c1 1.1 2.4 2 4 2l.8-.5c.1-.2.2-.5.1-.7l-1.9-6.7c-.1-.3-.3-.5-.6-.6L20 6.6V4c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v.6L4 11zM6 6h12v3.9L12 8 6 9.9V6z",
+  kaaba: "M12 2 4 6.5v11L12 22l8-4.5v-11L12 2zm0 2.3 5.8 3.3L12 10.9 6.2 7.6 12 4.3zM6 9.2l5 2.9v6.8l-5-2.8V9.2zm7 9.7v-6.8l5-2.9v6.8l-5 2.9z"
 };
 
 function icon(name, cls) {
@@ -80,6 +81,7 @@ const NAV_ITEMS = [
   ["flights.html", "Flights"],
   ["hotels.html", "Hotels"],
   ["holidays.html", "Holidays"],
+  ["umrah.html", "Umrah"],
   ["cruise.html", "Cruise"],
   ["visa.html", "Visa"],
   ["about.html", "About Us"],
@@ -169,7 +171,7 @@ function renderChrome() {
           '<li><a href="hotels.html">Hotel Booking</a></li>' +
           '<li><a href="holidays.html">Holiday Packages</a></li>' +
           '<li><a href="cruise.html">Cruise Packages</a></li>' +
-          '<li><a href="holidays.html#umrah">Umrah Packages</a></li>' +
+          '<li><a href="umrah.html">Umrah Packages</a></li>' +
           '<li><a href="visa.html">Visa Services</a></li>' +
           '<li><a href="contact.html">Travel Insurance</a></li>' +
         "</ul></div>" +
