@@ -180,6 +180,8 @@ function renderChrome() {
           '<li><a href="contact.html">Contact Us</a></li>' +
           '<li><a href="login.html">Customer Login</a></li>' +
           '<li><a href="register.html">Create Account</a></li>' +
+          '<li><a href="privacy.html">Privacy Policy</a></li>' +
+          '<li><a href="terms.html">Terms &amp; Conditions</a></li>' +
           '<li><a href="about.html#faq">FAQs</a></li>' +
         "</ul></div>" +
         "<div><h4>Get in Touch</h4><ul class=\"footer-contact\">" +
@@ -375,4 +377,3 @@ document.addEventListener("DOMContentLoaded", function () {
   document.querySelectorAll("form[data-formsubmit]").forEach(prepareFormSubmit);
   initReveal();
 });
-
