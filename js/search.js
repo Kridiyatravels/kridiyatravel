@@ -516,6 +516,21 @@ function initSearchWidget(root, activeTab) {
     });
   }
 
+  /* Cruise */
+  const cf = root.querySelector('form[data-tab-form="cruise"]');
+  if (cf) {
+    initDatePickers(cf);
+    applyDateDefaults(cf);
+    cf.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!validateForm(cf)) return;
+      const p = new URLSearchParams({ dest: cf.dest.value, line: cf.line.value, nights: cf.nights.value });
+      const sail = getDateFieldValue(cf, "saildate");
+      if (sail) p.set("saildate", sail);
+      location.href = "cruise.html?" + p.toString() + "#enquire";
+    });
+  }
+
   /* Visa */
   const vf = root.querySelector('form[data-tab-form="visa"]');
   if (vf) {
@@ -536,6 +551,7 @@ const WIDGET_TABS = [
   ["flights", "Flights", "plane"],
   ["hotels", "Hotels", "hotel"],
   ["holidays", "Holidays", "suitcase"],
+  ["cruise", "Cruise", "ship"],
   ["visa", "Visa", "passport"]
 ];
 
@@ -621,6 +637,28 @@ function holidaysPanelHTML() {
   );
 }
 
+function cruisePanelHTML() {
+  return (
+    '<div class="widget-panel" data-tab="cruise" role="tabpanel" hidden>' +
+    '<form data-tab-form="cruise" novalidate>' +
+      '<div class="seg-row">' +
+        '<div class="field seg-4"><label for="cr-dest">CRUISE PACKAGE</label>' +
+          '<select id="cr-dest" name="dest" required>' +
+            "<option value=\"\">Choose a cruise…</option>" +
+            ["Go Goa Gone (2 Nights)", "Lakshadweep Cruise (3 Nights)", "Lakshadweep & Goa Cruise (4 Nights)", "Jaffna Cruise (5 Nights)", "Coastal Odyssey (7 Nights)", "Other — tell us!"].map(function (d) { return "<option>" + d + "</option>"; }).join("") +
+          "</select></div>" +
+        '<div class="field seg-3"><label for="cr-line">CRUISE LINE</label>' +
+          '<select id="cr-line" name="line"><option>Cordelia Cruises</option><option>Celestyal</option><option>MSC Cruises</option><option>Royal Caribbean</option><option>Other</option></select></div>' +
+        dateFieldHTML("cr-date", "saildate", "SAILING DATE", { defaultOffset: 30, placeholder: "Add date" }).replace('class="field date-field"', 'class="field date-field seg-3"') +
+        '<div class="field seg-2"><label for="cr-nights">NIGHTS</label>' +
+          '<select id="cr-nights" name="nights"><option>2–3</option><option selected>4–6</option><option>7–9</option><option>10+</option></select></div>' +
+      "</div>" +
+      '<div class="widget-actions">' +
+        '<button class="btn btn-primary btn-lg" type="submit">' + icon("ship") + "Find Cruises</button></div>" +
+    "</form></div>"
+  );
+}
+
 function visaPanelHTML() {
   return (
     '<div class="widget-panel" data-tab="visa" role="tabpanel" hidden>' +
@@ -641,7 +679,7 @@ function visaPanelHTML() {
   );
 }
 
-const PANEL_BUILDERS = { flights: flightsPanelHTML, hotels: hotelsPanelHTML, holidays: holidaysPanelHTML, visa: visaPanelHTML };
+const PANEL_BUILDERS = { flights: flightsPanelHTML, hotels: hotelsPanelHTML, holidays: holidaysPanelHTML, cruise: cruisePanelHTML, visa: visaPanelHTML };
 
 /* only: pass a single tab key ("flights"/"hotels"/"holidays"/"visa") to render
    just that vertical's form with no tab switcher — used on the dedicated pages
