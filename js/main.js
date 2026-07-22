@@ -17,7 +17,8 @@ const KRIDIYA = {
   emails: {
     enquiry: "enquiry@kridiyatravel.com",
     contact: "contact@kridiyatravel.com",
-    info: "info@kridiyatravel.com"
+    info: "info@kridiyatravel.com",
+    deals: "deals@kridiyatravel.com"
   },
   social: {
     instagram: "https://www.instagram.com/kridiyatravel",
@@ -190,7 +191,7 @@ function renderChrome() {
           "<li>" + icon("mail") + '<a href="mailto:' + KRIDIYA.emails.info + '">' + KRIDIYA.emails.info + "</a></li>" +
         "</ul>" +
         "<h4>Deals in your inbox</h4>" +
-        '<form class="newsletter-form" id="newsletter-form" method="POST" action="https://formsubmit.co/' + KRIDIYA.emails.info + '">' +
+        '<form class="newsletter-form" id="newsletter-form" method="POST" action="https://formsubmit.co/' + KRIDIYA.emails.deals + '">' +
           '<input type="hidden" name="_subject" value="Newsletter subscription — kridiyatravel.com">' +
           '<input type="hidden" name="_captcha" value="false">' +
           '<input type="hidden" name="_template" value="table">' +

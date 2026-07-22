@@ -375,23 +375,110 @@ function initMultiCity(ff) {
   renumber();
 }
 
-/* ---------- Widget tabs + forms ---------- */
-function initSearchWidget(root, activeTab) {
-  if (!root) return;
-  const tabs = root.querySelectorAll(".widget-tab");
-  const panels = root.querySelectorAll(".widget-panel");
-  function select(name) {
-    tabs.forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.tab === name)); });
-    panels.forEach(function (p) { p.hidden = p.dataset.tab !== name; });
+/* ---------- Service picker carousel (home page only) ----------
+   One draggable strip of icon+label cards, snapped to center. Dragging
+   or swiping browses; tapping the already-centered card is what "chooses"
+   it and follows its link — tapping an off-center card just centers it
+   first, so a stray tap mid-swipe can't launch the wrong page. */
+function initServiceCarousel(root) {
+  const track = root.querySelector(".carousel-track");
+  if (!track) return;
+  const slides = Array.from(track.querySelectorAll(".service-slide"));
+  let activeIndex = 0, dragging = false, dragged = false, startX = 0, startScroll = 0;
+
+  const prevBtn = root.querySelector(".carousel-nav-btn.prev");
+  const nextBtn = root.querySelector(".carousel-nav-btn.next");
+  function setActive(i) {
+    activeIndex = i;
+    slides.forEach(function (s, idx) { s.classList.toggle("active", idx === i); });
+    if (prevBtn) prevBtn.disabled = i <= 0;
+    if (nextBtn) nextBtn.disabled = i >= slides.length - 1;
   }
-  if (tabs.length > 1) {
-    tabs.forEach(function (t) {
-      t.addEventListener("click", function () { select(t.dataset.tab); });
+  function nearestIndex() {
+    const center = track.scrollLeft + track.clientWidth / 2;
+    let best = 0, bestDist = Infinity;
+    slides.forEach(function (s, idx) {
+      const mid = s.offsetLeft + s.offsetWidth / 2;
+      const dist = Math.abs(mid - center);
+      if (dist < bestDist) { bestDist = dist; best = idx; }
     });
-    select(activeTab || tabs[0].dataset.tab);
-  } else {
-    panels.forEach(function (p) { p.hidden = false; });
+    return best;
   }
+  // Desktop drops the horizontal slide for a plain crossfade (handled
+  // entirely by CSS on the .active class — see the min-width:700px rules);
+  // only mobile/tablet needs the scrollLeft animation below.
+  const desktopFade = window.matchMedia("(min-width: 700px)");
+
+  // Native scrollTo({behavior:"smooth"}) fights (or is silently ignored
+  // by) a scroll-snap container in some browsers, so the glide is driven
+  // by hand: step scrollLeft itself every frame, snap switched off for
+  // the duration so it can't settle back mid-animation.
+  let snapRestoreTimer, animFrame;
+  function centerSlide(idx) {
+    if (desktopFade.matches) { setActive(idx); return; }
+    const s = slides[idx];
+    const target = s.offsetLeft + s.offsetWidth / 2 - track.clientWidth / 2;
+    const start = track.scrollLeft;
+    const change = target - start;
+    const duration = 320;
+    const startTime = performance.now();
+    track.style.scrollSnapType = "none";
+    cancelAnimationFrame(animFrame);
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      track.scrollLeft = start + change * eased;
+      if (t < 1) { animFrame = requestAnimationFrame(step); }
+    }
+    animFrame = requestAnimationFrame(step);
+    clearTimeout(snapRestoreTimer);
+    snapRestoreTimer = setTimeout(function () { track.style.scrollSnapType = ""; }, duration + 60);
+  }
+  let scrollTimer;
+  track.addEventListener("scroll", function () {
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(function () { setActive(nearestIndex()); }, 80);
+  });
+
+  // Touch swiping is native; this just adds click-and-drag panning for mice/trackpads.
+  track.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "touch") return;
+    dragging = true; dragged = false;
+    startX = e.clientX; startScroll = track.scrollLeft;
+    track.setPointerCapture(e.pointerId);
+    track.classList.add("dragging");
+  });
+  track.addEventListener("pointermove", function (e) {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    if (Math.abs(dx) > 4) dragged = true;
+    track.scrollLeft = startScroll - dx;
+  });
+  function endDrag() { dragging = false; track.classList.remove("dragging"); }
+  track.addEventListener("pointerup", endDrag);
+  track.addEventListener("pointercancel", endDrag);
+  track.addEventListener("pointerleave", function () { if (dragging) endDrag(); });
+
+  // Only one slide is ever visible at a time now (it fills the whole box),
+  // so there's no "peeking neighbour" to protect against — any plain tap
+  // on it should navigate immediately. Only a genuine drag suppresses that.
+  slides.forEach(function (s) {
+    s.addEventListener("click", function (e) {
+      if (dragged) { e.preventDefault(); }
+    });
+  });
+
+  if (prevBtn) prevBtn.addEventListener("click", function () { if (activeIndex > 0) { setActive(activeIndex - 1); centerSlide(activeIndex); } });
+  if (nextBtn) nextBtn.addEventListener("click", function () { if (activeIndex < slides.length - 1) { setActive(activeIndex + 1); centerSlide(activeIndex); } });
+
+  setActive(0);
+}
+
+/* ---------- Widget forms ---------- */
+function initSearchWidget(root) {
+  if (!root) return;
+  root.querySelectorAll(".widget-panel").forEach(function (p) { p.hidden = false; });
+  initServiceCarousel(root);
 
   /* Flights */
   const ff = root.querySelector('form[data-tab-form="flights"]');
@@ -563,12 +650,18 @@ function initSearchWidget(root, activeTab) {
 
 /* ---------- Widget HTML (shared across pages) ---------- */
 const WIDGET_TABS = [
-  ["flights", "Flights", "plane"],
-  ["hotels", "Hotels", "hotel"],
-  ["holidays", "Holidays", "suitcase"],
-  ["umrah", "Umrah", "kaaba"],
-  ["cruise", "Cruise", "ship"],
-  ["visa", "Visa", "passport"]
+  ["flights", "Flights", "plane", "Search Flights",
+    "We compare live fares across 40+ airlines and send you the lowest price — you pay only after you approve it."],
+  ["hotels", "Hotels", "hotel", "Search Hotels",
+    "We shortlist trade-rate stays with photos and honest advice — from RAK beach resorts to hotels worldwide."],
+  ["holidays", "Holidays", "suitcase", "Find Packages",
+    "We bundle flights, hotels and transfers into one tailored package, planned by people who've actually been there."],
+  ["umrah", "Umrah", "kaaba", "Find Umrah Packages",
+    "We bundle visa, flights, hotels near the Haram and transfers into one price, quoted personally for your group."],
+  ["cruise", "Cruise", "ship", "Find Cruises",
+    "We bundle your cabin, hotels, transfers and sightseeing into one easy price, quoted personally."],
+  ["visa", "Visa", "passport", "Check Visa Options",
+    "We check your eligibility, prepare your file and track it end-to-end — for tourist, visit and Umrah visas."]
 ];
 
 function flightsPanelHTML() {
@@ -607,7 +700,7 @@ function flightsPanelHTML() {
         '<button type="button" class="mc-add">' + icon("plus") + " Add another flight</button>" +
       "</div>" +
       '<div class="widget-actions">' +
-        '<button class="btn btn-primary btn-lg" type="submit">' + icon("plane") + "Search Flights</button></div>" +
+        '<button class="btn btn-primary btn-lg" type="submit">Search Flights</button></div>' +
     "</form></div>"
   );
 }
@@ -627,7 +720,7 @@ function hotelsPanelHTML() {
           '<select id="ht-guests" name="guests"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6+</option></select></div>' +
       "</div>" +
       '<div class="widget-actions">' +
-        '<button class="btn btn-primary btn-lg" type="submit">' + icon("hotel") + "Search Hotels</button></div>" +
+        '<button class="btn btn-primary btn-lg" type="submit">Search Hotels</button></div>' +
     "</form></div>"
   );
 }
@@ -648,7 +741,7 @@ function holidaysPanelHTML() {
           '<select id="hd-nights" name="nights"><option>2–3</option><option selected>4–6</option><option>7–9</option><option>10+</option></select></div>' +
       "</div>" +
       '<div class="widget-actions">' +
-        '<button class="btn btn-primary btn-lg" type="submit">' + icon("suitcase") + "Find Packages</button></div>" +
+        '<button class="btn btn-primary btn-lg" type="submit">Find Packages</button></div>' +
     "</form></div>"
   );
 }
@@ -670,7 +763,7 @@ function umrahPanelHTML() {
           '<select id="um-nights" name="nights"><option>5–6</option><option selected>7</option><option>10</option><option>14+</option></select></div>' +
       "</div>" +
       '<div class="widget-actions">' +
-        '<button class="btn btn-primary btn-lg" type="submit">' + icon("kaaba") + "Find Umrah Packages</button></div>" +
+        '<button class="btn btn-primary btn-lg" type="submit">Find Umrah Packages</button></div>' +
     "</form></div>"
   );
 }
@@ -692,7 +785,7 @@ function cruisePanelHTML() {
           '<select id="cr-nights" name="nights"><option>2–3</option><option selected>4–6</option><option>7–9</option><option>10+</option></select></div>' +
       "</div>" +
       '<div class="widget-actions">' +
-        '<button class="btn btn-primary btn-lg" type="submit">' + icon("ship") + "Find Cruises</button></div>" +
+        '<button class="btn btn-primary btn-lg" type="submit">Find Cruises</button></div>' +
     "</form></div>"
   );
 }
@@ -712,7 +805,7 @@ function visaPanelHTML() {
         dateFieldHTML("vs-date", "travel", "PLANNED TRAVEL DATE", { defaultOffset: 21, placeholder: "Add date" }).replace('class="field date-field"', 'class="field date-field seg-3"') +
       "</div>" +
       '<div class="widget-actions">' +
-        '<button class="btn btn-primary btn-lg" type="submit">' + icon("passport") + "Check Visa Options</button></div>" +
+        '<button class="btn btn-primary btn-lg" type="submit">Check Visa Options</button></div>' +
     "</form></div>"
   );
 }
@@ -727,14 +820,22 @@ function searchWidgetHTML(only) {
   if (only && PANEL_BUILDERS[only]) {
     return '<div class="search-widget search-widget-solo" id="search-widget">' + PANEL_BUILDERS[only]() + "</div>";
   }
+  // Home page: one draggable strip of service cards — no inline form here.
+  // Choosing a card (drag/swipe to center it, then tap) hands off to that
+  // service's own dedicated search page.
   return (
-    '<div class="search-widget" id="search-widget">' +
-    '<div class="widget-tabs" role="tablist" aria-label="What would you like to book?">' +
+    '<div class="search-widget search-widget-carousel" id="search-widget">' +
+    '<div class="carousel-track" role="group" aria-label="What would you like to book?">' +
     WIDGET_TABS.map(function (t) {
-      return '<button class="widget-tab" role="tab" data-tab="' + t[0] + '" aria-selected="false">' + icon(t[2]) + t[1] + "</button>";
+      return '<a class="service-slide" data-tab="' + t[0] + '" href="' + t[0] + '.html">' +
+        '<span class="service-slide-label">' + t[1] + "</span>" +
+        '<p class="service-slide-desc">' + t[4] + "</p>" +
+        '<span class="service-slide-cta">' + t[3] + icon("chevronRight") + "</span>" +
+      "</a>";
     }).join("") +
     "</div>" +
-    WIDGET_TABS.map(function (t) { return PANEL_BUILDERS[t[0]](); }).join("") +
+    '<button type="button" class="carousel-nav-btn prev" aria-label="Previous service">' + icon("chevronLeft") + "</button>" +
+    '<button type="button" class="carousel-nav-btn next" aria-label="Next service">' + icon("chevronRight") + "</button>" +
     "</div>"
   );
 }
@@ -919,7 +1020,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (wrap) {
     const only = document.body.dataset.widgetOnly || null;
     wrap.innerHTML = searchWidgetHTML(only);
-    initSearchWidget(wrap.firstElementChild, document.body.dataset.widgetTab);
+    initSearchWidget(wrap.firstElementChild);
 
     // Reflect an incoming search (URL params) back into the widget
     const p = new URLSearchParams(location.search);
