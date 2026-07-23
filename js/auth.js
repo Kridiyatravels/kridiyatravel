@@ -460,7 +460,8 @@ window.KridiyaAuth = (function () {
           const user = await KridiyaAuth.login(form.email.value, form.password.value);
           toast("Welcome back, " + user.name.split(" ")[0] + "!");
           const dest = new URLSearchParams(location.search).get("next");
-          location.href = dest && /^[a-z-]+\.html$/.test(dest) ? dest : "account.html";
+          const destOk = dest && (/^[a-z-]+\.html$/.test(dest) || /^https:\/\/admin\.kridiyatravel\.com\//.test(dest));
+          location.href = destOk ? dest : "account.html";
         } catch (err) {
           banner(form, err.message, "error");
           busy(form, false);
