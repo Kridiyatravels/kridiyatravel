@@ -1190,6 +1190,17 @@ a:hover { text-decoration: underline; }
 .enq-item b { color: var(--ink); }
 .enq-item time { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
 .enq-item p { margin: 0.35rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
+.enq-extra { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed var(--line); display: grid; gap: 0.6rem; }
+.enq-extra-done svg { width: 16px; height: 16px; fill: var(--success); vertical-align: -3px; margin-right: 0.2rem; }
+.cust-request-form { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.cust-request-form label { flex: 1 1 100%; font-size: 0.8rem; font-weight: 700; color: var(--ink-2); }
+.cust-request-form input[type="text"] { flex: 1 1 200px; min-height: 42px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 0.7rem; font: inherit; }
+.cust-request-form input[type="file"] { flex: 1 1 200px; }
+.cust-request-form .btn { min-height: 42px; }
+.quote-card { background: var(--brand-soft); border-radius: var(--r-md); padding: 0.8rem 1rem; }
+.quote-card p { color: var(--ink-2); }
+.quote-actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; flex-wrap: wrap; }
+.quote-actions .btn { min-height: 40px; padding: 0 1rem; font-size: 0.85rem; }
 .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); }
 .empty-state svg { width: 52px; height: 52px; fill: var(--line-strong); margin-bottom: 0.6rem; }
 .empty-actions,
@@ -1224,6 +1235,12 @@ a:hover { text-decoration: underline; }
 .admin-note-form { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: flex-start; }
 .admin-note-form textarea { flex: 1 1 260px; min-height: 44px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.5rem 0.7rem; font: inherit; resize: vertical; }
 .admin-note-form .btn { min-height: 44px; }
+.admin-request-form,
+.admin-quote-form { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: flex-start; }
+.admin-request-form select { min-height: 44px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 0.6rem; }
+.admin-quote-form textarea { flex: 1 1 100%; min-height: 44px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.5rem 0.7rem; font: inherit; resize: vertical; }
+.admin-request-form .btn,
+.admin-quote-form .btn { min-height: 44px; }
 @media (max-width: 640px) {
   .account-summary { grid-template-columns: 1fr; }
   .account-actions .btn,

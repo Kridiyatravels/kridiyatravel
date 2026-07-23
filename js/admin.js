@@ -18,6 +18,17 @@
   let currentStaffId = null;
   let allEnquiries = [];
   let notesByEnquiry = {};
+  let requestsByEnquiry = {};
+  let quotesByEnquiry = {};
+
+  function fmtMoney(amount, currency) {
+    return currency + " " + Number(amount).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function fmtWhen(iso) {
+    if (!iso) return "";
+    return new Date(iso).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
 
   function waReplyLink(enq) {
     const phone = String(enq.phone || "").replace(/[^0-9]/g, "");
@@ -58,6 +69,8 @@
     listEl.innerHTML = visible.map(function (enq) {
       const created = new Date(enq.created_at);
       const notes = notesByEnquiry[enq.id] || [];
+      const requests = requestsByEnquiry[enq.id] || [];
+      const quotes = quotesByEnquiry[enq.id] || [];
       const wa = waReplyLink(enq);
       return (
         '<div class="account-main admin-enq">' +
@@ -81,6 +94,8 @@
             (wa ? '<a class="btn btn-wa" target="_blank" rel="noopener" href="' + wa + '">' + icon("whatsapp") + " WhatsApp</a>" : "") +
             '<a class="btn btn-outline" href="' + mailReplyLink(enq) + '">' + icon("mail") + " Email</a>" +
             '<button type="button" class="btn btn-outline notes-toggle" data-id="' + enq.id + '">Notes (' + notes.length + ")</button>" +
+            '<button type="button" class="btn btn-outline requests-toggle" data-id="' + enq.id + '">Requests (' + requests.length + ")</button>" +
+            '<button type="button" class="btn btn-outline quotes-toggle" data-id="' + enq.id + '">Quote (' + quotes.length + ")</button>" +
           "</div>" +
           '<div class="admin-notes" data-notes-for="' + enq.id + '" hidden>' +
             '<div class="admin-notes-list">' +
@@ -95,6 +110,47 @@
             '<form class="admin-note-form" data-id="' + enq.id + '">' +
               '<textarea placeholder="Add an internal note (staff only, customer never sees this)…" required></textarea>' +
               '<button class="btn btn-primary" type="submit">Add note</button>' +
+            "</form>" +
+          "</div>" +
+          '<div class="admin-notes" data-requests-for="' + enq.id + '" hidden>' +
+            '<div class="admin-notes-list">' +
+              (requests.length
+                ? requests.map(function (r) {
+                    const answered = r.responded_at
+                      ? (r.kind === "file"
+                          ? (r.response_file_path
+                              ? '<button type="button" class="btn btn-outline view-file-btn" data-path="' + KridiyaAuth.escapeHTML(r.response_file_path) + '">View file: ' + KridiyaAuth.escapeHTML(r.response_file_name || "uploaded file") + "</button>"
+                              : '<span class="form-note">No file uploaded.</span>')
+                          : '<p style="margin:0.3rem 0 0">' + KridiyaAuth.escapeHTML(r.response_text || "") + "</p>")
+                      : '<span class="form-note">Waiting on customer.</span>';
+                    return '<div class="admin-note"><p><b>' + KridiyaAuth.escapeHTML(r.label) + '</b> <span class="admin-badge">' + (r.kind === "file" ? "File" : "Text") + "</span></p>" + answered + "</div>";
+                  }).join("")
+                : '<p class="form-note">No requests sent yet.</p>') +
+            "</div>" +
+            '<form class="admin-request-form" data-id="' + enq.id + '">' +
+              '<select name="kind"><option value="text">Text answer</option><option value="file">File upload</option></select>' +
+              '<input name="label" type="text" placeholder="e.g. Passport number and expiry date" required style="flex:1 1 260px;min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 0.7rem">' +
+              '<button class="btn btn-primary" type="submit">Ask</button>' +
+            "</form>" +
+          "</div>" +
+          '<div class="admin-notes" data-quotes-for="' + enq.id + '" hidden>' +
+            '<div class="admin-notes-list">' +
+              (quotes.length
+                ? quotes.map(function (q) {
+                    return '<div class="admin-note"><p><b>' + KridiyaAuth.escapeHTML(q.title) + "</b> — " + fmtMoney(q.price_amount, q.currency) +
+                      ' <span class="admin-badge">' + KridiyaAuth.statusLabel(q.status) + "</span></p>" +
+                      (q.valid_until ? '<p class="form-note" style="margin:0.2rem 0 0">Valid until ' + fmtWhen(q.valid_until) + "</p>" : "") +
+                      "</div>";
+                  }).join("")
+                : '<p class="form-note">No quote sent yet.</p>') +
+            "</div>" +
+            '<form class="admin-quote-form" data-id="' + enq.id + '">' +
+              '<input name="title" type="text" placeholder="e.g. Air India Express, 20kg baggage" required style="flex:1 1 220px;min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 0.7rem">' +
+              '<input name="price_amount" type="number" min="0" step="0.01" placeholder="Price" required style="width:120px;min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 0.7rem">' +
+              '<input name="currency" type="text" value="AED" maxlength="3" style="width:70px;min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 0.7rem;text-transform:uppercase">' +
+              '<input name="valid_until" type="datetime-local" style="min-height:44px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 0.5rem">' +
+              '<textarea name="terms" placeholder="Terms (optional) — e.g. subject to seat availability until ticketed"></textarea>' +
+              '<button class="btn btn-primary" type="submit">Send quote</button>' +
             "</form>" +
           "</div>" +
         "</div>"
@@ -115,6 +171,26 @@
     (result.data || []).forEach(function (n) {
       if (!notesByEnquiry[n.enquiry_id]) notesByEnquiry[n.enquiry_id] = [];
       notesByEnquiry[n.enquiry_id].push(n);
+    });
+  }
+
+  async function loadRequests() {
+    const result = await sb.from("enquiry_requests").select("*").order("created_at", { ascending: false });
+    if (result.error) throw result.error;
+    requestsByEnquiry = {};
+    (result.data || []).forEach(function (r) {
+      if (!requestsByEnquiry[r.enquiry_id]) requestsByEnquiry[r.enquiry_id] = [];
+      requestsByEnquiry[r.enquiry_id].push(r);
+    });
+  }
+
+  async function loadQuotes() {
+    const result = await sb.from("quotes").select("*").order("created_at", { ascending: false });
+    if (result.error) throw result.error;
+    quotesByEnquiry = {};
+    (result.data || []).forEach(function (q) {
+      if (!quotesByEnquiry[q.enquiry_id]) quotesByEnquiry[q.enquiry_id] = [];
+      quotesByEnquiry[q.enquiry_id].push(q);
     });
   }
 
@@ -159,11 +235,36 @@
       toast("Status updated.");
     });
 
-    listEl.addEventListener("click", function (e) {
-      const btn = e.target.closest(".notes-toggle");
-      if (!btn) return;
-      const panel = listEl.querySelector('.admin-notes[data-notes-for="' + btn.dataset.id + '"]');
-      if (panel) panel.hidden = !panel.hidden;
+    listEl.addEventListener("click", async function (e) {
+      const notesBtn = e.target.closest(".notes-toggle");
+      if (notesBtn) {
+        const panel = listEl.querySelector('.admin-notes[data-notes-for="' + notesBtn.dataset.id + '"]');
+        if (panel) panel.hidden = !panel.hidden;
+        return;
+      }
+      const reqBtn = e.target.closest(".requests-toggle");
+      if (reqBtn) {
+        const panel = listEl.querySelector('.admin-notes[data-requests-for="' + reqBtn.dataset.id + '"]');
+        if (panel) panel.hidden = !panel.hidden;
+        return;
+      }
+      const quoteBtn = e.target.closest(".quotes-toggle");
+      if (quoteBtn) {
+        const panel = listEl.querySelector('.admin-notes[data-quotes-for="' + quoteBtn.dataset.id + '"]');
+        if (panel) panel.hidden = !panel.hidden;
+        return;
+      }
+      const viewBtn = e.target.closest(".view-file-btn");
+      if (viewBtn) {
+        viewBtn.disabled = true;
+        const result = await sb.storage.from("enquiry-uploads").createSignedUrl(viewBtn.dataset.path, 120);
+        viewBtn.disabled = false;
+        if (result.error || !result.data) {
+          toast("Could not open file: " + (result.error ? result.error.message : "unknown error"));
+          return;
+        }
+        window.open(result.data.signedUrl, "_blank", "noopener");
+      }
     });
 
     listEl.addEventListener("submit", async function (e) {
@@ -191,6 +292,72 @@
       renderList();
       const panel = listEl.querySelector('.admin-notes[data-notes-for="' + id + '"]');
       if (panel) panel.hidden = false;
+    });
+
+    listEl.addEventListener("submit", async function (e) {
+      const form = e.target.closest(".admin-request-form");
+      if (!form) return;
+      e.preventDefault();
+      const id = form.dataset.id;
+      const label = form.label.value.trim();
+      if (!label) return;
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      const result = await sb
+        .from("enquiry_requests")
+        .insert({ enquiry_id: id, kind: form.kind.value, label: label, created_by: currentStaffId })
+        .select("*")
+        .single();
+      btn.disabled = false;
+      if (result.error) {
+        toast("Could not send request: " + result.error.message);
+        return;
+      }
+      if (!requestsByEnquiry[id]) requestsByEnquiry[id] = [];
+      requestsByEnquiry[id].unshift(result.data);
+      renderList();
+      const panel = listEl.querySelector('.admin-notes[data-requests-for="' + id + '"]');
+      if (panel) panel.hidden = false;
+      toast("Request sent to customer.");
+    });
+
+    listEl.addEventListener("submit", async function (e) {
+      const form = e.target.closest(".admin-quote-form");
+      if (!form) return;
+      e.preventDefault();
+      const id = form.dataset.id;
+      const title = form.title.value.trim();
+      const price = parseFloat(form.price_amount.value);
+      if (!title || !(price >= 0)) return;
+      const currency = (form.currency.value || "AED").trim().toUpperCase();
+      const validUntil = form.valid_until.value ? new Date(form.valid_until.value).toISOString() : null;
+      const terms = form.terms.value.trim();
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      const result = await sb
+        .from("quotes")
+        .insert({
+          enquiry_id: id,
+          title: title,
+          price_amount: price,
+          currency: currency,
+          valid_until: validUntil,
+          terms: terms || null,
+          created_by: currentStaffId
+        })
+        .select("*")
+        .single();
+      btn.disabled = false;
+      if (result.error) {
+        toast("Could not send quote: " + result.error.message);
+        return;
+      }
+      if (!quotesByEnquiry[id]) quotesByEnquiry[id] = [];
+      quotesByEnquiry[id].unshift(result.data);
+      renderList();
+      const panel = listEl.querySelector('.admin-notes[data-quotes-for="' + id + '"]');
+      if (panel) panel.hidden = false;
+      toast("Quote sent to customer.");
     });
   }
 
@@ -224,7 +391,7 @@
     }
 
     try {
-      await Promise.all([loadEnquiries(), loadNotes()]);
+      await Promise.all([loadEnquiries(), loadNotes(), loadRequests(), loadQuotes()]);
     } catch (err) {
       gate.innerHTML = '<div class="account-main empty-state"><p>Could not load enquiries: ' + KridiyaAuth.escapeHTML(err.message) + "</p></div>";
       return;

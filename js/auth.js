@@ -277,6 +277,60 @@ window.KridiyaAuth = (function () {
     return result.data || [];
   }
 
+  async function listRequests() {
+    const user = await currentUser();
+    if (!user) return [];
+    const sb = await client();
+    const result = await sb.from("enquiry_requests").select("*").order("created_at", { ascending: false });
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
+  async function listQuotes() {
+    const user = await currentUser();
+    if (!user) return [];
+    const sb = await client();
+    const result = await sb.from("quotes").select("*").order("created_at", { ascending: false });
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
+  async function respondToTextRequest(requestId, text) {
+    const sb = await client();
+    const result = await sb
+      .from("enquiry_requests")
+      .update({ response_text: text, responded_at: new Date().toISOString() })
+      .eq("id", requestId)
+      .select("*")
+      .single();
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function respondToFileRequest(requestId, file) {
+    const user = await currentUser();
+    if (!user) throw new Error("Please log in again.");
+    const sb = await client();
+    const path = user.id + "/" + requestId + "/" + file.name;
+    const upload = await sb.storage.from("enquiry-uploads").upload(path, file, { upsert: true });
+    if (upload.error) throw upload.error;
+    const result = await sb
+      .from("enquiry_requests")
+      .update({ response_file_path: path, response_file_name: file.name, responded_at: new Date().toISOString() })
+      .eq("id", requestId)
+      .select("*")
+      .single();
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function respondToQuote(quoteId, status) {
+    const sb = await client();
+    const result = await sb.from("quotes").update({ status: status }).eq("id", quoteId).select("*").single();
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
   function getUser(email) {
     const cached = session();
     if (!cached) return null;
@@ -327,6 +381,11 @@ window.KridiyaAuth = (function () {
     getUser: getUser,
     listBookings: listBookings,
     listEnquiries: listEnquiries,
+    listRequests: listRequests,
+    listQuotes: listQuotes,
+    respondToTextRequest: respondToTextRequest,
+    respondToFileRequest: respondToFileRequest,
+    respondToQuote: respondToQuote,
     passwordIssue: passwordIssue,
     passwordStrength: passwordStrength,
     escapeHTML: escapeHTML,
@@ -493,6 +552,94 @@ window.KridiyaAuth = (function () {
     });
   }
 
+  function requestsHTML(requests) {
+    if (!requests.length) return "";
+    return '<div class="enq-extra">' + requests.map(function (r) {
+      if (r.responded_at) {
+        const answer = r.kind === "file"
+          ? (r.response_file_name ? "Uploaded: " + KridiyaAuth.escapeHTML(r.response_file_name) : "Uploaded")
+          : KridiyaAuth.escapeHTML(r.response_text || "");
+        return '<p class="form-note enq-extra-done">' + icon("check") + " " + KridiyaAuth.escapeHTML(r.label) + " — " + answer + "</p>";
+      }
+      if (r.kind === "file") {
+        return '<form class="cust-request-form" data-request-id="' + r.id + '" data-kind="file">' +
+          "<label>" + KridiyaAuth.escapeHTML(r.label) + "</label>" +
+          '<input type="file" required>' +
+          '<button class="btn btn-outline" type="submit">Upload</button>' +
+          "</form>";
+      }
+      return '<form class="cust-request-form" data-request-id="' + r.id + '" data-kind="text">' +
+        "<label>" + KridiyaAuth.escapeHTML(r.label) + "</label>" +
+        '<input type="text" required placeholder="Your answer">' +
+        '<button class="btn btn-outline" type="submit">Send</button>' +
+        "</form>";
+    }).join("") + "</div>";
+  }
+
+  function quotesHTML(quotes) {
+    if (!quotes.length) return "";
+    return '<div class="enq-extra">' + quotes.map(function (q) {
+      const amount = KridiyaAuth.escapeHTML(q.currency + " " + Number(q.price_amount).toLocaleString("en-GB"));
+      const validity = q.valid_until
+        ? "Valid until " + new Date(q.valid_until).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+        : "";
+      if (q.status === "sent") {
+        return '<div class="quote-card">' +
+          "<p><b>" + KridiyaAuth.escapeHTML(q.title) + "</b> — " + amount + "</p>" +
+          (q.terms ? '<p class="form-note">' + KridiyaAuth.escapeHTML(q.terms) + "</p>" : "") +
+          (validity ? '<p class="form-note">' + validity + "</p>" : "") +
+          '<div class="quote-actions">' +
+            '<button class="btn btn-primary" type="button" data-quote-id="' + q.id + '" data-action="accepted">Accept quote</button>' +
+            '<button class="btn btn-outline" type="button" data-quote-id="' + q.id + '" data-action="declined">Decline</button>' +
+          "</div></div>";
+      }
+      return '<p class="form-note enq-extra-done">' + icon("check") + " " + KridiyaAuth.escapeHTML(q.title) + " — " + amount +
+        " (" + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(q.status)) + ")</p>";
+    }).join("") + "</div>";
+  }
+
+  function wireEnquiryExtras(listEl) {
+    listEl.addEventListener("submit", async function (e) {
+      const form = e.target.closest(".cust-request-form");
+      if (!form) return;
+      e.preventDefault();
+      const id = form.dataset.requestId;
+      const kind = form.dataset.kind;
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      try {
+        if (kind === "file") {
+          const file = form.querySelector('input[type="file"]').files[0];
+          if (!file) { btn.disabled = false; return; }
+          await KridiyaAuth.respondToFileRequest(id, file);
+        } else {
+          const value = form.querySelector('input[type="text"]').value.trim();
+          if (!value) { btn.disabled = false; return; }
+          await KridiyaAuth.respondToTextRequest(id, value);
+        }
+        toast("Sent — thank you.");
+        location.reload();
+      } catch (err) {
+        btn.disabled = false;
+        toast(err.message);
+      }
+    });
+
+    listEl.addEventListener("click", async function (e) {
+      const btn = e.target.closest("[data-quote-id]");
+      if (!btn) return;
+      btn.disabled = true;
+      try {
+        await KridiyaAuth.respondToQuote(btn.dataset.quoteId, btn.dataset.action);
+        toast(btn.dataset.action === "accepted" ? "Quote accepted." : "Quote declined.");
+        location.reload();
+      } catch (err) {
+        btn.disabled = false;
+        toast(err.message);
+      }
+    });
+  }
+
   if (page === "account") {
     document.addEventListener("DOMContentLoaded", async function () {
       const user = await KridiyaAuth.currentUser();
@@ -512,12 +659,29 @@ window.KridiyaAuth = (function () {
 
       const listEl = document.getElementById("enq-list");
       try {
-        const results = await Promise.all([KridiyaAuth.listBookings(), KridiyaAuth.listEnquiries()]);
+        const results = await Promise.all([
+          KridiyaAuth.listBookings(),
+          KridiyaAuth.listEnquiries(),
+          KridiyaAuth.listRequests(),
+          KridiyaAuth.listQuotes()
+        ]);
         const bookings = results[0];
         const enquiries = results[1];
+        const requestsByEnquiry = {};
+        results[2].forEach(function (r) {
+          if (!requestsByEnquiry[r.enquiry_id]) requestsByEnquiry[r.enquiry_id] = [];
+          requestsByEnquiry[r.enquiry_id].push(r);
+        });
+        const quotesByEnquiry = {};
+        results[3].forEach(function (q) {
+          if (!quotesByEnquiry[q.enquiry_id]) quotesByEnquiry[q.enquiry_id] = [];
+          quotesByEnquiry[q.enquiry_id].push(q);
+        });
 
         const combined = enquiries.map(function (e) {
           return {
+            id: e.id,
+            isEnquiry: true,
             reference: e.reference,
             status: e.status,
             title: KridiyaAuth.statusLabel(e.service_type) + " enquiry",
@@ -529,6 +693,8 @@ window.KridiyaAuth = (function () {
         }).concat(bookings.map(function (booking) {
           const pax = (booking.adults || 0) + (booking.children || 0) + (booking.infants || 0);
           return {
+            id: null,
+            isEnquiry: false,
             reference: booking.booking_reference,
             status: booking.status,
             title: booking.title,
@@ -545,6 +711,8 @@ window.KridiyaAuth = (function () {
         if (combined.length) {
           listEl.innerHTML = combined.map(function (item) {
             const created = new Date(item.created_at);
+            const requests = item.isEnquiry ? (requestsByEnquiry[item.id] || []) : [];
+            const quotes = item.isEnquiry ? (quotesByEnquiry[item.id] || []) : [];
             return '<div class="enq-item">' +
               '<div class="enq-top"><b>' + KridiyaAuth.escapeHTML(item.title) + "</b>" +
               '<time datetime="' + KridiyaAuth.escapeHTML(item.created_at) + '">' +
@@ -556,8 +724,12 @@ window.KridiyaAuth = (function () {
               KridiyaAuth.escapeHTML(item.detail || "") +
               (item.paxLabel ? " - " + item.paxLabel : "") + " - " +
               KridiyaAuth.escapeHTML(item.amount) +
-              "</p></div>";
+              "</p>" +
+              requestsHTML(requests) +
+              quotesHTML(quotes) +
+              "</div>";
           }).join("");
+          wireEnquiryExtras(listEl);
         }
       } catch (err) {
         listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load your enquiries yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
