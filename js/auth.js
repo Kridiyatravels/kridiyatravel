@@ -78,6 +78,35 @@ window.KridiyaAuth = (function () {
     });
   }
 
+  /* Sessions are stored in a cookie scoped to .kridiyatravel.com (not the
+     browser's default localStorage, which is locked to one exact origin)
+     so a login on kridiyatravel.com is also recognised on
+     admin.kridiyatravel.com, and vice versa. Falls back to a plain,
+     unscoped cookie on localhost so local development still works. */
+  function sharedCookieStorage() {
+    const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    function readCookie(name) {
+      const m = document.cookie.match(new RegExp("(?:^|; )" + name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "=([^;]*)"));
+      return m ? decodeURIComponent(m[1]) : null;
+    }
+    return {
+      getItem: function (key) {
+        return readCookie(key);
+      },
+      setItem: function (key, value) {
+        const maxAge = 60 * 60 * 24 * 180;
+        document.cookie = key + "=" + encodeURIComponent(value) +
+          (isLocal ? "" : "; domain=.kridiyatravel.com") +
+          "; path=/; max-age=" + maxAge +
+          (isLocal ? "" : "; secure") +
+          "; samesite=lax";
+      },
+      removeItem: function (key) {
+        document.cookie = key + "=" + (isLocal ? "" : "; domain=.kridiyatravel.com") + "; path=/; max-age=0";
+      }
+    };
+  }
+
   async function client() {
     if (cachedClient) return cachedClient;
     if (!clientPromise) {
@@ -86,7 +115,8 @@ window.KridiyaAuth = (function () {
           auth: {
             persistSession: true,
             autoRefreshToken: true,
-            detectSessionInUrl: true
+            detectSessionInUrl: true,
+            storage: sharedCookieStorage()
           }
         });
         return cachedClient;
@@ -442,10 +472,16 @@ window.KridiyaAuth = (function () {
     }
   }
 
+  function loginRedirectTarget() {
+    const dest = new URLSearchParams(location.search).get("next");
+    const destOk = dest && (/^[a-z-]+\.html$/.test(dest) || /^https:\/\/admin\.kridiyatravel\.com\//.test(dest));
+    return destOk ? dest : "account.html";
+  }
+
   if (page === "login") {
     document.addEventListener("DOMContentLoaded", async function () {
       if (await existingUserOrNull()) {
-        location.replace("account.html");
+        location.replace(loginRedirectTarget());
         return;
       }
 
@@ -459,9 +495,7 @@ window.KridiyaAuth = (function () {
         try {
           const user = await KridiyaAuth.login(form.email.value, form.password.value);
           toast("Welcome back, " + user.name.split(" ")[0] + "!");
-          const dest = new URLSearchParams(location.search).get("next");
-          const destOk = dest && (/^[a-z-]+\.html$/.test(dest) || /^https:\/\/admin\.kridiyatravel\.com\//.test(dest));
-          location.href = destOk ? dest : "account.html";
+          location.href = loginRedirectTarget();
         } catch (err) {
           banner(form, err.message, "error");
           busy(form, false);
