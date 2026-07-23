@@ -96,6 +96,7 @@
             '<button type="button" class="btn btn-outline notes-toggle" data-id="' + enq.id + '">Notes (' + notes.length + ")</button>" +
             '<button type="button" class="btn btn-outline requests-toggle" data-id="' + enq.id + '">Requests (' + requests.length + ")</button>" +
             '<button type="button" class="btn btn-outline quotes-toggle" data-id="' + enq.id + '">Quote (' + quotes.length + ")</button>" +
+            '<a class="btn btn-outline" href="documents.html?enquiry=' + enq.id + '">Document</a>' +
           "</div>" +
           '<div class="admin-notes" data-notes-for="' + enq.id + '" hidden>' +
             '<div class="admin-notes-list">' +

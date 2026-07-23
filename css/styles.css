@@ -1,5 +1,5 @@
 ﻿/* ============================================================
-   Kridiya Travel and Tourism FC-LLC — design system
+   Kridiya Travel and Tourism FZ-LLC — design system
    KD logo system: clean graphite, bright orange, and gold.
    Dark structure stays neutral graphite.
    ============================================================ */
@@ -1241,6 +1241,26 @@ a:hover { text-decoration: underline; }
 .admin-quote-form textarea { flex: 1 1 100%; min-height: 44px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.5rem 0.7rem; font: inherit; resize: vertical; }
 .admin-request-form .btn,
 .admin-quote-form .btn { min-height: 44px; }
+
+/* ---------- Document generator ---------- */
+.search-hits { display: grid; gap: 0.4rem; margin-top: 0.6rem; }
+.search-hit {
+  text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 0.6rem 0.8rem; font: inherit; font-weight: 600; color: var(--ink); cursor: pointer;
+}
+.search-hit:hover { border-color: var(--brand); background: var(--brand-soft); }
+.search-hit .form-note { display: block; font-weight: 400; margin-top: 0.15rem; }
+.linked-box {
+  margin-top: 0.8rem; padding: 0.7rem 0.9rem; background: var(--brand-soft); border-radius: var(--r-sm);
+  font-size: 0.9rem; color: var(--ink-2);
+}
+.repeat-row {
+  border: 1px dashed var(--line-strong); border-radius: var(--r-sm); padding: 0.8rem 0.9rem 0.4rem;
+  margin-bottom: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: flex-end;
+}
+.repeat-row .field { flex: 1 1 140px; }
+.repeat-remove { margin-bottom: 0.55rem; min-height: 40px; font-size: 0.82rem; padding: 0 0.8rem; }
+.doc-preview-frame { width: 100%; height: 720px; border: 1px solid var(--line); border-radius: var(--r-md); background: #fff; }
 @media (max-width: 640px) {
   .account-summary { grid-template-columns: 1fr; }
   .account-actions .btn,

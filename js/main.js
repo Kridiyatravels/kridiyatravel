@@ -8,7 +8,7 @@ document.documentElement.classList.add("js");
 /* ---------- Business config ---------- */
 const KRIDIYA = {
   brand: "Kridiya Travel",
-  legal: "Kridiya Travel and Tourism FC-LLC",
+  legal: "Kridiya Travel and Tourism FZ-LLC",
   slogan: "Your Journey, Our Passion.",
   address: "Ras Al Khaimah, United Arab Emirates",
   phoneDisplay: "+971 50 941 3873",
