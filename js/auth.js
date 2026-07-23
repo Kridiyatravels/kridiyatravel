@@ -262,6 +262,21 @@ window.KridiyaAuth = (function () {
     return result.data || [];
   }
 
+  async function listEnquiries() {
+    const user = await currentUser();
+    if (!user) return [];
+
+    const sb = await client();
+    const result = await sb
+      .from("enquiries")
+      .select("id, reference, service_type, status, summary, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
   function getUser(email) {
     const cached = session();
     if (!cached) return null;
@@ -311,6 +326,7 @@ window.KridiyaAuth = (function () {
     updateProfile: updateProfile,
     getUser: getUser,
     listBookings: listBookings,
+    listEnquiries: listEnquiries,
     passwordIssue: passwordIssue,
     passwordStrength: passwordStrength,
     escapeHTML: escapeHTML,
@@ -496,32 +512,55 @@ window.KridiyaAuth = (function () {
 
       const listEl = document.getElementById("enq-list");
       try {
-        const bookings = await KridiyaAuth.listBookings();
+        const results = await Promise.all([KridiyaAuth.listBookings(), KridiyaAuth.listEnquiries()]);
+        const bookings = results[0];
+        const enquiries = results[1];
+
+        const combined = enquiries.map(function (e) {
+          return {
+            reference: e.reference,
+            status: e.status,
+            title: KridiyaAuth.statusLabel(e.service_type) + " enquiry",
+            detail: e.summary,
+            paxLabel: "",
+            amount: "Quote pending",
+            created_at: e.created_at
+          };
+        }).concat(bookings.map(function (booking) {
+          const pax = (booking.adults || 0) + (booking.children || 0) + (booking.infants || 0);
+          return {
+            reference: booking.booking_reference,
+            status: booking.status,
+            title: booking.title,
+            detail: booking.route_or_destination || booking.service_type,
+            paxLabel: pax ? pax + " traveller" + (pax === 1 ? "" : "s") : "",
+            amount: booking.amount ? (booking.currency + " " + Number(booking.amount).toLocaleString("en-GB")) : "Quote pending",
+            created_at: booking.created_at
+          };
+        })).sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+
         const summaryBookings = document.getElementById("summary-bookings");
-        if (summaryBookings) summaryBookings.textContent = String(bookings.length);
-        if (bookings.length) {
-          listEl.innerHTML = bookings.map(function (booking) {
-            const created = new Date(booking.created_at);
-            const pax = (booking.adults || 0) + (booking.children || 0) + (booking.infants || 0);
-            const amount = booking.amount
-              ? KridiyaAuth.escapeHTML(booking.currency + " " + Number(booking.amount).toLocaleString("en-GB"))
-              : "Quote pending";
+        if (summaryBookings) summaryBookings.textContent = String(combined.length);
+
+        if (combined.length) {
+          listEl.innerHTML = combined.map(function (item) {
+            const created = new Date(item.created_at);
             return '<div class="enq-item">' +
-              '<div class="enq-top"><b>' + KridiyaAuth.escapeHTML(booking.title) + "</b>" +
-              '<time datetime="' + KridiyaAuth.escapeHTML(booking.created_at) + '">' +
+              '<div class="enq-top"><b>' + KridiyaAuth.escapeHTML(item.title) + "</b>" +
+              '<time datetime="' + KridiyaAuth.escapeHTML(item.created_at) + '">' +
               created.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) +
               "</time></div>" +
               "<p>" +
-              KridiyaAuth.escapeHTML(booking.booking_reference) + " - " +
-              KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(booking.status)) + " - " +
-              KridiyaAuth.escapeHTML(booking.route_or_destination || booking.service_type) + " - " +
-              pax + " traveller" + (pax === 1 ? "" : "s") + " - " +
-              amount +
+              KridiyaAuth.escapeHTML(item.reference) + " - " +
+              KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.status)) + " - " +
+              KridiyaAuth.escapeHTML(item.detail || "") +
+              (item.paxLabel ? " - " + item.paxLabel : "") + " - " +
+              KridiyaAuth.escapeHTML(item.amount) +
               "</p></div>";
           }).join("");
         }
       } catch (err) {
-        listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load bookings yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
+        listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load your enquiries yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
       }
 
       const pf = document.getElementById("profile-form");

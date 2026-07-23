@@ -1202,6 +1202,28 @@ a:hover { text-decoration: underline; }
 .empty-actions { justify-content: center; margin-top: 1rem; }
 .account-actions .btn,
 .empty-actions .btn { min-height: 44px; }
+
+/* ---------- Admin enquiry dashboard ---------- */
+.admin-filters-card { padding: 1.1rem 1.3rem; margin-bottom: 1.2rem; }
+.admin-filters { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end; }
+.admin-filters .field { min-width: 180px; margin: 0; }
+.admin-filter-check { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; color: var(--text-muted); font-weight: 600; padding-bottom: 0.5rem; }
+.admin-enq { margin-bottom: 1rem; }
+.admin-badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+  background: var(--brand-soft); color: var(--brand-deep); border-radius: 999px; padding: 0.2rem 0.6rem; vertical-align: middle;
+}
+.admin-enq-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
+.admin-enq-actions .status-select { min-height: 40px; border-radius: var(--r-sm); border: 1px solid var(--line); padding: 0 0.6rem; font-weight: 600; }
+.admin-enq-actions .btn { min-height: 40px; padding: 0 0.9rem; font-size: 0.85rem; }
+.admin-notes { margin-top: 0.9rem; padding-top: 0.9rem; border-top: 1px dashed var(--line); }
+.admin-notes-list { display: grid; gap: 0.5rem; margin-bottom: 0.7rem; }
+.admin-note { background: var(--brand-soft); border-radius: var(--r-sm); padding: 0.5rem 0.7rem; }
+.admin-note p { margin: 0; font-size: 0.88rem; color: var(--ink-2); }
+.admin-note time { font-size: 0.75rem; color: var(--text-muted); }
+.admin-note-form { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: flex-start; }
+.admin-note-form textarea { flex: 1 1 260px; min-height: 44px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0.5rem 0.7rem; font: inherit; resize: vertical; }
+.admin-note-form .btn { min-height: 44px; }
 @media (max-width: 640px) {
   .account-summary { grid-template-columns: 1fr; }
   .account-actions .btn,

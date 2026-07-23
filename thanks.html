@@ -16,16 +16,22 @@
 <header id="site-header" class="site-header"></header>
 <main>
   <div class="container auth-wrap">
-    <div class="auth-card" style="text-align:center">
+    <div class="auth-card" style="text-align:center" id="thanks-card">
       <svg viewBox="0 0 24 24" style="width:64px;height:64px;fill:var(--success);margin:0 auto 0.8rem" aria-hidden="true">
         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 15-4.5-4.5 1.4-1.4L10 14.2l7.1-7.1 1.4 1.4L10 17z"/>
       </svg>
-      <h1 style="font-size:1.7rem">Enquiry received!</h1>
-      <p style="margin-inline:auto">Thank you for choosing Kridiya Travel. Your message is on its way to our experts, and we'll get back to you shortly with the best options.</p>
+      <h1 style="font-size:1.7rem" id="thanks-title">Enquiry received!</h1>
+      <p style="margin-inline:auto" id="thanks-body">Thank you for choosing Kridiya Travel. Your message is on its way to our experts, and we'll get back to you shortly with the best options.</p>
+      <div id="thanks-ref" hidden style="margin:1rem auto 0;padding:0.8rem 1rem;border:1px dashed var(--brand-deep);border-radius:12px;max-width:420px">
+        <div style="font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Your reference</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--brand-deep);letter-spacing:0.02em" id="thanks-ref-code">—</div>
+        <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.3rem" id="thanks-ref-summary"></div>
+      </div>
       <p class="slogan" style="font-family:var(--font-swash);color:var(--brand-deep);font-size:1.4rem;font-weight:700;font-style:italic">Your Journey, Our Passion.</p>
       <div style="display:grid;gap:0.6rem;margin-top:1.2rem">
-        <a class="btn btn-wa btn-block" href="https://wa.me/971509413873?text=Hello%20Kridiya%20Travel!%20I%20just%20sent%20an%20enquiry%20from%20your%20website." target="_blank" rel="noopener">Chat now on WhatsApp</a>
+        <a class="btn btn-wa btn-block" id="thanks-wa" href="https://wa.me/971509413873?text=Hello%20Kridiya%20Travel!%20I%20just%20sent%20an%20enquiry%20from%20your%20website." target="_blank" rel="noopener">Chat now on WhatsApp</a>
         <a class="btn btn-outline btn-block" href="index.html">Back to home</a>
+        <a class="btn btn-outline btn-block" id="thanks-track" href="register.html" hidden>Create an account to track this enquiry</a>
       </div>
       <p class="form-note" style="margin-top:1rem">In a hurry? Call us any time on <a href="tel:+971509413873">+971 50 941 3873</a>.</p>
     </div>
@@ -34,6 +40,37 @@
 <footer id="site-footer" class="site-footer"></footer>
 <script src="js/main.js" defer></script>
 <script src="js/auth.js" defer></script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var raw = null;
+  try { raw = sessionStorage.getItem("kridiya_last_enquiry"); } catch (e) {}
+  if (!raw) return;
+  var enq;
+  try { enq = JSON.parse(raw); } catch (e) { return; }
+  try { sessionStorage.removeItem("kridiya_last_enquiry"); } catch (e) {}
+  if (!enq || !enq.reference) return;
+
+  var firstName = enq.name ? enq.name.split(" ")[0] : "";
+  document.getElementById("thanks-title").textContent = firstName
+    ? "Thanks, " + firstName + " — your " + (enq.typeLabel || "enquiry").toLowerCase() + " is in."
+    : "Your " + (enq.typeLabel || "enquiry").toLowerCase() + " is in.";
+  document.getElementById("thanks-body").textContent = "A Kridiya travel expert will check current availability and reply with confirmed options. No payment is required until you approve a quote.";
+
+  var refBox = document.getElementById("thanks-ref");
+  refBox.hidden = false;
+  document.getElementById("thanks-ref-code").textContent = enq.reference;
+  document.getElementById("thanks-ref-summary").textContent = enq.summary || "";
+
+  var waText = "Hello Kridiya Travel! My enquiry ID is " + enq.reference + ". " + (enq.summary || "");
+  document.getElementById("thanks-wa").href = "https://wa.me/971509413873?text=" + encodeURIComponent(waText);
+
+  var session = window.KridiyaAuth ? KridiyaAuth.session() : null;
+  if (!session) {
+    var trackBtn = document.getElementById("thanks-track");
+    trackBtn.hidden = false;
+  }
+});
+</script>
 </body>
 </html>
 

@@ -246,8 +246,96 @@ function toast(msg) {
 
 /* ---------- FormSubmit plumbing ----------
    Every enquiry/contact form POSTs to https://formsubmit.co/<inbox>.
-   We add the redirect target at submit time (needs an absolute URL),
-   run validation, and archive a copy into the signed-in user's history. */
+   Forms tagged data-enquiry-type also get a KD-XXX-##### reference,
+   get written to Supabase (so the enquiry can be tracked on the account
+   and admin pages), and hand the reference to thanks.html. The footer
+   newsletter form has no data-enquiry-type and keeps submitting natively. */
+const SERVICE_TYPE_RULES = [
+  [/flight/i, "flight"],
+  [/hotel/i, "hotel"],
+  [/holiday/i, "holiday"],
+  [/visa/i, "visa"],
+  [/umrah/i, "umrah"],
+  [/cruise/i, "cruise"]
+];
+const SERVICE_PREFIX = { flight: "FLT", hotel: "HTL", holiday: "HOL", visa: "VSA", umrah: "UMR", cruise: "CRU", other: "ENQ" };
+
+function serviceTypeFromLabel(label) {
+  const hit = SERVICE_TYPE_RULES.find(function (r) { return r[0].test(label || ""); });
+  return hit ? hit[1] : "other";
+}
+
+function generateReference(serviceType) {
+  const prefix = SERVICE_PREFIX[serviceType] || "ENQ";
+  const stamp = Date.now().toString(36).toUpperCase().slice(-5);
+  const rand = Math.random().toString(36).toUpperCase().slice(2, 5);
+  return "KD-" + prefix + "-" + stamp + rand;
+}
+
+function gatherEnquiryFields(form) {
+  const data = new FormData(form);
+  const details = {};
+  const parts = [];
+  data.forEach(function (v, k) {
+    if (k.charAt(0) === "_" || k === "Name" || k === "Email" || k === "Phone") return;
+    const val = String(v).trim();
+    if (!val) return;
+    details[k] = val;
+    parts.push(k.replace(/_/g, " ") + ": " + val);
+  });
+  return {
+    fullName: String(data.get("Name") || "").trim(),
+    email: String(data.get("Email") || "").trim(),
+    phone: String(data.get("Phone") || "").trim(),
+    details: details,
+    summary: parts.join(" · ")
+  };
+}
+
+async function submitEnquiryToSupabase(fields, serviceType, reference) {
+  const sb = await KridiyaAuth.client();
+  const session = KridiyaAuth.session();
+  const result = await sb.from("enquiries").insert({
+    reference: reference,
+    user_id: session ? session.id : null,
+    service_type: serviceType,
+    full_name: fields.fullName,
+    email: fields.email,
+    phone: fields.phone || null,
+    summary: fields.summary || "Enquiry",
+    details: fields.details
+  });
+  if (result.error) throw result.error;
+}
+
+function formSubmitAjaxURL(form) {
+  return form.action.replace("https://formsubmit.co/", "https://formsubmit.co/ajax/");
+}
+
+async function sendFormSubmitAjax(form, reference) {
+  const data = new FormData(form);
+  const payload = { Reference: reference };
+  data.forEach(function (v, k) { payload[k] = v; });
+  await fetch(formSubmitAjaxURL(form), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+
+function stashEnquiryForThanksPage(reference, serviceType, summary, typeLabel, name) {
+  try {
+    sessionStorage.setItem("kridiya_last_enquiry", JSON.stringify({
+      reference: reference,
+      serviceType: serviceType,
+      typeLabel: typeLabel,
+      summary: summary,
+      name: name,
+      at: new Date().toISOString()
+    }));
+  } catch (e) { /* best-effort */ }
+}
+
 function prepareFormSubmit(form) {
   if (!form) return;
   let next = form.querySelector('input[name="_next"]');
@@ -257,15 +345,37 @@ function prepareFormSubmit(form) {
     next.name = "_next";
     form.appendChild(next);
   }
+  next.value = new URL("thanks.html", location.href).href;
+
   form.addEventListener("submit", function (e) {
     if (!validateForm(form)) { e.preventDefault(); return; }
-    next.value = new URL("thanks.html", location.href).href;
+
+    const type = form.dataset.enquiryType;
+    if (!type) return; // newsletter form: submits natively, no reference needed
+
+    e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Sending…';
     }
-    archiveEnquiry(form);
+
+    const serviceType = serviceTypeFromLabel(type);
+    const reference = generateReference(serviceType);
+    const fields = gatherEnquiryFields(form);
+    const dest = next.value;
+
+    Promise.allSettled([
+      submitEnquiryToSupabase(fields, serviceType, reference).catch(function (err) {
+        console.error("Kridiya: could not save enquiry to Supabase", err);
+      }),
+      sendFormSubmitAjax(form, reference).catch(function (err) {
+        console.error("Kridiya: could not email enquiry", err);
+      })
+    ]).then(function () {
+      stashEnquiryForThanksPage(reference, serviceType, fields.summary, type, fields.fullName);
+      location.href = dest;
+    });
   });
 }
 
@@ -311,25 +421,6 @@ function validateForm(form) {
 document.addEventListener("input", function (e) {
   if (e.target.matches(".field input, .field select, .field textarea")) setFieldError(e.target, "");
 });
-
-/* ---------- Enquiry history (per signed-in user) ---------- */
-function archiveEnquiry(form) {
-  try {
-    const session = window.KridiyaAuth ? KridiyaAuth.session() : null;
-    if (!session) return;
-    const type = form.dataset.enquiryType || "Enquiry";
-    const data = new FormData(form);
-    const parts = [];
-    data.forEach(function (v, k) {
-      if (k.startsWith("_") || !String(v).trim()) return;
-      parts.push(k.replace(/_/g, " ") + ": " + v);
-    });
-    const key = "kridiya_enquiries_" + session.email;
-    const list = JSON.parse(localStorage.getItem(key) || "[]");
-    list.unshift({ type: type, at: new Date().toISOString(), summary: parts.join(" · ") });
-    localStorage.setItem(key, JSON.stringify(list.slice(0, 50)));
-  } catch (err) { /* history is best-effort */ }
-}
 
 /* ---------- Reveal-on-scroll (enhance-only; content visible without JS) ---------- */
 function initReveal() {

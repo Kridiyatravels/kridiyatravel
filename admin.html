@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enquiry Admin — Kridiya Travel and Tourism</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/favicon-180.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="admin">
+<header id="site-header" class="site-header"></header>
+<main>
+  <section class="section">
+    <div class="container">
+      <div id="admin-gate">
+        <div class="account-main empty-state"><p>Checking access…</p></div>
+      </div>
+
+      <div id="admin-app" hidden>
+        <div class="account-head">
+          <div>
+            <h1>Enquiries</h1>
+            <p>Every enquiry submitted through the website, newest first. Staff only.</p>
+          </div>
+          <span class="form-note" id="admin-count"></span>
+        </div>
+
+        <div class="account-main admin-filters-card">
+          <div class="admin-filters">
+            <div class="field">
+              <label for="flt-status">STATUS</label>
+              <select id="flt-status"><option value="">All statuses</option></select>
+            </div>
+            <div class="field">
+              <label for="flt-service">SERVICE</label>
+              <select id="flt-service"><option value="">All services</option></select>
+            </div>
+            <label class="admin-filter-check"><input type="checkbox" id="flt-today"> Today only</label>
+          </div>
+        </div>
+
+        <div id="admin-list"></div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script src="js/main.js" defer></script>
+<script src="js/auth.js" defer></script>
+<script src="js/admin.js" defer></script>
+</body>
+</html>
