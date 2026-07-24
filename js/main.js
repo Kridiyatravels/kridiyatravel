@@ -85,6 +85,7 @@ const NAV_ITEMS = [
   ["umrah.html", "Umrah"],
   ["cruise.html", "Cruise"],
   ["visa.html", "Visa"],
+  ["corporate-booking.html", "Corporate"],
   ["about.html", "About Us"],
   ["contact.html", "Contact"]
 ];
@@ -174,6 +175,7 @@ function renderChrome() {
           '<li><a href="cruise.html">Cruise Packages</a></li>' +
           '<li><a href="umrah.html">Umrah Packages</a></li>' +
           '<li><a href="visa.html">Visa Services</a></li>' +
+          '<li><a href="corporate-booking.html">Corporate Bookings</a></li>' +
           '<li><a href="contact.html">Travel Insurance</a></li>' +
         "</ul></div>" +
         "<div><h4>Company</h4><ul class=\"footer-links\">" +
