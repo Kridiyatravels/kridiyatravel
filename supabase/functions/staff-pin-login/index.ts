@@ -1,16 +1,14 @@
 // Kridiya Travel — staff PIN sign-in.
-// Called before the visitor has any session, so this function has to
-// implement its own authentication rather than relying on a caller JWT
-// (verify_jwt is deliberately off for this one function). The browser
+// Called before the visitor has any session, so this function does its
+// own authentication (verify_jwt is deliberately off here). The browser
 // only ever sends the 6-digit PIN — no name or email is picked client
-// side. Since a PIN is really just that staff member's Supabase Auth
-// password, the only way to find out *whose* PIN it is without an
-// identity hint is to try it against every active staff account's
-// email until Supabase Auth's own rate-limited sign-in accepts one.
-// Staff lists are small (a handful of people), so this stays cheap;
-// create-staff-account/reset-staff-pin already reject a freshly
-// generated PIN that collides with anyone else's, so at most one
-// candidate should ever match.
+// side. A PIN is just that staff member's Supabase Auth password, so:
+//   1. staff_email_for_pin() (a SECURITY DEFINER db function) matches the
+//      PIN against every active staff member's stored bcrypt hash and
+//      returns the owning email — only when the PIN is correct, so it
+//      never leaks staff emails.
+//   2. We then mint a real session via Supabase Auth's own token
+//      endpoint. Everything uses the public publishable key.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = ["https://admin.kridiyatravel.com", "http://localhost:8138", "http://localhost:8137"];
@@ -38,8 +36,13 @@ Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, origin);
 
   const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // Use the publishable key throughout. The auto-injected legacy JWT keys
+  // (SUPABASE_ANON_KEY / SUPABASE_SERVICE_ROLE_KEY) are disabled on this
+  // project in favour of the new key system, so any Supabase call made
+  // with them is rejected — which is why the previous versions of this
+  // function always returned "Incorrect PIN". The publishable key is the
+  // same public value the site already ships.
+  const PUBLISHABLE_KEY = Deno.env.get("KRIDIYA_PUBLISHABLE_KEY") || "sb_publishable_wiA9tSt74X-UQhW4yOXgIQ_lEUG1Q1Q";
 
   let body: Record<string, unknown>;
   try {
@@ -54,47 +57,47 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Enter your 6-digit PIN." }, 400, origin);
   }
 
-  const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-  const anonClient = createClient(SUPABASE_URL, ANON_KEY);
+  const pub = createClient(SUPABASE_URL, PUBLISHABLE_KEY);
 
-  const { data: profiles, error: profilesErr } = await adminClient
-    .from("staff_profiles")
-    .select("user_id")
-    .eq("active", true);
-
-  if (profilesErr || !profiles?.length) {
+  // Resolve whose PIN this is. staff_email_for_pin() (SECURITY DEFINER)
+  // checks the PIN against each active staff member's stored bcrypt hash
+  // in the database and returns the matching email — and only returns an
+  // email when the PIN is correct, so it can't be used to enumerate staff.
+  const { data: email, error: rpcErr } = await pub.rpc("staff_email_for_pin", { p_pin: pin });
+  if (rpcErr || !email || typeof email !== "string") {
     return json({ error: "Incorrect PIN." }, 401, origin);
   }
 
-  // Try the PIN against each active staff member's email in turn — the
-  // real check is this signInWithPassword call, nothing above it does
-  // any verification. Stop at the first (and, by construction, only)
-  // match.
-  for (const p of profiles) {
-    const { data: authUser } = await adminClient.auth.admin.getUserById(p.user_id);
-    const email = authUser?.user?.email;
-    if (!email) continue;
-
-    const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password: pin });
-    if (signInErr || !signInData?.session) continue;
-
-    await adminClient.from("audit_events").insert({
-      actor_user_id: p.user_id,
-      event_type: "auth.login",
-      entity_type: "user",
-      entity_id: p.user_id,
-      metadata: { method: "pin" }
-    });
-
-    return json(
-      {
-        access_token: signInData.session.access_token,
-        refresh_token: signInData.session.refresh_token
-      },
-      200,
-      origin
-    );
+  // Mint a real session through Supabase Auth's own rate-limited token
+  // endpoint (this second check is the authoritative one).
+  const resp = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", apikey: PUBLISHABLE_KEY },
+    body: JSON.stringify({ email, password: pin })
+  });
+  const tok = await resp.json().catch(() => ({}));
+  if (!resp.ok || !tok.access_token) {
+    return json({ error: "Incorrect PIN." }, 401, origin);
   }
 
-  return json({ error: "Incorrect PIN." }, 401, origin);
+  // Best-effort login audit, as the just-signed-in user. Never blocks login.
+  try {
+    const uid = tok.user?.id ?? null;
+    const userClient = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
+      global: { headers: { Authorization: "Bearer " + tok.access_token } }
+    });
+    await userClient.from("audit_events").insert({
+      actor_user_id: uid,
+      event_type: "auth.login",
+      entity_type: "user",
+      entity_id: uid,
+      metadata: { method: "pin" }
+    });
+  } catch (_e) { /* audit is best-effort */ }
+
+  return json(
+    { access_token: tok.access_token, refresh_token: tok.refresh_token },
+    200,
+    origin
+  );
 });
