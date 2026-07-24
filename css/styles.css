@@ -1197,10 +1197,36 @@ a:hover { text-decoration: underline; }
 .cust-request-form input[type="text"] { flex: 1 1 200px; min-height: 42px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 0.7rem; font: inherit; }
 .cust-request-form input[type="file"] { flex: 1 1 200px; }
 .cust-request-form .btn { min-height: 42px; }
-.quote-card { background: var(--brand-soft); border-radius: var(--r-md); padding: 0.8rem 1rem; }
+.quote-list { display: grid; gap: 0.9rem; }
+.quote-card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 1.1rem 1.2rem; box-shadow: 0 2px 10px oklch(0.18 0.006 270 / 0.06);
+}
 .quote-card p { color: var(--ink-2); }
-.quote-actions { display: flex; gap: 0.6rem; margin-top: 0.6rem; flex-wrap: wrap; }
-.quote-actions .btn { min-height: 40px; padding: 0 1rem; font-size: 0.85rem; }
+.quote-card-head {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+  padding-bottom: 0.7rem; margin-bottom: 0.7rem; border-bottom: 1px solid var(--line);
+}
+.quote-card-head h4 { margin: 0; font-size: 1.05rem; color: var(--ink); }
+.quote-price { font-size: 1.3rem; font-weight: 800; color: var(--brand-deep); white-space: nowrap; }
+.quote-details { display: grid; gap: 0.4rem; }
+.quote-row { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; font-size: 0.9rem; }
+.quote-k { color: var(--text-muted); flex: 0 0 auto; }
+.quote-v { color: var(--ink); font-weight: 600; text-align: right; }
+.quote-addons {
+  margin-top: 0.8rem; padding: 0.7rem 0.85rem; background: var(--brand-soft);
+  border-radius: 12px; display: grid; gap: 0.35rem;
+}
+.quote-addons-title { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand-deep); }
+.quote-terms { margin-top: 0.8rem; font-size: 0.85rem; }
+.quote-terms summary { cursor: pointer; color: var(--brand-deep); font-weight: 700; }
+.quote-terms ul { margin: 0.5rem 0 0; padding-left: 1.1rem; color: var(--text-muted); display: grid; gap: 0.25rem; }
+.quote-valid { margin: 0.8rem 0 0; font-size: 0.82rem; color: var(--text-muted); }
+.quote-actions { display: flex; gap: 0.6rem; margin-top: 0.9rem; flex-wrap: wrap; }
+.quote-actions .btn { min-height: 42px; padding: 0 1.2rem; font-size: 0.88rem; }
+.quote-card-done { opacity: 0.9; }
+.quote-status-line { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--success); font-weight: 600; }
+.quote-status-line svg { width: 15px; height: 15px; fill: var(--success); vertical-align: -2px; margin-right: 0.25rem; }
 .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); }
 .empty-state svg { width: 52px; height: 52px; fill: var(--line-strong); margin-bottom: 0.6rem; }
 .empty-actions,

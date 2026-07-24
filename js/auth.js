@@ -580,25 +580,63 @@ window.KridiyaAuth = (function () {
     }).join("") + "</div>";
   }
 
+  function money(v, c) {
+    return KridiyaAuth.escapeHTML((c || "AED") + " " + Number(v || 0).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  }
+  function quoteDetailRows(q) {
+    const od = (q.option_data && typeof q.option_data === "object") ? q.option_data : {};
+    let rows = Object.keys(od).map(function (k) {
+      return od[k] ? '<div class="quote-row"><span class="quote-k">' + KridiyaAuth.escapeHTML(k) + '</span><span class="quote-v">' + KridiyaAuth.escapeHTML(String(od[k])) + "</span></div>" : "";
+    }).join("");
+    if (!rows) {
+      const legacy = [];
+      if (q.airline || q.stops) legacy.push(["Flight", [q.airline, q.stops].filter(Boolean).join(" · ")]);
+      if (q.outbound) legacy.push(["Onward", q.outbound]);
+      if (q.inbound) legacy.push(["Return", q.inbound]);
+      if (q.baggage) legacy.push(["Baggage", q.baggage]);
+      rows = legacy.map(function (r) {
+        return '<div class="quote-row"><span class="quote-k">' + KridiyaAuth.escapeHTML(r[0]) + '</span><span class="quote-v">' + KridiyaAuth.escapeHTML(r[1]) + "</span></div>";
+      }).join("");
+    }
+    return rows;
+  }
   function quotesHTML(quotes) {
     if (!quotes.length) return "";
-    return '<div class="enq-extra">' + quotes.map(function (q) {
-      const amount = KridiyaAuth.escapeHTML(q.currency + " " + Number(q.price_amount).toLocaleString("en-GB"));
+    return '<div class="enq-extra quote-list">' + quotes.map(function (q) {
+      const amount = money(q.price_amount, q.currency);
       const validity = q.valid_until
-        ? "Valid until " + new Date(q.valid_until).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+        ? new Date(q.valid_until).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric" })
         : "";
+      const details = quoteDetailRows(q);
+      const adds = Array.isArray(q.addons) ? q.addons : [];
+      const addonsHtml = adds.length
+        ? '<div class="quote-addons"><span class="quote-addons-title">Optional add-ons</span>' + adds.map(function (a) {
+            return '<div class="quote-row"><span class="quote-k">' + KridiyaAuth.escapeHTML(a.name) + '</span><span class="quote-v">' + (a.price != null ? money(a.price, q.currency) : "") + "</span></div>";
+          }).join("") + "</div>"
+        : "";
+      const termsHtml = q.terms
+        ? '<details class="quote-terms"><summary>Terms &amp; conditions</summary><ul>' + String(q.terms).split("\n").map(function (t) {
+            t = t.replace(/^[-•]\s*/, "").trim();
+            return t ? "<li>" + KridiyaAuth.escapeHTML(t) + "</li>" : "";
+          }).join("") + "</ul></details>"
+        : "";
+
       if (q.status === "sent") {
         return '<div class="quote-card">' +
-          "<p><b>" + KridiyaAuth.escapeHTML(q.title) + "</b> — " + amount + "</p>" +
-          (q.terms ? '<p class="form-note">' + KridiyaAuth.escapeHTML(q.terms) + "</p>" : "") +
-          (validity ? '<p class="form-note">' + validity + "</p>" : "") +
+          '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(q.title || "Quote") + '</h4><div class="quote-price">' + amount + "</div></div>" +
+          (details ? '<div class="quote-details">' + details + "</div>" : "") +
+          addonsHtml +
+          termsHtml +
+          (validity ? '<p class="quote-valid">Valid until ' + KridiyaAuth.escapeHTML(validity) + "</p>" : "") +
           '<div class="quote-actions">' +
             '<button class="btn btn-primary" type="button" data-quote-id="' + q.id + '" data-action="accepted">Accept quote</button>' +
             '<button class="btn btn-outline" type="button" data-quote-id="' + q.id + '" data-action="declined">Decline</button>' +
           "</div></div>";
       }
-      return '<p class="form-note enq-extra-done">' + icon("check") + " " + KridiyaAuth.escapeHTML(q.title) + " — " + amount +
-        " (" + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(q.status)) + ")</p>";
+      return '<div class="quote-card quote-card-done">' +
+        '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(q.title || "Quote") + '</h4><div class="quote-price">' + amount + "</div></div>" +
+        (details ? '<div class="quote-details">' + details + "</div>" : "") +
+        '<p class="quote-status-line">' + icon("check") + " " + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(q.status)) + "</p></div>";
     }).join("") + "</div>";
   }
 
