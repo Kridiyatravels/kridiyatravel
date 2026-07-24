@@ -61,11 +61,36 @@ Deno.serve(async (req: Request) => {
   if (!email || !email.includes("@")) return json({ error: "Enter a valid email address." }, 400, origin);
   if (!validRoles.includes(role)) return json({ error: "Invalid role." }, 400, origin);
 
-  const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  const pin = String(buf[0] % 1000000).padStart(6, "0");
-
   const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const anonClient = createClient(SUPABASE_URL, ANON_KEY);
+
+  // Staff sign in with the PIN alone (no name picker), so a PIN has to
+  // be unique across every active staff account — otherwise it would
+  // be ambiguous whose account it logs into. Since PINs are stored only
+  // as hashed Supabase Auth passwords, the sole way to check "is this
+  // PIN already taken" is to try it against everyone else's email.
+  const { data: existingProfiles } = await adminClient.from("staff_profiles").select("user_id").eq("active", true);
+  const existingEmails: string[] = [];
+  for (const p of existingProfiles || []) {
+    const { data: u } = await adminClient.auth.admin.getUserById(p.user_id);
+    if (u?.user?.email) existingEmails.push(u.user.email);
+  }
+
+  let pin = "";
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    const candidate = String(buf[0] % 1000000).padStart(6, "0");
+    let collision = false;
+    for (const existingEmail of existingEmails) {
+      const { data: probe, error: probeErr } = await anonClient.auth.signInWithPassword({ email: existingEmail, password: candidate });
+      if (!probeErr && probe?.session) { collision = true; break; }
+    }
+    if (!collision) { pin = candidate; break; }
+  }
+  if (!pin) {
+    return json({ error: "Could not generate a unique PIN — try again." }, 500, origin);
+  }
 
   const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
     email,

@@ -1,11 +1,16 @@
 // Kridiya Travel — staff PIN sign-in.
 // Called before the visitor has any session, so this function has to
 // implement its own authentication rather than relying on a caller JWT
-// (verify_jwt is deliberately off for this one function). It resolves
-// the staff member's real email server-side — the browser only ever
-// sees a name/department picker, never the email — signs in through
-// Supabase Auth's normal rate-limited password endpoint, and hands the
-// resulting session tokens back for the browser to adopt.
+// (verify_jwt is deliberately off for this one function). The browser
+// only ever sends the 6-digit PIN — no name or email is picked client
+// side. Since a PIN is really just that staff member's Supabase Auth
+// password, the only way to find out *whose* PIN it is without an
+// identity hint is to try it against every active staff account's
+// email until Supabase Auth's own rate-limited sign-in accepts one.
+// Staff lists are small (a handful of people), so this stays cheap;
+// create-staff-account/reset-staff-pin already reject a freshly
+// generated PIN that collides with anyone else's, so at most one
+// candidate should ever match.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const ALLOWED_ORIGINS = ["https://admin.kridiyatravel.com", "http://localhost:8138", "http://localhost:8137"];
@@ -43,56 +48,53 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Invalid request body" }, 400, origin);
   }
 
-  const staffProfileId = String(body.staff_profile_id || "").trim();
   const pin = String(body.pin || "").trim();
 
-  if (!staffProfileId || !/^\d{4,8}$/.test(pin)) {
-    return json({ error: "Pick your name and enter your PIN." }, 400, origin);
+  if (!/^\d{6}$/.test(pin)) {
+    return json({ error: "Enter your 6-digit PIN." }, 400, origin);
   }
 
   const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-
-  const { data: profile, error: profileErr } = await adminClient
-    .from("staff_profiles")
-    .select("user_id, active")
-    .eq("id", staffProfileId)
-    .maybeSingle();
-
-  if (profileErr || !profile || !profile.active) {
-    return json({ error: "Incorrect name or PIN." }, 401, origin);
-  }
-
-  const { data: authUser, error: authUserErr } = await adminClient.auth.admin.getUserById(profile.user_id);
-  if (authUserErr || !authUser?.user?.email) {
-    return json({ error: "Incorrect name or PIN." }, 401, origin);
-  }
-
-  // The real sign-in, through Supabase's own rate-limited endpoint —
-  // this call is what actually checks the PIN, nothing above it does.
   const anonClient = createClient(SUPABASE_URL, ANON_KEY);
-  const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({
-    email: authUser.user.email,
-    password: pin
-  });
 
-  if (signInErr || !signInData?.session) {
-    return json({ error: "Incorrect name or PIN." }, 401, origin);
+  const { data: profiles, error: profilesErr } = await adminClient
+    .from("staff_profiles")
+    .select("user_id")
+    .eq("active", true);
+
+  if (profilesErr || !profiles?.length) {
+    return json({ error: "Incorrect PIN." }, 401, origin);
   }
 
-  await adminClient.from("audit_events").insert({
-    actor_user_id: profile.user_id,
-    event_type: "auth.login",
-    entity_type: "user",
-    entity_id: profile.user_id,
-    metadata: { method: "pin" }
-  });
+  // Try the PIN against each active staff member's email in turn — the
+  // real check is this signInWithPassword call, nothing above it does
+  // any verification. Stop at the first (and, by construction, only)
+  // match.
+  for (const p of profiles) {
+    const { data: authUser } = await adminClient.auth.admin.getUserById(p.user_id);
+    const email = authUser?.user?.email;
+    if (!email) continue;
 
-  return json(
-    {
-      access_token: signInData.session.access_token,
-      refresh_token: signInData.session.refresh_token
-    },
-    200,
-    origin
-  );
+    const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password: pin });
+    if (signInErr || !signInData?.session) continue;
+
+    await adminClient.from("audit_events").insert({
+      actor_user_id: p.user_id,
+      event_type: "auth.login",
+      entity_type: "user",
+      entity_id: p.user_id,
+      metadata: { method: "pin" }
+    });
+
+    return json(
+      {
+        access_token: signInData.session.access_token,
+        refresh_token: signInData.session.refresh_token
+      },
+      200,
+      origin
+    );
+  }
+
+  return json({ error: "Incorrect PIN." }, 401, origin);
 });

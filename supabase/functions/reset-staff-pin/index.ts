@@ -53,11 +53,35 @@ Deno.serve(async (req: Request) => {
   const targetUserId = String(body.user_id || "").trim();
   if (!targetUserId) return json({ error: "Missing user_id" }, 400, origin);
 
-  const buf = new Uint32Array(1);
-  crypto.getRandomValues(buf);
-  const pin = String(buf[0] % 1000000).padStart(6, "0");
-
   const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const anonClient = createClient(SUPABASE_URL, ANON_KEY);
+
+  // Same PIN-uniqueness requirement as create-staff-account: staff sign
+  // in with the PIN alone, so no one else active can share it. Exclude
+  // the target themselves — colliding with their own current PIN is
+  // fine, that's just "reset landed on the same number".
+  const { data: existingProfiles } = await adminClient.from("staff_profiles").select("user_id").eq("active", true).neq("user_id", targetUserId);
+  const existingEmails: string[] = [];
+  for (const p of existingProfiles || []) {
+    const { data: u } = await adminClient.auth.admin.getUserById(p.user_id);
+    if (u?.user?.email) existingEmails.push(u.user.email);
+  }
+
+  let pin = "";
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    const candidate = String(buf[0] % 1000000).padStart(6, "0");
+    let collision = false;
+    for (const existingEmail of existingEmails) {
+      const { data: probe, error: probeErr } = await anonClient.auth.signInWithPassword({ email: existingEmail, password: candidate });
+      if (!probeErr && probe?.session) { collision = true; break; }
+    }
+    if (!collision) { pin = candidate; break; }
+  }
+  if (!pin) {
+    return json({ error: "Could not generate a unique PIN — try again." }, 500, origin);
+  }
 
   const { error: updateErr } = await adminClient.auth.admin.updateUserById(targetUserId, { password: pin });
   if (updateErr) {
