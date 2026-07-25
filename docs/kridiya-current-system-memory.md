@@ -640,10 +640,12 @@ Current owner decisions as of 2026-07-25:
 - Staff/admin can record a SharePoint invoice link now; automatic SharePoint upload is a later phase.
 - Chosen SharePoint structure is `Kridiya Travel/Operations/Bookings/YYYY/MM/BOOKING-REFERENCE/...` for booking documents and `Kridiya Travel/Finance/YYYY/MM` for monthly finance exports.
 - Refunds must be tracked as `refund_pending` before completion, approved by owner/admin or finance with `approve_refunds`, and shown in accounting as refund pending, refunded, and net collected.
+- Refund backend is now implemented with `request_payment_refund`, `approve_payment_refund`, and `complete_payment_refund` RPCs, with audit events for each step.
+- Admin payments page is upgraded into Finance Control with filters, search, refund queue, approve/complete refund actions, proof/receipt chips, booking links, and net collection totals.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
 
 ## Next Best Action
 
-Upgrade payments/refund workflow so staff can record refund requests, owner/finance can approve/complete them, and refund proof/reference can be attached to the accounting trail.
+Upgrade the admin/staff portal module by module into a precise professional operating system: dashboard command center, booking workflow, payments/refunds, accounting, backups, staff monitoring, documents, supplier controls, sales/CRM, marketing follow-up, and IT/security review.
