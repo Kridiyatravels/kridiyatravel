@@ -642,6 +642,7 @@ Current owner decisions as of 2026-07-25:
 - Refunds must be tracked as `refund_pending` before completion, approved by owner/admin or finance with `approve_refunds`, and shown in accounting as refund pending, refunded, and net collected.
 - Refund backend is now implemented with `request_payment_refund`, `approve_payment_refund`, and `complete_payment_refund` RPCs, with audit events for each step.
 - Admin payments page is upgraded into Finance Control with filters, search, refund queue, approve/complete refund actions, proof/receipt chips, booking links, and net collection totals.
+- Admin dashboard is upgraded into a command center with system health, open sales/cost/profit, 30-day net collection, confirmed-before-payment risk, refund queue, overdue/today tasks, document pending, and direct action links.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
