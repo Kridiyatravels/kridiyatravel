@@ -7,6 +7,11 @@ Use this file as the handoff memory for a new Codex or Claude chat.
 ## Business
 
 - Company: Kridiya Travel and Tourism FZ-LLC
+- Trade licence: 5033347, RAK Freezone, Free Zone Limited Liability Company FZ-LLC
+- Licence address: FDRK7105, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah, United Arab Emirates
+- Licence activity: Retail sale of Travel and Entertainment Services E-trafficking
+- Licence issue/expiry: issued 28-05-2025, expires 27-05-2027
+- Licence manager: Indirani Alagarsamy Alagarsamy
 - Currency: AED
 - Current active services: Flights and Visa
 - Prepare system for: Hotels, Holiday Packages, Umrah, Cruise, Insurance, Transfers, Corporate Bookings
