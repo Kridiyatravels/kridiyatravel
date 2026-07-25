@@ -377,8 +377,6 @@ a:hover { text-decoration: underline; }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
 .hero-cta .btn { font-size: 0.92rem; }
 .hero-cta .btn svg { width: 18px; height: 18px; fill: currentColor; }
-.btn-hero-call { background: var(--surface); color: var(--brand-deep); border: 1px solid var(--line-strong); }
-.btn-hero-call:hover { background: var(--brand-soft); }
 @media (max-width: 480px) { .hero-cta .btn { flex: 1 1 100%; justify-content: center; } }
 
 .page-hero { padding: 1.6rem 0 4.6rem; }
@@ -498,24 +496,32 @@ a:hover { text-decoration: underline; }
   .service-slide-cta, .service-slide-cta svg, .carousel-nav-btn, .service-slide { transition: none; }
 }
 
-/* Home page tabbed widget: a real search box front-and-centre. */
+/* Home page tabbed widget: a real search box front-and-centre, with a
+   centred row of floating pill tabs. */
 .search-widget-tabbed { padding-top: 0; }
 .widget-tabs {
-  display: flex; gap: 0.2rem; overflow-x: auto; scrollbar-width: none;
-  padding: 0.5rem 0.6rem 0.1rem;
+  display: flex; gap: 0.4rem; overflow-x: auto; scrollbar-width: none;
+  justify-content: center;
+  padding: 0.9rem 1rem 0.55rem;
 }
 .widget-tabs::-webkit-scrollbar { display: none; }
 .widget-tab {
-  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.4rem;
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.5rem;
   border: none; background: transparent; cursor: pointer;
   font: 700 0.9rem/1 var(--font); color: var(--ink-2);
-  padding: 0.7rem 1rem; border-radius: 999px; white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s;
+  padding: 0.65rem 1.15rem; border-radius: 999px; white-space: nowrap;
+  transition: background-color 0.18s var(--ease-out), color 0.18s var(--ease-out),
+              box-shadow 0.18s var(--ease-out), transform 0.18s var(--ease-out);
 }
 .widget-tab svg { width: 18px; height: 18px; fill: currentColor; }
 .widget-tab:hover { color: var(--brand-deep); background: var(--brand-soft); }
-.widget-tab.active { color: #fff; background: var(--brand-deep); }
-@media (max-width: 560px) { .widget-tab { padding: 0.6rem 0.8rem; font-size: 0.82rem; } }
+.widget-tab.active {
+  color: #fff; background: var(--brand-deep);
+  box-shadow: 0 6px 16px oklch(0.55 0.16 45 / 0.34);
+  transform: translateY(-1px);
+}
+@media (max-width: 720px) { .widget-tabs { justify-content: flex-start; } }
+@media (max-width: 560px) { .widget-tab { padding: 0.55rem 0.9rem; font-size: 0.82rem; } }
 
 .widget-panel { padding: 0 1.4rem 1.5rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
 .widget-panel[hidden] { display: none; }
