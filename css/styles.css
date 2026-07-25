@@ -1260,7 +1260,7 @@ a:hover { text-decoration: underline; }
 }
 .account-item-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.6rem;
   margin-top: 0.75rem;
 }
@@ -1285,6 +1285,26 @@ a:hover { text-decoration: underline; }
   padding: 0 0.65rem;
   font-size: 0.76rem;
   font-weight: 800;
+}
+.corporate-portal-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.corporate-portal-flow {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: grid;
+  gap: 0.7rem;
+}
+.corporate-portal-flow li { color: var(--text-muted); }
+.corporate-portal-flow b { display: block; color: var(--ink); font-size: 0.94rem; }
+.corporate-portal-flow span { display: block; margin-top: 0.15rem; font-size: 0.86rem; line-height: 1.4; }
+.corporate-portal-checks { display: flex; flex-wrap: wrap; gap: 0.55rem; }
+.corporate-portal-checks span {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--ink-2);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 .enq-extra { margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px dashed var(--line); display: grid; gap: 0.6rem; }
 .enq-extra-done svg { width: 16px; height: 16px; fill: var(--success); vertical-align: -3px; margin-right: 0.2rem; }
@@ -1386,6 +1406,7 @@ a:hover { text-decoration: underline; }
 @media (max-width: 640px) {
   .account-summary { grid-template-columns: 1fr; }
   .account-item-grid { grid-template-columns: 1fr; }
+  .corporate-portal-grid { grid-template-columns: 1fr; }
   .portal-next { align-items: flex-start; flex-direction: column; }
   .portal-next .btn { width: 100%; }
   .account-actions .btn,

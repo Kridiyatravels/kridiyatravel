@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corporate Portal - Kridiya Travel and Tourism</title>
+<meta name="description" content="Corporate travel portal for company travel requests, approvals, LPO guidance, booking visibility, and Kridiya support.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/favicon-180.png">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body data-page="corporate-account">
+<header id="site-header" class="site-header"></header>
+<main>
+  <section class="section">
+    <div class="container">
+      <div class="account-head">
+        <div>
+          <h1>Corporate portal</h1>
+          <p>Company travel requests, approvals, booking visibility, and billing coordination.</p>
+        </div>
+        <a class="btn btn-primary" href="corporate-booking.html">New corporate request</a>
+      </div>
+      <div id="corporate-account-gate" class="account-main empty-state"><p>Checking access...</p></div>
+      <div id="corporate-account-app" hidden>
+        <div class="corporate-portal-grid">
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Company access</h2>
+                <p id="corp-access-copy">Loading your account status...</p>
+              </div>
+              <a href="account.html">My account</a>
+            </div>
+            <div class="account-summary">
+              <div><span id="corp-visible-items">0</span><b>Linked items</b><small>Visible in your customer account</small></div>
+              <div><span>OTP</span><b>Login model</b><small>Email login/magic-link ready path</small></div>
+              <div><span>Staff</span><b>Approval control</b><small>Booking, payment, and documents remain verified by Kridiya</small></div>
+            </div>
+          </div>
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Corporate operating flow</h2>
+                <p>Use this process for every company travel request.</p>
+              </div>
+            </div>
+            <ol class="corporate-portal-flow">
+              <li><b>Request</b><span>Company submits route, travellers, dates, payment/LPO needs, and approval person.</span></li>
+              <li><b>Quote</b><span>Kridiya checks suppliers and sends options with rules, deadline, and total cost.</span></li>
+              <li><b>Approval</b><span>Company confirms written approval, payment, credit terms, or LPO before booking.</span></li>
+              <li><b>Booking</b><span>Kridiya creates the booking, tracks supplier cost, and prepares documents.</span></li>
+              <li><b>Handover</b><span>Invoice, receipt, ticket, voucher, visa note, or refund/cancellation update is shared.</span></li>
+            </ol>
+          </div>
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Need from company</h2>
+                <p>Keep these ready so approvals do not delay supplier confirmation.</p>
+              </div>
+            </div>
+            <div class="corporate-portal-checks">
+              <span>Authorized requester name</span>
+              <span>Billing/accounts email</span>
+              <span>LPO or approval person</span>
+              <span>Traveller passport details</span>
+              <span>Payment proof or credit approval</span>
+              <span>Urgency and supplier preference</span>
+            </div>
+          </div>
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Support</h2>
+                <p>For urgent business travel, WhatsApp is fastest.</p>
+              </div>
+            </div>
+            <div class="account-actions">
+              <a class="btn btn-primary" href="https://wa.me/971509413873?text=Hello%20Kridiya%20Travel!%20I%20need%20corporate%20travel%20support." target="_blank" rel="noopener">WhatsApp corporate desk</a>
+              <a class="btn btn-outline" href="mailto:enquiry@kridiyatravel.com">Email enquiry team</a>
+              <a class="btn btn-outline" href="corporate-booking.html">New request</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script src="js/main.js" defer></script>
+<script src="js/auth.js" defer></script>
+</body>
+</html>

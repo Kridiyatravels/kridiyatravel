@@ -254,7 +254,7 @@ window.KridiyaAuth = (function () {
     const sb = await client();
     const result = await sb
       .from("bookings")
-      .select("id, booking_reference, service_type, title, route_or_destination, travel_start, travel_end, adults, children, infants, amount, currency, status, created_at")
+      .select("id, booking_reference, service_type, title, route_or_destination, travel_start, travel_end, adults, children, infants, amount, currency, status, payment_status, document_status, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -750,6 +750,8 @@ window.KridiyaAuth = (function () {
             detail: booking.route_or_destination || booking.service_type,
             paxLabel: pax ? pax + " traveller" + (pax === 1 ? "" : "s") : "",
             amount: booking.amount ? (booking.currency + " " + Number(booking.amount).toLocaleString("en-GB")) : "Quote pending",
+            paymentStatus: booking.payment_status,
+            documentStatus: booking.document_status,
             created_at: booking.created_at
           };
         })).sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
@@ -775,6 +777,8 @@ window.KridiyaAuth = (function () {
                 '<span><small>Details</small><b>' + KridiyaAuth.escapeHTML(item.detail || "Team will update") + '</b></span>' +
                 '<span><small>Amount</small><b>' + KridiyaAuth.escapeHTML(item.amount) + '</b></span>' +
                 (item.paxLabel ? '<span><small>Travellers</small><b>' + KridiyaAuth.escapeHTML(item.paxLabel) + '</b></span>' : "") +
+                (item.paymentStatus ? '<span><small>Payment</small><b>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.paymentStatus)) + '</b></span>' : "") +
+                (item.documentStatus ? '<span><small>Documents</small><b>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.documentStatus)) + '</b></span>' : "") +
               '</div>' +
               ((requests.length || quotes.length) ? '<div class="account-item-alerts">' +
                 (requests.length ? '<span>' + KridiyaAuth.escapeHTML(String(requests.length)) + ' request(s)</span>' : '') +
@@ -836,6 +840,32 @@ window.KridiyaAuth = (function () {
         await KridiyaAuth.logout();
         location.href = "index.html";
       });
+    });
+  }
+
+  if (page === "corporate-account") {
+    document.addEventListener("DOMContentLoaded", async function () {
+      const user = await KridiyaAuth.currentUser();
+      if (!user) {
+        location.replace("login.html?next=corporate-account.html");
+        return;
+      }
+      const gate = document.getElementById("corporate-account-gate");
+      const app = document.getElementById("corporate-account-app");
+      try {
+        const bookings = await KridiyaAuth.listBookings();
+        const companyLike = bookings.filter(function (b) {
+          return /corporate|business|company|lpo/i.test([b.service_type, b.title, b.route_or_destination, b.status].join(" "));
+        });
+        document.getElementById("corp-visible-items").textContent = String(companyLike.length || bookings.length);
+        document.getElementById("corp-access-copy").textContent = companyLike.length
+          ? "Your account has corporate-style travel activity visible. Kridiya staff still controls approval, payment, supplier, and document release."
+          : "Corporate account access is ready for requests. Company-specific booking visibility will expand after Kridiya links your company profile.";
+        gate.hidden = true;
+        app.hidden = false;
+      } catch (err) {
+        gate.innerHTML = '<div class="form-banner error" role="alert">Could not load corporate portal yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
+      }
     });
   }
 

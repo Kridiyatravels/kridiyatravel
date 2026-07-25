@@ -182,6 +182,7 @@ function renderChrome() {
           '<li><a href="about.html">About Us</a></li>' +
           '<li><a href="contact.html">Contact Us</a></li>' +
           '<li><a href="login.html">Customer Login</a></li>' +
+          '<li><a href="corporate-account.html">Corporate Portal</a></li>' +
           '<li><a href="register.html">Create Account</a></li>' +
           '<li><a href="privacy.html">Privacy Policy</a></li>' +
           '<li><a href="terms.html">Terms &amp; Conditions</a></li>' +
