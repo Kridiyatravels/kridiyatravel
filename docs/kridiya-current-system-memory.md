@@ -645,6 +645,7 @@ Current owner decisions as of 2026-07-25:
 - Admin dashboard is upgraded into a command center with system health, open sales/cost/profit, 30-day net collection, confirmed-before-payment risk, refund queue, overdue/today tasks, document pending, and direct action links.
 - Booking detail is upgraded with a command workflow panel showing workflow completion, next required action, customer/traveller/payment/supplier/invoice/document/task controls, and risk flags without adding unnecessary extra modules.
 - Staff & Permissions is upgraded with top-level staff stats, grouped permission sections, high-access risk labels, PIN reset guidance, and clearer 30-day monitoring metrics.
+- Accounting and Backups are upgraded with owner monthly review, finance health, export checklist, backup readiness, SharePoint finance folder guidance, and cleaner handover flow.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
