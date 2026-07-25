@@ -1832,9 +1832,18 @@ body {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
+  counter-reset: step;
 }
 .corporate-process-grid .step {
   margin: 0;
+  padding: 1.1rem 1.1rem 1.1rem 3.4rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+.corporate-process-grid .step::before {
+  left: 1.1rem;
 }
 @media (max-width: 980px) {
   .corporate-hero-inner,
