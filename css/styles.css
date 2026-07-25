@@ -1905,3 +1905,10 @@ body {
 
 /* Print sanity */
 @media print { .wa-float, .topbar, .nav-toggle { display: none !important; } }
+
+/* White text on solid orange — ONLY the widget search buttons and the header
+   account/login chip (readability fix; leaves every other button unchanged). */
+.widget-actions .btn-primary,
+#account-btn { background: var(--brand); color: #fff; }
+.widget-actions .btn-primary:hover,
+#account-btn:hover { background: var(--brand-deep); color: #fff; }
