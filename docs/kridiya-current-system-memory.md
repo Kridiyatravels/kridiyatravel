@@ -654,6 +654,7 @@ Current owner decisions as of 2026-07-25:
 - Corporate Accounts is being upgraded with deeper account control: health scoring, billing email checks, authorized/accounts contact checks, LPO approver readiness, credit/monthly billing risk, inactive/on-hold warnings, and corporate value/risk summary.
 - Documents and Templates are being upgraded with control panels: business/document readiness checks, linked-enquiry audit readiness, document type coverage, template category coverage, channel mix, and next document/message guidance.
 - Dashboard is being upgraded with Operations QA: module-by-module readiness, live risk/warning states, direct module links, and the full enquiry-to-accounting workflow path for final launch testing.
+- Dashboard is also being upgraded with Launch Readiness: owner go-live percentage, live checklist cards for sales, bookings, finance/refunds, suppliers, documents/templates, and audit/backup, with direct links to clear each warning.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
