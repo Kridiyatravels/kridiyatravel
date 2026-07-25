@@ -660,6 +660,7 @@ Current owner decisions as of 2026-07-25:
 - Workflow Test now stores launch-test notes in the browser and includes them in the copied QA report, so blockers and owner decisions can travel with the checklist.
 - Admin now includes an admin-only SOP & Handover page covering daily opening, enquiry-to-quote, booking control, finance/refunds/suppliers, documents/templates, corporate handling, staff/security, backups, and emergency operation, with a copyable SOP for staff training and owner handover.
 - Public customer account now has a Portal Overview card with live counts for bookings/enquiries, active quotes, open requests, and a next-action strip that points customers to requests, quotes, new enquiry, or WhatsApp support.
+- Public customer account booking/enquiry list now renders as structured portal cards with item type badges, reference, status, details, amount, traveller count, and request/quote alert chips.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.

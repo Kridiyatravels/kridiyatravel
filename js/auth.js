@@ -763,18 +763,23 @@ window.KridiyaAuth = (function () {
             const created = new Date(item.created_at);
             const requests = item.isEnquiry ? (requestsByEnquiry[item.id] || []) : [];
             const quotes = item.isEnquiry ? (quotesByEnquiry[item.id] || []) : [];
+            const itemType = item.isEnquiry ? "Enquiry" : "Booking";
             return '<div class="enq-item">' +
-              '<div class="enq-top"><b>' + KridiyaAuth.escapeHTML(item.title) + "</b>" +
+              '<div class="enq-top"><div><span class="account-chip">' + KridiyaAuth.escapeHTML(itemType) + '</span><b>' + KridiyaAuth.escapeHTML(item.title || item.reference || itemType) + "</b></div>" +
               '<time datetime="' + KridiyaAuth.escapeHTML(item.created_at) + '">' +
               created.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) +
               "</time></div>" +
-              "<p>" +
-              KridiyaAuth.escapeHTML(item.reference) + " - " +
-              KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.status)) + " - " +
-              KridiyaAuth.escapeHTML(item.detail || "") +
-              (item.paxLabel ? " - " + item.paxLabel : "") + " - " +
-              KridiyaAuth.escapeHTML(item.amount) +
-              "</p>" +
+              '<div class="account-item-grid">' +
+                '<span><small>Reference</small><b>' + KridiyaAuth.escapeHTML(item.reference || "Pending") + '</b></span>' +
+                '<span><small>Status</small><b>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.status)) + '</b></span>' +
+                '<span><small>Details</small><b>' + KridiyaAuth.escapeHTML(item.detail || "Team will update") + '</b></span>' +
+                '<span><small>Amount</small><b>' + KridiyaAuth.escapeHTML(item.amount) + '</b></span>' +
+                (item.paxLabel ? '<span><small>Travellers</small><b>' + KridiyaAuth.escapeHTML(item.paxLabel) + '</b></span>' : "") +
+              '</div>' +
+              ((requests.length || quotes.length) ? '<div class="account-item-alerts">' +
+                (requests.length ? '<span>' + KridiyaAuth.escapeHTML(String(requests.length)) + ' request(s)</span>' : '') +
+                (quotes.length ? '<span>' + KridiyaAuth.escapeHTML(String(quotes.length)) + ' quote(s)</span>' : '') +
+              '</div>' : '') +
               requestsHTML(requests) +
               quotesHTML(quotes) +
               "</div>";
