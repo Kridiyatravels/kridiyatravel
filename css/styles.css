@@ -1905,3 +1905,9 @@ body {
 
 /* Print sanity */
 @media print { .wa-float, .topbar, .nav-toggle { display: none !important; } }
+
+/* Per request: --brand-deep (orange) -> white on buttons and their icons.
+   Background (--brand-soft) is left unchanged. Icons inside buttons already
+   use fill:currentColor, so they follow the white text. */
+.btn-primary, .btn-primary:hover,
+.btn-outline, .btn-outline:hover { color: oklch(1 0 0); }
