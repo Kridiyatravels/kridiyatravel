@@ -657,6 +657,7 @@ Current owner decisions as of 2026-07-25:
 - Dashboard is also being upgraded with Launch Readiness: owner go-live percentage, live checklist cards for sales, bookings, finance/refunds, suppliers, documents/templates, and audit/backup, with direct links to clear each warning.
 - Dashboard now includes a browser-saved Workflow Test checklist for launch QA: enquiry, quote, booking, customer payment/refund edge case, supplier cost, documents, accounting, and backup.
 - Workflow Test can copy a timestamped QA report with checked/unchecked launch steps for owner handover, WhatsApp/email sharing, or internal audit notes.
+- Workflow Test now stores launch-test notes in the browser and includes them in the copied QA report, so blockers and owner decisions can travel with the checklist.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
