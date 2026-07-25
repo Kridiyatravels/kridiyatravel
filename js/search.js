@@ -477,7 +477,26 @@ function initServiceCarousel(root) {
 /* ---------- Widget forms ---------- */
 function initSearchWidget(root) {
   if (!root) return;
-  root.querySelectorAll(".widget-panel").forEach(function (p) { p.hidden = false; });
+  const tabsBar = root.querySelector(".widget-tabs");
+  if (tabsBar) {
+    const activate = function (key) {
+      root.querySelectorAll(".widget-tab").forEach(function (b) {
+        const on = b.dataset.tab === key;
+        b.classList.toggle("active", on);
+        b.setAttribute("aria-selected", String(on));
+      });
+      root.querySelectorAll(".widget-panel").forEach(function (p) { p.hidden = p.dataset.tab !== key; });
+    };
+    tabsBar.addEventListener("click", function (e) {
+      const b = e.target.closest(".widget-tab");
+      if (b) activate(b.dataset.tab);
+    });
+    const cur = root.querySelector(".widget-tab.active");
+    activate(cur ? cur.dataset.tab : "flights");
+  } else {
+    // Solo service pages: the single panel is always shown.
+    root.querySelectorAll(".widget-panel").forEach(function (p) { p.hidden = false; });
+  }
   initServiceCarousel(root);
 
   /* Flights */
@@ -840,6 +859,24 @@ function searchWidgetHTML(only) {
   );
 }
 
+/* Home page: a real tabbed search widget (Flights / Hotels / Holidays /
+   Umrah / Cruise / Visa) so visitors can search directly instead of clicking
+   through to a service page. Reuses the exact same PANEL_BUILDERS as the solo
+   service pages, so the forms stay identical and proven. */
+function searchWidgetTabbedHTML(activeTab) {
+  const active = PANEL_BUILDERS[activeTab] ? activeTab : "flights";
+  const tabs = WIDGET_TABS.map(function (t) {
+    const key = t[0];
+    return '<button type="button" class="widget-tab' + (key === active ? " active" : "") +
+      '" role="tab" aria-selected="' + (key === active) + '" data-tab="' + key + '">' +
+      icon(t[2]) + "<span>" + t[1] + "</span></button>";
+  }).join("");
+  const panels = WIDGET_TABS.map(function (t) { return PANEL_BUILDERS[t[0]](); }).join("");
+  return '<div class="search-widget search-widget-tabbed" id="search-widget">' +
+    '<div class="widget-tabs" role="tablist" aria-label="What would you like to book?">' + tabs + "</div>" +
+    panels + "</div>";
+}
+
 /* ---------- Enquiry panel builder ---------- */
 function enquiryFormHTML(opts) {
   const s = window.KridiyaAuth ? KridiyaAuth.session() : null;
@@ -1019,7 +1056,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const wrap = document.getElementById("widget-mount");
   if (wrap) {
     const only = document.body.dataset.widgetOnly || null;
-    wrap.innerHTML = searchWidgetHTML(only);
+    wrap.innerHTML = only
+      ? searchWidgetHTML(only)
+      : searchWidgetTabbedHTML(document.body.dataset.widgetTab || "flights");
     initSearchWidget(wrap.firstElementChild);
 
     // Reflect an incoming search (URL params) back into the widget

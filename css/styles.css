@@ -374,6 +374,12 @@ a:hover { text-decoration: underline; }
 .hero-badges { display: flex; flex-wrap: wrap; gap: 0.4rem 1.3rem; margin-top: 0.7rem; }
 .hero-badges span { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.8rem; font-weight: 600; color: var(--on-dark-muted); }
 .hero-badges svg { width: 14px; height: 14px; fill: var(--gold); flex: none; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
+.hero-cta .btn { font-size: 0.92rem; }
+.hero-cta .btn svg { width: 18px; height: 18px; fill: currentColor; }
+.btn-hero-call { background: var(--surface); color: var(--brand-deep); border: 1px solid var(--line-strong); }
+.btn-hero-call:hover { background: var(--brand-soft); }
+@media (max-width: 480px) { .hero-cta .btn { flex: 1 1 100%; justify-content: center; } }
 
 .page-hero { padding: 1.6rem 0 4.6rem; }
 .page-hero h1 { font-size: 1.7rem; }
@@ -491,6 +497,25 @@ a:hover { text-decoration: underline; }
 @media (prefers-reduced-motion: reduce) {
   .service-slide-cta, .service-slide-cta svg, .carousel-nav-btn, .service-slide { transition: none; }
 }
+
+/* Home page tabbed widget: a real search box front-and-centre. */
+.search-widget-tabbed { padding-top: 0; }
+.widget-tabs {
+  display: flex; gap: 0.2rem; overflow-x: auto; scrollbar-width: none;
+  padding: 0.5rem 0.6rem 0.1rem;
+}
+.widget-tabs::-webkit-scrollbar { display: none; }
+.widget-tab {
+  flex: 0 0 auto; display: inline-flex; align-items: center; gap: 0.4rem;
+  border: none; background: transparent; cursor: pointer;
+  font: 700 0.9rem/1 var(--font); color: var(--ink-2);
+  padding: 0.7rem 1rem; border-radius: 999px; white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.widget-tab svg { width: 18px; height: 18px; fill: currentColor; }
+.widget-tab:hover { color: var(--brand-deep); background: var(--brand-soft); }
+.widget-tab.active { color: #fff; background: var(--brand-deep); }
+@media (max-width: 560px) { .widget-tab { padding: 0.6rem 0.8rem; font-size: 0.82rem; } }
 
 .widget-panel { padding: 0 1.4rem 1.5rem; border-top: 1px solid var(--line); padding-top: 1.2rem; }
 .widget-panel[hidden] { display: none; }
