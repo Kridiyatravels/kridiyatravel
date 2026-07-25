@@ -1738,38 +1738,42 @@ body {
 }
 
 /* Corporate booking request */
-.corporate-hero-inner {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
-  gap: 1.4rem;
-  align-items: end;
-}
-.corporate-status {
-  display: grid;
-  gap: 0.45rem;
-  padding: 1rem;
-  border: 1px solid var(--line);
-  border-radius: var(--r-sm);
-  background: rgb(255 255 255 / 0.82);
-  box-shadow: var(--shadow-card);
-}
-.corporate-status span {
+.corporate-flow {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem;
-  min-height: 2.15rem;
-  color: var(--ink);
-  font-size: 0.92rem;
-  font-weight: 800;
+  gap: 0.5rem 0.4rem;
+  margin: 1.6rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: flow;
 }
-.corporate-status span::before {
-  content: "";
-  width: 0.7rem;
-  height: 0.7rem;
+.corporate-flow li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.85);
+  box-shadow: var(--shadow-card);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+  counter-increment: flow;
+}
+.corporate-flow li::before {
+  content: counter(flow);
+  display: grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
   flex: 0 0 auto;
   border-radius: 999px;
   background: var(--brand);
-  box-shadow: 0 0 0 4px var(--brand-soft);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 .corporate-layout {
   display: grid;
@@ -1846,7 +1850,6 @@ body {
   left: 1.1rem;
 }
 @media (max-width: 980px) {
-  .corporate-hero-inner,
   .corporate-layout,
   .corporate-process-grid {
     grid-template-columns: 1fr;
