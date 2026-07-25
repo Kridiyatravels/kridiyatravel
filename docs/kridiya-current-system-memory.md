@@ -13,6 +13,7 @@ Use this file as the handoff memory for a new Codex or Claude chat.
 - Corporate booking should be active now
 - Rule: payment before booking
 - Current payment methods: bank transfer, cash, payment link
+- VAT/TRN decision: not VAT registered yet; do not show TRN, do not apply VAT, and use no-VAT wording on invoices/receipts for now.
 - Future payment methods: Stripe, Tabby/Tamara, PayPal
 - Current suppliers: Akbar Travels, Select My Flight
 - Admin currently: one owner/admin, more staff later
@@ -34,6 +35,7 @@ Use this file as the handoff memory for a new Codex or Claude chat.
 - Staff login decision: PIN-only for staff login. Admin creates staff accounts by name/email/role and the system generates the PIN.
 - Payment proof decision: staff-only upload for now; customer upload comes later after the customer portal is hardened.
 - Supplier invoice decision: store in Supabase private storage and also keep/copy to SharePoint when needed.
+- Backup/storage decision: use SharePoint/Microsoft 365 as the preferred backup and document-copy layer.
 - Corporate contact channel for now: +971 50 941 3873 and enquiry@kridiyatravel.com.
 - Public customer login decision: keep visible for customer profile, enquiries, quotes, and requested uploads. Staff still controls bookings/payments.
 
