@@ -658,6 +658,7 @@ Current owner decisions as of 2026-07-25:
 - Dashboard now includes a browser-saved Workflow Test checklist for launch QA: enquiry, quote, booking, customer payment/refund edge case, supplier cost, documents, accounting, and backup.
 - Workflow Test can copy a timestamped QA report with checked/unchecked launch steps for owner handover, WhatsApp/email sharing, or internal audit notes.
 - Workflow Test now stores launch-test notes in the browser and includes them in the copied QA report, so blockers and owner decisions can travel with the checklist.
+- Admin now includes an admin-only SOP & Handover page covering daily opening, enquiry-to-quote, booking control, finance/refunds/suppliers, documents/templates, corporate handling, staff/security, backups, and emergency operation, with a copyable SOP for staff training and owner handover.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
