@@ -1064,5 +1064,10 @@ document.addEventListener("DOMContentLoaded", function () {
   }
   initFlightResults();
   initHotelResults();
+
+  // Airport autocomplete for standalone data-airport fields outside the
+  // search widget (e.g. the corporate booking form). Widget fields are
+  // already initialised above, and attachAirportAC is a no-op if re-run.
+  document.querySelectorAll("input[data-airport]").forEach(attachAirportAC);
 });
 
