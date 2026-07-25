@@ -71,7 +71,10 @@ Deno.serve(async (req: Request) => {
   for (let attempt = 0; attempt < 5; attempt++) {
     const buf = new Uint32Array(1);
     crypto.getRandomValues(buf);
-    const candidate = String(buf[0] % 1000000).padStart(6, "0");
+    // Range 100000-999999: always a true 6-digit PIN, never a leading
+    // zero (a leading zero gets dropped when read aloud/copied and looks
+    // like a 5-digit PIN).
+    const candidate = String(100000 + (buf[0] % 900000));
     let collision = false;
     for (const existingEmail of existingEmails) {
       const { data: probe, error: probeErr } = await anonClient.auth.signInWithPassword({ email: existingEmail, password: candidate });
