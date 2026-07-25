@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/favicon-180.png">
+<link rel="preload" as="image" href="assets/home/hero.jpg">
 <link rel="stylesheet" href="css/styles.css">
 <link rel="canonical" href="https://kridiyatravel.com/">
 <!-- Social share preview. Replace og:image/twitter:image with a branded 1200x630 image when available. -->
@@ -48,7 +49,7 @@
 <main>
 
  <!-- Portal banner + booking widget -->
- <section class="hero hero-photo" aria-labelledby="hero-title" style="--hero-img: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&amp;q=70&amp;auto=format&amp;fit=crop')">
+ <section class="hero hero-photo" aria-labelledby="hero-title" style="--hero-img: url('assets/home/hero.jpg')">
  <svg class="hero-plane" viewBox="0 0 200 120" aria-hidden="true">
  <path d="M0 100 C60 90 120 60 195 15" fill="none" stroke="oklch(0.83 0.15 84 / 0.7)" stroke-width="1.5" stroke-dasharray="5 7"/>
  <path d="M186 22 199 9l4-1-1 4-13 13-4 1z" fill="oklch(0.83 0.15 84)"/>
@@ -139,27 +140,27 @@
  </div>
  <div class="dest-grid">
  <a class="dest-card reveal" href="flights.html?trip=round&amp;from=DXB&amp;fromCity=Dubai&amp;to=BOM&amp;toCity=Mumbai&amp;adults=1&amp;children=0&amp;infants=0&amp;cabin=Economy">
- <img src="https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/dest-mumbai.jpg" width="640" height="800" alt="" loading="lazy">
  <div class="dest-info"><h3>Mumbai</h3><span class="dest-fare">DXB -> BOM - India</span><br><span class="dest-fare-amt">from AED 649*</span></div>
  </a>
  <a class="dest-card reveal" href="flights.html?trip=round&amp;from=DXB&amp;fromCity=Dubai&amp;to=COK&amp;toCity=Kochi&amp;adults=1&amp;children=0&amp;infants=0&amp;cabin=Economy">
- <img src="https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/dest-kochi.jpg" width="640" height="360" alt="" loading="lazy">
  <div class="dest-info"><h3>Kochi</h3><span class="dest-fare">DXB -> COK - Kerala, India</span><br><span class="dest-fare-amt">from AED 599*</span></div>
  </a>
  <a class="dest-card reveal" href="flights.html?trip=round&amp;from=DXB&amp;fromCity=Dubai&amp;to=DEL&amp;toCity=Delhi&amp;adults=1&amp;children=0&amp;infants=0&amp;cabin=Economy">
- <img src="https://images.unsplash.com/photo-1587474260584-136574528ed5?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/dest-delhi.jpg" width="640" height="427" alt="" loading="lazy">
  <div class="dest-info"><h3>Delhi</h3><span class="dest-fare">DXB -> DEL - India</span><br><span class="dest-fare-amt">from AED 699*</span></div>
  </a>
  <a class="dest-card reveal" href="flights.html?trip=round&amp;from=DXB&amp;fromCity=Dubai&amp;to=IST&amp;toCity=Istanbul&amp;adults=1&amp;children=0&amp;infants=0&amp;cabin=Economy">
- <img src="https://images.unsplash.com/photo-1541432901042-2d8bd64b4a9b?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/dest-istanbul.jpg" width="640" height="445" alt="" loading="lazy">
  <div class="dest-info"><h3>Istanbul</h3><span class="dest-fare">DXB -> IST - Turkiye</span><br><span class="dest-fare-amt">from AED 899*</span></div>
  </a>
  <a class="dest-card reveal" href="flights.html?trip=round&amp;from=DXB&amp;fromCity=Dubai&amp;to=LHR&amp;toCity=London&amp;adults=1&amp;children=0&amp;infants=0&amp;cabin=Economy">
- <img src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/dest-london.jpg" width="640" height="427" alt="" loading="lazy">
  <div class="dest-info"><h3>London</h3><span class="dest-fare">DXB -> LHR - United Kingdom</span><br><span class="dest-fare-amt">from AED 1,799*</span></div>
  </a>
  <a class="dest-card reveal" href="flights.html?trip=round&amp;from=DXB&amp;fromCity=Dubai&amp;to=BKK&amp;toCity=Bangkok&amp;adults=1&amp;children=0&amp;infants=0&amp;cabin=Economy">
- <img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/bangkok.jpg" width="640" height="443" alt="" loading="lazy">
  <div class="dest-info"><h3>Bangkok</h3><span class="dest-fare">DXB -> BKK - Thailand</span><br><span class="dest-fare-amt">from AED 1,099*</span></div>
  </a>
  </div>
@@ -179,7 +180,7 @@
  </div>
  <div class="pkg-grid">
  <article class="pkg-card reveal">
- <div class="pkg-media"><img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="Dubai skyline at dusk" loading="lazy" onerror="this.remove()"><span class="pkg-tag">Staycation</span></div>
+ <div class="pkg-media"><img src="assets/home/pkg-dubai.jpg" width="640" height="427" alt="Dubai skyline at dusk" loading="lazy"><span class="pkg-tag">Staycation</span></div>
  <div class="pkg-body">
  <h3>Dubai &amp; RAK Escape</h3>
  <div class="pkg-meta"><span>3 nights</span><span>4-star hotel</span><span>Breakfast + transfers</span></div>
@@ -188,7 +189,7 @@
  </div>
  </article>
  <article class="pkg-card reveal">
- <div class="pkg-media"><img src="https://images.unsplash.com/photo-1565008576549-57569a49371d?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="Old town of Tbilisi, Georgia" loading="lazy" onerror="this.remove()"><span class="pkg-tag">Best seller</span></div>
+ <div class="pkg-media"><img src="assets/home/pkg-georgia.jpg" width="640" height="388" alt="Old town of Tbilisi, Georgia" loading="lazy"><span class="pkg-tag">Best seller</span></div>
  <div class="pkg-body">
  <h3>Georgia - Tbilisi &amp; Kazbegi</h3>
  <div class="pkg-meta"><span>4 nights</span><span>Visa on us</span><span>Daily tours</span></div>
@@ -197,7 +198,7 @@
  </div>
  </article>
  <article class="pkg-card reveal">
- <div class="pkg-media"><img src="https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="Longtail boat on a Thai beach" loading="lazy" onerror="this.remove()"><span class="pkg-tag">Family favourite</span></div>
+ <div class="pkg-media"><img src="assets/home/bangkok.jpg" width="640" height="443" alt="Longtail boat on a Thai beach" loading="lazy"><span class="pkg-tag">Family favourite</span></div>
  <div class="pkg-body">
  <h3>Thailand - Bangkok &amp; Phuket</h3>
  <div class="pkg-meta"><span>5 nights</span><span>4-star hotels</span><span>Island cruise</span></div>
@@ -206,7 +207,7 @@
  </div>
  </article>
  <article class="pkg-card reveal">
- <div class="pkg-media"><img src="https://images.unsplash.com/photo-1514282401047-d79a71a590e8?w=640&amp;q=60&amp;auto=format&amp;fit=crop" alt="Overwater villas in the Maldives" loading="lazy" onerror="this.remove()"><span class="pkg-tag">Honeymoon</span></div>
+ <div class="pkg-media"><img src="assets/home/pkg-maldives.jpg" width="640" height="800" alt="Overwater villas in the Maldives" loading="lazy"><span class="pkg-tag">Honeymoon</span></div>
  <div class="pkg-body">
  <h3>Maldives All-Inclusive</h3>
  <div class="pkg-meta"><span>4 nights</span><span>Water villa</span><span>Seaplane transfers</span></div>
@@ -257,7 +258,7 @@
  </ul>
  </div>
  <div class="why-visual reveal">
- <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&amp;q=60&amp;auto=format&amp;fit=crop" alt="Aircraft wing above the clouds at sunset" loading="lazy" onerror="this.remove()">
+ <img src="assets/home/hero.jpg" width="1600" height="1063" alt="Aircraft wing above the clouds at sunset" loading="lazy">
  </div>
  </div>
  </section>
