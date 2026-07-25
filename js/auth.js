@@ -720,6 +720,13 @@ window.KridiyaAuth = (function () {
           quotesByEnquiry[q.enquiry_id].push(q);
         });
 
+        const openRequests = results[2].filter(function (r) {
+          return !/submitted|completed|done|closed/i.test(String(r.status || ""));
+        });
+        const activeQuotes = results[3].filter(function (q) {
+          return !/declined|expired|cancelled/i.test(String(q.status || ""));
+        });
+
         const combined = enquiries.map(function (e) {
           return {
             id: e.id,
@@ -749,6 +756,7 @@ window.KridiyaAuth = (function () {
 
         const summaryBookings = document.getElementById("summary-bookings");
         if (summaryBookings) summaryBookings.textContent = String(combined.length);
+        renderPortalOverview(combined, activeQuotes, openRequests);
 
         if (combined.length) {
           listEl.innerHTML = combined.map(function (item) {
@@ -824,6 +832,41 @@ window.KridiyaAuth = (function () {
         location.href = "index.html";
       });
     });
+  }
+
+  function renderPortalOverview(items, quotes, requests) {
+    const summary = document.getElementById("portal-summary");
+    const next = document.getElementById("portal-next-action");
+    if (!summary || !next) return;
+    const bookings = items.filter(function (item) { return !item.isEnquiry; }).length;
+    const enquiries = items.length - bookings;
+    summary.innerHTML =
+      '<div><span>' + KridiyaAuth.escapeHTML(String(items.length)) + '</span><b>Total items</b><small>' + KridiyaAuth.escapeHTML(bookings + " booking(s), " + enquiries + " enquiry(s)") + '</small></div>' +
+      '<div><span>' + KridiyaAuth.escapeHTML(String(quotes.length)) + '</span><b>Quotes</b><small>Active options from our team</small></div>' +
+      '<div><span>' + KridiyaAuth.escapeHTML(String(requests.length)) + '</span><b>Requests</b><small>Documents or replies needed</small></div>';
+    let tone = "ok";
+    let title = "Your portal is ready";
+    let text = "You can start a new enquiry or message our team for an update.";
+    let href = "index.html";
+    let cta = "New enquiry";
+    if (requests.length) {
+      tone = "warn";
+      title = "Action needed";
+      text = requests.length + " request(s) need your reply or document update.";
+      href = "#enq-list";
+      cta = "Review requests";
+    } else if (quotes.length) {
+      tone = "info";
+      title = "Quote available";
+      text = quotes.length + " quote option(s) are waiting for your review.";
+      href = "#enq-list";
+      cta = "View quotes";
+    } else if (!items.length) {
+      tone = "neutral";
+      title = "No linked travel yet";
+      text = "Send your first enquiry, or ask our team to attach an existing booking to this account.";
+    }
+    next.innerHTML = '<div class="portal-next portal-next-' + tone + '"><div><b>' + KridiyaAuth.escapeHTML(title) + '</b><p>' + KridiyaAuth.escapeHTML(text) + '</p></div><a class="btn btn-primary" href="' + KridiyaAuth.escapeHTML(href) + '">' + KridiyaAuth.escapeHTML(cta) + '</a></div>';
   }
 
   if (page === "reset-password") {

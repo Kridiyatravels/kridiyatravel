@@ -1222,6 +1222,24 @@ a:hover { text-decoration: underline; }
   line-height: 1.35;
   margin-top: 0.15rem;
 }
+.customer-portal-overview { overflow: visible; }
+.portal-next-action { margin-top: 0.85rem; }
+.portal-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  background: var(--bg);
+  padding: 0.9rem 1rem;
+}
+.portal-next b { display: block; color: var(--ink); font-size: 0.98rem; }
+.portal-next p { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.86rem; }
+.portal-next-warn { border-color: color-mix(in oklab, var(--gold-deep) 40%, var(--line)); background: color-mix(in oklab, var(--gold) 12%, var(--surface)); }
+.portal-next-info { border-color: color-mix(in oklab, var(--brand) 28%, var(--line)); background: var(--brand-soft); }
+.portal-next-ok { border-color: color-mix(in oklab, var(--success) 28%, var(--line)); background: color-mix(in oklab, var(--success) 8%, var(--surface)); }
+.portal-next-neutral { background: var(--bg); }
 .enq-item { border: 1px solid var(--line); border-radius: var(--r-md); padding: 1rem 1.1rem; }
 .enq-item + .enq-item { margin-top: 0.8rem; }
 .enq-item .enq-top { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
@@ -1327,6 +1345,8 @@ a:hover { text-decoration: underline; }
 .doc-preview-frame { width: 100%; height: 720px; border: 1px solid var(--line); border-radius: var(--r-md); background: #fff; }
 @media (max-width: 640px) {
   .account-summary { grid-template-columns: 1fr; }
+  .portal-next { align-items: flex-start; flex-direction: column; }
+  .portal-next .btn { width: 100%; }
   .account-actions .btn,
   .empty-actions .btn { width: 100%; }
 }
