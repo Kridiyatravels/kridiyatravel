@@ -680,7 +680,9 @@ const WIDGET_TABS = [
   ["cruise", "Cruise", "ship", "Find Cruises",
     "We bundle your cabin, hotels, transfers and sightseeing into one easy price, quoted personally."],
   ["visa", "Visa", "passport", "Check Visa Options",
-    "We check your eligibility, prepare your file and track it end-to-end — for tourist, visit and Umrah visas."]
+    "We check your eligibility, prepare your file and track it end-to-end — for tourist, visit and Umrah visas."],
+  ["corporate", "Corporate", "users", "Corporate Booking",
+    "Company flights, visas, hotels and group travel — billed to your company with one reference."]
 ];
 
 function flightsPanelHTML() {
@@ -829,7 +831,23 @@ function visaPanelHTML() {
   );
 }
 
-const PANEL_BUILDERS = { flights: flightsPanelHTML, hotels: hotelsPanelHTML, holidays: holidaysPanelHTML, umrah: umrahPanelHTML, cruise: cruisePanelHTML, visa: visaPanelHTML };
+/* Corporate is not a search — it's a signpost to the dedicated corporate
+   booking form. Same tab, but the panel is a short pitch + a link out. */
+function corporatePanelHTML() {
+  return (
+    '<div class="widget-panel widget-panel-cta" data-tab="corporate" role="tabpanel" hidden>' +
+      '<div class="widget-cta">' +
+        "<div>" +
+          "<h3>Corporate &amp; business travel</h3>" +
+          "<p>Company flights, visas, hotels and group travel — quoted first, billed to your company with LPO and one tracking reference. Send your requirement once and we handle the rest.</p>" +
+        "</div>" +
+        '<a class="btn btn-primary btn-lg" href="corporate-booking.html">Open corporate booking ' + icon("chevronRight") + "</a>" +
+      "</div>" +
+    "</div>"
+  );
+}
+
+const PANEL_BUILDERS = { flights: flightsPanelHTML, hotels: hotelsPanelHTML, holidays: holidaysPanelHTML, umrah: umrahPanelHTML, cruise: cruisePanelHTML, visa: visaPanelHTML, corporate: corporatePanelHTML };
 
 /* only: pass a single tab key ("flights"/"hotels"/"holidays"/"visa") to render
    just that vertical's form with no tab switcher — used on the dedicated pages

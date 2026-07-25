@@ -652,6 +652,7 @@ Current owner decisions as of 2026-07-25:
 - Booking detail supplier payments are being upgraded into supplier/vendor control: payable/paid/balance visibility, margin exposure, supplier reference check, invoice attachment check, SharePoint backup check, dispute flagging, and next supplier action guidance.
 - Admin Customers is being upgraded into customer/corporate portal control: portal readiness, guest invite queue, booked guest detection, profile cleanup detection, customer-card portal state, and copy-ready portal invite messages without touching the public login flow yet.
 - Corporate Accounts is being upgraded with deeper account control: health scoring, billing email checks, authorized/accounts contact checks, LPO approver readiness, credit/monthly billing risk, inactive/on-hold warnings, and corporate value/risk summary.
+- Documents and Templates are being upgraded with control panels: business/document readiness checks, linked-enquiry audit readiness, document type coverage, template category coverage, channel mix, and next document/message guidance.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `enquiry@kridiyatravel.com`.
 - Customer login should remain visible on the public site.
