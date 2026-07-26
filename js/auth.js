@@ -460,6 +460,43 @@ window.KridiyaAuth = (function () {
     el.className = "form-banner " + (kind || "error");
   }
 
+  function readableErrorValue(value, depth) {
+    if (!value || depth > 2) return "";
+    if (typeof value === "string") return value.trim();
+    if (value instanceof Error && value.message) return value.message.trim();
+
+    const keys = ["message", "error_description", "description", "details", "hint", "msg"];
+    for (let i = 0; i < keys.length; i++) {
+      const text = readableErrorValue(value[keys[i]], depth + 1);
+      if (text) return text;
+    }
+
+    const nested = readableErrorValue(value.error, depth + 1);
+    if (nested) return nested;
+
+    try {
+      const text = JSON.stringify(value);
+      return text && text !== "{}" ? text : "";
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function errorMessage(err, fallback) {
+    const text = readableErrorValue(err, 0);
+    if (!text) return fallback;
+    if (/already registered|user already exists|already been registered/i.test(text)) {
+      return "An account already exists for this email. Please log in or use password reset.";
+    }
+    if (/database error saving new user|error saving new user/i.test(text)) {
+      return "We could not finish account setup right now. Please try again, or contact Kridiya Travel on WhatsApp so we can create it for you.";
+    }
+    if (/failed to fetch|network|load failed/i.test(text)) {
+      return "Could not reach the secure account service. Please check your internet connection and try again.";
+    }
+    return text;
+  }
+
   function busy(form, on, label) {
     const btn = form.querySelector('button[type="submit"]');
     if (!btn) return;
@@ -519,7 +556,7 @@ window.KridiyaAuth = (function () {
           toast("Welcome back, " + user.name.split(" ")[0] + "!");
           location.href = loginRedirectTarget();
         } catch (err) {
-          banner(form, err.message, "error");
+          banner(form, errorMessage(err, "Could not sign in. Please check your email and password."), "error");
           busy(form, false);
         }
       });
@@ -540,7 +577,7 @@ window.KridiyaAuth = (function () {
             await KridiyaAuth.resetPassword(email);
             banner(form, "Password reset email sent. Check your inbox.", "success");
           } catch (err) {
-            banner(form, err.message, "error");
+            banner(form, errorMessage(err, "Could not send the password reset email. Please try again."), "error");
           }
           resetBtn.disabled = false;
           resetBtn.textContent = "Send password reset email";
@@ -602,7 +639,7 @@ window.KridiyaAuth = (function () {
           toast("Welcome to Kridiya Travel, " + user.name.split(" ")[0] + "!");
           location.href = "account.html";
         } catch (err) {
-          banner(form, err.message, "error");
+          banner(form, errorMessage(err, "Could not create the account. Please try again or contact Kridiya Travel."), "error");
           busy(form, false);
         }
       });
@@ -740,7 +777,7 @@ window.KridiyaAuth = (function () {
       try {
         await KridiyaAuth.openBookingDocument(btn.dataset.documentId, btn.dataset.storagePath);
       } catch (err) {
-        toast(err.message);
+        toast(errorMessage(err, "Could not prepare the document."));
       }
       btn.disabled = false;
       btn.textContent = old;
@@ -767,7 +804,7 @@ window.KridiyaAuth = (function () {
         location.reload();
       } catch (err) {
         btn.disabled = false;
-        toast(err.message);
+        toast(errorMessage(err, "Could not send your reply."));
       }
     });
 
@@ -781,7 +818,7 @@ window.KridiyaAuth = (function () {
         location.reload();
       } catch (err) {
         btn.disabled = false;
-        toast(err.message);
+        toast(errorMessage(err, "Could not update the quote."));
       }
     });
   }
@@ -929,7 +966,7 @@ window.KridiyaAuth = (function () {
           listEl.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z"/></svg><p><b>No bookings linked yet.</b><br>Send an enquiry while signed in, or ask our team to attach an existing booking to this account.</p><div class="empty-actions"><a class="btn btn-primary" href="index.html">Start planning</a><a class="btn btn-outline" href="https://wa.me/971509413873" target="_blank" rel="noopener">WhatsApp support</a></div></div>';
         }
       } catch (err) {
-        listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load your enquiries yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
+        listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load your enquiries yet: ' + KridiyaAuth.escapeHTML(errorMessage(err, "Please refresh and try again.")) + "</div>";
       }
 
       const pf = document.getElementById("profile-form");
@@ -947,7 +984,7 @@ window.KridiyaAuth = (function () {
           document.getElementById("acc-avatar").textContent = updated.name.trim().charAt(0).toUpperCase();
           refreshHeaderName(updated);
         } catch (err) {
-          toast(err.message);
+          toast(errorMessage(err, "Could not update your profile."));
         }
         btn.disabled = false;
       });
@@ -969,7 +1006,7 @@ window.KridiyaAuth = (function () {
           banner(pwf, "Password updated successfully.", "success");
           pwf.reset();
         } catch (err) {
-          banner(pwf, err.message, "error");
+          banner(pwf, errorMessage(err, "Could not update your password."), "error");
         }
         busy(pwf, false);
       });
@@ -1002,7 +1039,7 @@ window.KridiyaAuth = (function () {
         gate.hidden = true;
         app.hidden = false;
       } catch (err) {
-        gate.innerHTML = '<div class="form-banner error" role="alert">Could not load corporate portal yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
+        gate.innerHTML = '<div class="form-banner error" role="alert">Could not load corporate portal yet: ' + KridiyaAuth.escapeHTML(errorMessage(err, "Please refresh and try again.")) + "</div>";
       }
     });
   }
@@ -1067,7 +1104,7 @@ window.KridiyaAuth = (function () {
           banner(form, "Password updated. Taking you to your account...", "success");
           setTimeout(function () { location.href = "account.html"; }, 1000);
         } catch (err) {
-          banner(form, err.message, "error");
+          banner(form, errorMessage(err, "Could not update your password."), "error");
           busy(form, false);
         }
       });
@@ -1088,7 +1125,7 @@ window.KridiyaAuth = (function () {
           banner(form, "Password reset email sent. Check your inbox and use the newest link.", "success");
           form.reset();
         } catch (err) {
-          banner(form, err.message, "error");
+          banner(form, errorMessage(err, "Could not send the password reset email. Please try again."), "error");
         }
         busy(form, false);
       });
