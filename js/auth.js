@@ -267,7 +267,7 @@ window.KridiyaAuth = (function () {
     const sb = await client();
     const result = await sb
       .from("booking_documents")
-      .select("id, booking_id, document_type, file_name, external_reference, visible_to_customer, created_at")
+      .select("id, booking_id, document_type, file_name, storage_path, external_reference, visible_to_customer, created_at")
       .eq("user_id", user.id)
       .eq("visible_to_customer", true)
       .order("created_at", { ascending: false });
@@ -289,6 +289,27 @@ window.KridiyaAuth = (function () {
       .order("created_at", { ascending: false });
     if (result.error) return [];
     return result.data || [];
+  }
+  async function openBookingDocument(documentId, storagePath) {
+    const user = await currentUser();
+    if (!user) throw new Error("Please log in again.");
+    if (!documentId || !storagePath) throw new Error("This document does not have a downloadable file yet.");
+    const sb = await client();
+    const check = await sb
+      .from("booking_documents")
+      .select("id, storage_path")
+      .eq("id", documentId)
+      .eq("user_id", user.id)
+      .eq("visible_to_customer", true)
+      .maybeSingle();
+    if (check.error || !check.data || check.data.storage_path !== storagePath) {
+      throw new Error("This document is not available for your account.");
+    }
+    const result = await sb.storage.from("booking-documents").createSignedUrl(storagePath, 300, { download: true });
+    if (result.error || !result.data || !result.data.signedUrl) {
+      throw new Error(result.error ? result.error.message : "Could not prepare document download.");
+    }
+    window.open(result.data.signedUrl, "_blank", "noopener");
   }
 
   async function listEnquiries() {
@@ -411,6 +432,7 @@ window.KridiyaAuth = (function () {
     listBookings: listBookings,
     listEnquiries: listEnquiries,
     listBookingDocuments: listBookingDocuments,
+    openBookingDocument: openBookingDocument,
     listCustomerPayments: listCustomerPayments,
     listRequests: listRequests,
     listQuotes: listQuotes,
@@ -691,7 +713,9 @@ window.KridiyaAuth = (function () {
         '<div class="doc-ticket-body"><b>' + KridiyaAuth.escapeHTML(d.file_name || view.label) + '</b>' +
         '<span>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(d.document_type || view.label)) + (created ? " / " + KridiyaAuth.escapeHTML(created) : "") + '</span>' +
         (d.external_reference ? '<small>Reference: ' + KridiyaAuth.escapeHTML(d.external_reference) + '</small>' : '') + '</div>' +
-        '<span class="customer-row-state">Released</span></div>';
+        (d.storage_path
+          ? '<button class="btn btn-outline btn-sm customer-doc-download" type="button" data-document-id="' + KridiyaAuth.escapeHTML(d.id) + '" data-storage-path="' + KridiyaAuth.escapeHTML(d.storage_path) + '">Download</button>'
+          : '<span class="customer-row-state">Released</span>') + '</div>';
     }).join("") + "</div>";
   }
 
@@ -707,6 +731,20 @@ window.KridiyaAuth = (function () {
   }
 
   function wireEnquiryExtras(listEl) {
+    listEl.addEventListener("click", async function (e) {
+      const btn = e.target.closest(".customer-doc-download");
+      if (!btn) return;
+      btn.disabled = true;
+      const old = btn.textContent;
+      btn.textContent = "Preparing...";
+      try {
+        await KridiyaAuth.openBookingDocument(btn.dataset.documentId, btn.dataset.storagePath);
+      } catch (err) {
+        toast(err.message);
+      }
+      btn.disabled = false;
+      btn.textContent = old;
+    });
     listEl.addEventListener("submit", async function (e) {
       const form = e.target.closest(".cust-request-form");
       if (!form) return;
