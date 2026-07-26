@@ -23,6 +23,17 @@ function json(body: unknown, status: number, origin: string | null) {
   });
 }
 
+async function findAuthUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
+  for (let page = 1; page <= 10; page++) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 100 });
+    if (error) throw error;
+    const found = data.users.find((u) => (u.email || "").toLowerCase() === email);
+    if (found) return found;
+    if (data.users.length < 100) break;
+  }
+  return null;
+}
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin");
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(origin) });
@@ -41,9 +52,6 @@ Deno.serve(async (req: Request) => {
   if (adminErr || !isAdmin) {
     return json({ error: "Only admins can create staff accounts" }, 403, origin);
   }
-  const { data: callerData } = await callerClient.auth.getUser();
-  const callerId = callerData?.user?.id ?? null;
-
   let body: Record<string, unknown>;
   try {
     body = await req.json();
@@ -102,33 +110,33 @@ Deno.serve(async (req: Request) => {
     user_metadata: { full_name: fullName }
   });
 
-  if (createErr || !created?.user) {
-    return json({ error: createErr?.message || "Could not create the account." }, 400, origin);
+  let newUserId = created?.user?.id || "";
+  let reusedExisting = false;
+  if (createErr || !newUserId) {
+    const existing = await findAuthUserByEmail(adminClient, email).catch(() => null);
+    if (!existing?.id) {
+      return json({ error: createErr?.message || "Could not create the account." }, 400, origin);
+    }
+    reusedExisting = true;
+    newUserId = existing.id;
+    const { error: passwordErr } = await adminClient.auth.admin.updateUserById(newUserId, {
+      password: pin,
+      email_confirm: true,
+      user_metadata: { full_name: fullName }
+    });
+    if (passwordErr) return json({ error: passwordErr.message }, 400, origin);
   }
-  const newUserId = created.user.id;
 
-  const { error: profileErr } = await adminClient.from("staff_profiles").insert({
-    user_id: newUserId,
+  const setup = await callerClient.rpc("setup_staff_account_record", {
+    target_user_id: newUserId,
     full_name: fullName,
     department: department || null,
-    created_by: callerId
+    role
   });
-  if (profileErr) {
-    return json({ error: "Account created but profile setup failed: " + profileErr.message }, 500, origin);
+  if (setup.error) {
+    if (!reusedExisting) await adminClient.auth.admin.deleteUser(newUserId).catch(() => null);
+    return json({ error: "Account auth was ready but staff setup failed: " + setup.error.message }, 500, origin);
   }
 
-  const { error: roleErr } = await adminClient.from("staff_roles").insert({ user_id: newUserId, role });
-  if (roleErr) {
-    return json({ error: "Account created but role assignment failed: " + roleErr.message }, 500, origin);
-  }
-
-  await adminClient.from("audit_events").insert({
-    actor_user_id: callerId,
-    event_type: "staff.created",
-    entity_type: "user",
-    entity_id: newUserId,
-    metadata: { full_name: fullName, department, email, role }
-  });
-
-  return json({ user_id: newUserId, pin, email }, 200, origin);
+  return json({ user_id: newUserId, pin, email, reused_existing: reusedExisting }, 200, origin);
 });
