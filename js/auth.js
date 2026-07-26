@@ -703,7 +703,16 @@ window.KridiyaAuth = (function () {
   }
   function quotesHTML(quotes) {
     if (!quotes.length) return "";
-    return '<div class="enq-extra quote-list">' + quotes.map(function (q) {
+    const sortedQuotes = quotes.slice().sort(function (a, b) {
+      const byPrice = Number(a.price_amount || 0) - Number(b.price_amount || 0);
+      if (byPrice) return byPrice;
+      return String(a.created_at || "").localeCompare(String(b.created_at || ""));
+    });
+    function displayTitle(q, index) {
+      const name = String(q.title || "").replace(/^Option\s+\d+\s*:\s*/i, "").trim();
+      return "Option " + (index + 1) + (name ? ": " + name : "");
+    }
+    return '<div class="enq-extra quote-list">' + sortedQuotes.map(function (q, index) {
       const amount = money(q.price_amount, q.currency);
       const validity = q.valid_until
         ? new Date(q.valid_until).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric" })
@@ -724,7 +733,7 @@ window.KridiyaAuth = (function () {
 
       if (q.status === "sent") {
         return '<div class="quote-card">' +
-          '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(q.title || "Quote") + '</h4><div class="quote-price">' + amount + "</div></div>" +
+          '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(displayTitle(q, index)) + '</h4><div class="quote-price">' + amount + "</div></div>" +
           (details ? '<div class="quote-details">' + details + "</div>" : "") +
           addonsHtml +
           termsHtml +
@@ -735,7 +744,7 @@ window.KridiyaAuth = (function () {
           "</div></div>";
       }
       return '<div class="quote-card quote-card-done">' +
-        '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(q.title || "Quote") + '</h4><div class="quote-price">' + amount + "</div></div>" +
+        '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(displayTitle(q, index)) + '</h4><div class="quote-price">' + amount + "</div></div>" +
         (details ? '<div class="quote-details">' + details + "</div>" : "") +
         '<p class="quote-status-line">' + icon("check") + " " + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(q.status)) + "</p></div>";
     }).join("") + "</div>";
