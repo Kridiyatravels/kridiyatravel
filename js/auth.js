@@ -484,7 +484,7 @@ window.KridiyaAuth = (function () {
 
   function errorMessage(err, fallback) {
     const text = readableErrorValue(err, 0);
-    if (!text) return fallback;
+    if (!text || text === "{}") return fallback;
     if (/already registered|user already exists|already been registered/i.test(text)) {
       return "An account already exists for this email. Please log in or use password reset.";
     }
