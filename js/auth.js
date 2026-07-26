@@ -261,6 +261,35 @@ window.KridiyaAuth = (function () {
     if (result.error) throw result.error;
     return result.data || [];
   }
+  async function listBookingDocuments() {
+    const user = await currentUser();
+    if (!user) return [];
+    const sb = await client();
+    const result = await sb
+      .from("booking_documents")
+      .select("id, booking_id, document_type, file_name, external_reference, visible_to_customer, created_at")
+      .eq("user_id", user.id)
+      .eq("visible_to_customer", true)
+      .order("created_at", { ascending: false });
+    if (result.error) return [];
+    return result.data || [];
+  }
+  async function listCustomerPayments(bookingIds, enquiryIds) {
+    const user = await currentUser();
+    if (!user) return [];
+    const ids = [];
+    (bookingIds || []).forEach(function (id) { ids.push("booking_id.eq." + id); });
+    (enquiryIds || []).forEach(function (id) { ids.push("enquiry_id.eq." + id); });
+    if (!ids.length) return [];
+    const sb = await client();
+    const result = await sb
+      .from("payments")
+      .select("id, booking_id, enquiry_id, payment_reference, payment_direction, amount, currency, method, status, refund_amount, refund_reason, refund_method, refund_reference, refund_requested_at, refund_approved_at, refund_completed_at, created_at")
+      .or(ids.join(","))
+      .order("created_at", { ascending: false });
+    if (result.error) return [];
+    return result.data || [];
+  }
 
   async function listEnquiries() {
     const user = await currentUser();
@@ -381,6 +410,8 @@ window.KridiyaAuth = (function () {
     getUser: getUser,
     listBookings: listBookings,
     listEnquiries: listEnquiries,
+    listBookingDocuments: listBookingDocuments,
+    listCustomerPayments: listCustomerPayments,
     listRequests: listRequests,
     listQuotes: listQuotes,
     respondToTextRequest: respondToTextRequest,
@@ -639,6 +670,23 @@ window.KridiyaAuth = (function () {
         '<p class="quote-status-line">' + icon("check") + " " + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(q.status)) + "</p></div>";
     }).join("") + "</div>";
   }
+  function customerDocsHTML(docs) {
+    if (!docs.length) return "";
+    return '<div class="enq-extra customer-doc-list"><h4>Documents</h4>' + docs.map(function (d) {
+      const created = d.created_at ? new Date(d.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
+      return '<div class="customer-mini-row"><b>' + KridiyaAuth.escapeHTML(d.file_name || KridiyaAuth.statusLabel(d.document_type)) + '</b><span>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(d.document_type)) + (created ? " / " + KridiyaAuth.escapeHTML(created) : "") + '</span>' + (d.external_reference ? '<small>' + KridiyaAuth.escapeHTML(d.external_reference) + '</small>' : '') + '</div>';
+    }).join("") + "</div>";
+  }
+  function customerPaymentsHTML(payments) {
+    if (!payments.length) return "";
+    return '<div class="enq-extra customer-payment-list"><h4>Payments and refunds</h4>' + payments.map(function (p) {
+      const status = KridiyaAuth.statusLabel(p.status);
+      const amount = money(p.refund_amount || p.amount, p.currency);
+      const isRefund = /refund/i.test(String(p.status || "")) || p.refund_amount;
+      const ref = p.refund_reference || p.payment_reference || "";
+      return '<div class="customer-mini-row"><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div>';
+    }).join("") + "</div>";
+  }
 
   function wireEnquiryExtras(listEl) {
     listEl.addEventListener("submit", async function (e) {
@@ -701,14 +749,20 @@ window.KridiyaAuth = (function () {
 
       const listEl = document.getElementById("enq-list");
       try {
-        const results = await Promise.all([
+        let results = await Promise.all([
           KridiyaAuth.listBookings(),
           KridiyaAuth.listEnquiries(),
           KridiyaAuth.listRequests(),
-          KridiyaAuth.listQuotes()
+          KridiyaAuth.listQuotes(),
+          KridiyaAuth.listBookingDocuments()
         ]);
         const bookings = results[0];
         const enquiries = results[1];
+        const docs = results[4] || [];
+        const payments = await KridiyaAuth.listCustomerPayments(
+          bookings.map(function (b) { return b.id; }),
+          enquiries.map(function (e) { return e.id; })
+        );
         const requestsByEnquiry = {};
         results[2].forEach(function (r) {
           if (!requestsByEnquiry[r.enquiry_id]) requestsByEnquiry[r.enquiry_id] = [];
@@ -718,6 +772,23 @@ window.KridiyaAuth = (function () {
         results[3].forEach(function (q) {
           if (!quotesByEnquiry[q.enquiry_id]) quotesByEnquiry[q.enquiry_id] = [];
           quotesByEnquiry[q.enquiry_id].push(q);
+        });
+        const docsByBooking = {};
+        docs.forEach(function (d) {
+          if (!docsByBooking[d.booking_id]) docsByBooking[d.booking_id] = [];
+          docsByBooking[d.booking_id].push(d);
+        });
+        const paymentsByBooking = {};
+        const paymentsByEnquiry = {};
+        payments.forEach(function (p) {
+          if (p.booking_id) {
+            if (!paymentsByBooking[p.booking_id]) paymentsByBooking[p.booking_id] = [];
+            paymentsByBooking[p.booking_id].push(p);
+          }
+          if (p.enquiry_id) {
+            if (!paymentsByEnquiry[p.enquiry_id]) paymentsByEnquiry[p.enquiry_id] = [];
+            paymentsByEnquiry[p.enquiry_id].push(p);
+          }
         });
 
         const openRequests = results[2].filter(function (r) {
@@ -742,7 +813,7 @@ window.KridiyaAuth = (function () {
         }).concat(bookings.map(function (booking) {
           const pax = (booking.adults || 0) + (booking.children || 0) + (booking.infants || 0);
           return {
-            id: null,
+            id: booking.id,
             isEnquiry: false,
             reference: booking.booking_reference,
             status: booking.status,
@@ -765,6 +836,8 @@ window.KridiyaAuth = (function () {
             const created = new Date(item.created_at);
             const requests = item.isEnquiry ? (requestsByEnquiry[item.id] || []) : [];
             const quotes = item.isEnquiry ? (quotesByEnquiry[item.id] || []) : [];
+            const itemDocs = item.isEnquiry ? [] : (docsByBooking[item.id] || []);
+            const itemPayments = item.isEnquiry ? (paymentsByEnquiry[item.id] || []) : (paymentsByBooking[item.id] || []);
             const itemType = item.isEnquiry ? "Enquiry" : "Booking";
             return '<div class="enq-item">' +
               '<div class="enq-top"><div><span class="account-chip">' + KridiyaAuth.escapeHTML(itemType) + '</span><b>' + KridiyaAuth.escapeHTML(item.title || item.reference || itemType) + "</b></div>" +
@@ -780,12 +853,16 @@ window.KridiyaAuth = (function () {
                 (item.paymentStatus ? '<span><small>Payment</small><b>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.paymentStatus)) + '</b></span>' : "") +
                 (item.documentStatus ? '<span><small>Documents</small><b>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.documentStatus)) + '</b></span>' : "") +
               '</div>' +
-              ((requests.length || quotes.length) ? '<div class="account-item-alerts">' +
+              ((requests.length || quotes.length || itemDocs.length || itemPayments.length) ? '<div class="account-item-alerts">' +
                 (requests.length ? '<span>' + KridiyaAuth.escapeHTML(String(requests.length)) + ' request(s)</span>' : '') +
                 (quotes.length ? '<span>' + KridiyaAuth.escapeHTML(String(quotes.length)) + ' quote(s)</span>' : '') +
+                (itemDocs.length ? '<span>' + KridiyaAuth.escapeHTML(String(itemDocs.length)) + ' document(s)</span>' : '') +
+                (itemPayments.length ? '<span>' + KridiyaAuth.escapeHTML(String(itemPayments.length)) + ' payment/refund update(s)</span>' : '') +
               '</div>' : '') +
               requestsHTML(requests) +
               quotesHTML(quotes) +
+              customerDocsHTML(itemDocs) +
+              customerPaymentsHTML(itemPayments) +
               "</div>";
           }).join("");
           wireEnquiryExtras(listEl);

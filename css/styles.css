@@ -1404,6 +1404,19 @@ a:hover { text-decoration: underline; }
 .quote-card-done { opacity: 0.9; }
 .quote-status-line { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--success); font-weight: 600; }
 .quote-status-line svg { width: 15px; height: 15px; fill: var(--success); vertical-align: -2px; margin-right: 0.25rem; }
+.customer-doc-list h4,
+.customer-payment-list h4 { margin: 0; font-size: 0.86rem; color: var(--ink); }
+.customer-mini-row {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+}
+.customer-mini-row b { color: var(--ink); font-size: 0.9rem; }
+.customer-mini-row span,
+.customer-mini-row small { color: var(--text-muted); font-size: 0.8rem; }
 .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--text-muted); }
 .empty-state svg { width: 52px; height: 52px; fill: var(--line-strong); margin-bottom: 0.6rem; }
 .empty-actions,
