@@ -589,12 +589,12 @@ window.KridiyaAuth = (function () {
 
   function requestsHTML(requests) {
     if (!requests.length) return "";
-    return '<div class="enq-extra">' + requests.map(function (r) {
+    return '<div class="enq-extra customer-action-list"><h4>Action needed from you</h4>' + requests.map(function (r) {
       if (r.responded_at) {
         const answer = r.kind === "file"
           ? (r.response_file_name ? "Uploaded: " + KridiyaAuth.escapeHTML(r.response_file_name) : "Uploaded")
           : KridiyaAuth.escapeHTML(r.response_text || "");
-        return '<p class="form-note enq-extra-done">' + icon("check") + " " + KridiyaAuth.escapeHTML(r.label) + " — " + answer + "</p>";
+        return '<p class="form-note enq-extra-done">' + icon("check") + " " + KridiyaAuth.escapeHTML(r.label) + " - " + answer + "</p>";
       }
       if (r.kind === "file") {
         return '<form class="cust-request-form" data-request-id="' + r.id + '" data-kind="file">' +
@@ -621,7 +621,7 @@ window.KridiyaAuth = (function () {
     }).join("");
     if (!rows) {
       const legacy = [];
-      if (q.airline || q.stops) legacy.push(["Flight", [q.airline, q.stops].filter(Boolean).join(" · ")]);
+      if (q.airline || q.stops) legacy.push(["Flight", [q.airline, q.stops].filter(Boolean).join(" / ")]);
       if (q.outbound) legacy.push(["Onward", q.outbound]);
       if (q.inbound) legacy.push(["Return", q.inbound]);
       if (q.baggage) legacy.push(["Baggage", q.baggage]);
@@ -647,7 +647,7 @@ window.KridiyaAuth = (function () {
         : "";
       const termsHtml = q.terms
         ? '<details class="quote-terms"><summary>Terms &amp; conditions</summary><ul>' + String(q.terms).split("\n").map(function (t) {
-            t = t.replace(/^[-•]\s*/, "").trim();
+            t = t.replace(/^[-*]\s*/, "").trim();
             return t ? "<li>" + KridiyaAuth.escapeHTML(t) + "</li>" : "";
           }).join("") + "</ul></details>"
         : "";
@@ -671,20 +671,21 @@ window.KridiyaAuth = (function () {
     }).join("") + "</div>";
   }
   function customerDocsHTML(docs) {
-    if (!docs.length) return "";
+    if (!docs.length) return '<div class="enq-extra customer-doc-list customer-empty-list"><h4>Documents</h4><p>No customer-visible documents have been released yet.</p></div>';
     return '<div class="enq-extra customer-doc-list"><h4>Documents</h4>' + docs.map(function (d) {
       const created = d.created_at ? new Date(d.created_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "";
-      return '<div class="customer-mini-row"><b>' + KridiyaAuth.escapeHTML(d.file_name || KridiyaAuth.statusLabel(d.document_type)) + '</b><span>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(d.document_type)) + (created ? " / " + KridiyaAuth.escapeHTML(created) : "") + '</span>' + (d.external_reference ? '<small>' + KridiyaAuth.escapeHTML(d.external_reference) + '</small>' : '') + '</div>';
+      return '<div class="customer-mini-row customer-doc-row"><div><b>' + KridiyaAuth.escapeHTML(d.file_name || KridiyaAuth.statusLabel(d.document_type)) + '</b><span>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(d.document_type)) + (created ? " / " + KridiyaAuth.escapeHTML(created) : "") + '</span>' + (d.external_reference ? '<small>' + KridiyaAuth.escapeHTML(d.external_reference) + '</small>' : '') + '</div><span class="customer-row-state">Released</span></div>';
     }).join("") + "</div>";
   }
+
   function customerPaymentsHTML(payments) {
-    if (!payments.length) return "";
+    if (!payments.length) return '<div class="enq-extra customer-payment-list customer-empty-list"><h4>Payments and refunds</h4><p>No customer payment or refund updates yet.</p></div>';
     return '<div class="enq-extra customer-payment-list"><h4>Payments and refunds</h4>' + payments.map(function (p) {
       const status = KridiyaAuth.statusLabel(p.status);
       const amount = money(p.refund_amount || p.amount, p.currency);
       const isRefund = /refund/i.test(String(p.status || "")) || p.refund_amount;
       const ref = p.refund_reference || p.payment_reference || "";
-      return '<div class="customer-mini-row"><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div>';
+      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span></div>';
     }).join("") + "</div>";
   }
 
@@ -707,7 +708,7 @@ window.KridiyaAuth = (function () {
           if (!value) { btn.disabled = false; return; }
           await KridiyaAuth.respondToTextRequest(id, value);
         }
-        toast("Sent — thank you.");
+        toast("Sent - thank you.");
         location.reload();
       } catch (err) {
         btn.disabled = false;
@@ -839,11 +840,13 @@ window.KridiyaAuth = (function () {
             const itemDocs = item.isEnquiry ? [] : (docsByBooking[item.id] || []);
             const itemPayments = item.isEnquiry ? (paymentsByEnquiry[item.id] || []) : (paymentsByBooking[item.id] || []);
             const itemType = item.isEnquiry ? "Enquiry" : "Booking";
-            return '<div class="enq-item">' +
+            const attention = requests.length ? "Needs your reply" : quotes.length ? "Quote ready" : itemDocs.length ? "Documents released" : itemPayments.length ? "Payment updated" : "In progress";
+            return '<article class="enq-item">' +
               '<div class="enq-top"><div><span class="account-chip">' + KridiyaAuth.escapeHTML(itemType) + '</span><b>' + KridiyaAuth.escapeHTML(item.title || item.reference || itemType) + "</b></div>" +
               '<time datetime="' + KridiyaAuth.escapeHTML(item.created_at) + '">' +
               created.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) +
               "</time></div>" +
+              '<div class="customer-status-strip"><span>' + KridiyaAuth.escapeHTML(attention) + '</span><small>' + KridiyaAuth.escapeHTML(item.reference || "Reference pending") + '</small></div>' +
               '<div class="account-item-grid">' +
                 '<span><small>Reference</small><b>' + KridiyaAuth.escapeHTML(item.reference || "Pending") + '</b></span>' +
                 '<span><small>Status</small><b>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(item.status)) + '</b></span>' +
@@ -861,11 +864,13 @@ window.KridiyaAuth = (function () {
               '</div>' : '') +
               requestsHTML(requests) +
               quotesHTML(quotes) +
-              customerDocsHTML(itemDocs) +
+              (!item.isEnquiry ? customerDocsHTML(itemDocs) : '') +
               customerPaymentsHTML(itemPayments) +
-              "</div>";
+              "</article>";
           }).join("");
           wireEnquiryExtras(listEl);
+        } else {
+          listEl.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z"/></svg><p><b>No bookings linked yet.</b><br>Send an enquiry while signed in, or ask our team to attach an existing booking to this account.</p><div class="empty-actions"><a class="btn btn-primary" href="index.html">Start planning</a><a class="btn btn-outline" href="https://wa.me/971509413873" target="_blank" rel="noopener">WhatsApp support</a></div></div>';
         }
       } catch (err) {
         listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load your enquiries yet: ' + KridiyaAuth.escapeHTML(err.message) + "</div>";
