@@ -841,7 +841,7 @@ function corporatePanelHTML() {
           "<h3>Corporate &amp; business travel</h3>" +
           "<p>Company flights, visas, hotels and group travel — quoted first, billed to your company with LPO and one tracking reference. Send your requirement once and we handle the rest.</p>" +
         "</div>" +
-        '<a class="btn btn-primary btn-lg" href="corporate-booking.html">Open corporate booking ' + icon("chevronRight") + "</a>" +
+        '<a class="btn btn-primary btn-lg" href="https://corporate.kridiyatravel.com">Open business travel ' + icon("chevronRight") + "</a>" +
       "</div>" +
     "</div>"
   );
@@ -1127,4 +1127,3 @@ document.addEventListener("DOMContentLoaded", function () {
   // already initialised above, and attachAirportAC is a no-op if re-run.
   document.querySelectorAll("input[data-airport]").forEach(attachAirportAC);
 });
-
