@@ -34,7 +34,7 @@ This is fine as a prototype, but it is not a shared customer database. Accounts 
 2. Enable email/password Auth.
 3. Turn on email confirmation.
 4. Configure redirect URLs:
-   - `https://kridiyatravel.com/`
+   - `https://www.kridiyatravel.com/`
    - `https://www.kridiyatravel.com/` if used
    - local test URL if needed
 5. Run `supabase/kridiya_phase1_schema.sql` in the Supabase SQL editor.
@@ -187,7 +187,7 @@ Use Supabase for:
    - enable Confirm email;
    - set secure password requirements if available.
 3. Authentication -> URL Configuration:
-   - set Site URL to `https://kridiyatravel.com`;
+   - set Site URL to `https://www.kridiyatravel.com`;
    - add redirect URLs for production and local test URLs.
 4. Authentication -> Sessions:
    - keep default JWT expiry around 1 hour;

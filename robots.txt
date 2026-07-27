@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /thanks.html
-Sitemap: https://kridiyatravel.com/sitemap.xml
+Sitemap: https://www.kridiyatravel.com/sitemap.xml

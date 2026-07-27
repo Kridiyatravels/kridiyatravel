@@ -10,7 +10,7 @@ window.KridiyaAuth = (function () {
   const SUPABASE_KEY = "sb_publishable_wiA9tSt74X-UQhW4yOXgIQ_lEUG1Q1Q";
   const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   const SESSION_KEY = "kridiya_session";
-  const PUBLIC_SITE_URL = "https://kridiyatravel.com/";
+  const PUBLIC_SITE_URL = "https://www.kridiyatravel.com/";
 
   let clientPromise = null;
   let cachedClient = null;
