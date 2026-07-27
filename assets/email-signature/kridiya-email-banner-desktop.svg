@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="650" height="110" viewBox="0 0 650 110" role="img" aria-labelledby="title desc">
+  <title id="title">Kridiya Travel desktop email signature banner</title>
+  <desc id="desc">Transparent professional email banner with Kridiya logo and business contact details.</desc>
+  <rect x="0" y="0" width="650" height="110" rx="0" fill="transparent"/>
+  <image href="kridiya-signature-logo-transparent.png" x="20" y="10" width="84" height="82" preserveAspectRatio="xMidYMid meet"/>
+  <line x1="122" y1="22" x2="122" y2="88" stroke="#e7a15f" stroke-width="1"/>
+  <text x="142" y="35" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#b64a00">Kridiya Travel and Tourism FZ-LLC</text>
+  <text x="142" y="57" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2937">FDRK7105, Compass Building, Al Shohada Road, Al Hamra Industrial Zone-FZ, Ras Al Khaimah, United Arab Emirates</text>
+  <text x="142" y="76" font-family="Arial, Helvetica, sans-serif" font-size="12" fill="#1f2937">+971 50 941 3873  ·  contact@kridiyatravl.com  ·  kridiyatravel.com</text>
+  <line x1="142" y1="91" x2="615" y2="91" stroke="#e7a15f" stroke-width="1" opacity=".7"/>
+</svg>

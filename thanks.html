@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Thank You — Kridiya Travel and Tourism</title>
+<title>Thank You - Kridiya Travel and Tourism</title>
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,7 @@
       <p style="margin-inline:auto" id="thanks-body">Thank you for choosing Kridiya Travel. Your message is on its way to our experts, and we'll get back to you shortly with the best options.</p>
       <div id="thanks-ref" hidden style="margin:1rem auto 0;padding:0.8rem 1rem;border:1px dashed var(--brand-deep);border-radius:12px;max-width:420px">
         <div style="font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-muted)">Your reference</div>
-        <div style="font-size:1.3rem;font-weight:800;color:var(--brand-deep);letter-spacing:0.02em" id="thanks-ref-code">—</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--brand-deep);letter-spacing:0.02em" id="thanks-ref-code">Reference pending</div>
         <div style="font-size:0.85rem;color:var(--text-muted);margin-top:0.3rem" id="thanks-ref-summary"></div>
       </div>
       <p class="slogan" style="font-family:var(--font-swash);color:var(--brand-deep);font-size:1.4rem;font-weight:700;font-style:italic">Your Journey, Our Passion.</p>
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var firstName = enq.name ? enq.name.split(" ")[0] : "";
   document.getElementById("thanks-title").textContent = firstName
-    ? "Thanks, " + firstName + " — your " + (enq.typeLabel || "enquiry").toLowerCase() + " is in."
+    ? "Thanks, " + firstName + " - your " + (enq.typeLabel || "enquiry").toLowerCase() + " is in."
     : "Your " + (enq.typeLabel || "enquiry").toLowerCase() + " is in.";
   document.getElementById("thanks-body").textContent = "A Kridiya travel expert will check current availability and reply with confirmed options. No payment is required until you approve a quote.";
 

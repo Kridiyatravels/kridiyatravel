@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    Kridiya Travel — booking widget, airport autocomplete,
    custom date calendar, and search -> enquiry result panels.
    Requires: airports.js, main.js

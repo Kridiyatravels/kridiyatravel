@@ -1,4 +1,4 @@
-﻿// Airport dataset for Kridiya Travel search autocomplete.
+// Airport dataset for Kridiya Travel search autocomplete.
 // Rows: [IATA, city, country, airport name] — ordered by route connectivity (popular first).
 const AIRPORTS = [
 ["ATL","Atlanta","United States","Hartsfield Jackson Atlanta Intl"],

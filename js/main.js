@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    Kridiya Travel — shared chrome, config & helpers
    ============================================================ */
 "use strict";
@@ -326,6 +326,12 @@ async function sendFormSubmitAjax(form, reference) {
   });
 }
 
+function restoreSubmitButton(btn, label) {
+  if (!btn) return;
+  btn.disabled = false;
+  btn.textContent = label || "Send enquiry";
+}
+
 function stashEnquiryForThanksPage(reference, serviceType, summary, typeLabel, name) {
   try {
     sessionStorage.setItem("kridiya_last_enquiry", JSON.stringify({
@@ -358,6 +364,7 @@ function prepareFormSubmit(form) {
 
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
+    const originalButtonLabel = btn ? btn.textContent : "";
     if (btn) {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Sending…';
@@ -369,13 +376,21 @@ function prepareFormSubmit(form) {
     const dest = next.value;
 
     Promise.allSettled([
-      submitEnquiryToSupabase(fields, serviceType, reference).catch(function (err) {
-        console.error("Kridiya: could not save enquiry to Supabase", err);
-      }),
-      sendFormSubmitAjax(form, reference).catch(function (err) {
-        console.error("Kridiya: could not email enquiry", err);
-      })
-    ]).then(function () {
+      submitEnquiryToSupabase(fields, serviceType, reference),
+      sendFormSubmitAjax(form, reference)
+    ]).then(function (results) {
+      const savedToSupabase = results[0].status === "fulfilled";
+      const emailedToTeam = results[1].status === "fulfilled";
+
+      if (!savedToSupabase) console.error("Kridiya: could not save enquiry to Supabase", results[0].reason);
+      if (!emailedToTeam) console.error("Kridiya: could not email enquiry", results[1].reason);
+
+      if (!savedToSupabase && !emailedToTeam) {
+        restoreSubmitButton(btn, originalButtonLabel);
+        toast("We could not send this enquiry. Please try again or WhatsApp us on +971 50 941 3873.");
+        return;
+      }
+
       stashEnquiryForThanksPage(reference, serviceType, fields.summary, type, fields.fullName);
       location.href = dest;
     });

@@ -10,12 +10,17 @@ window.KridiyaAuth = (function () {
   const SUPABASE_KEY = "sb_publishable_wiA9tSt74X-UQhW4yOXgIQ_lEUG1Q1Q";
   const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
   const SESSION_KEY = "kridiya_session";
+  const PUBLIC_SITE_URL = "https://kridiyatravel.com/";
 
   let clientPromise = null;
   let cachedClient = null;
 
   function cleanEmail(email) {
     return String(email || "").trim().toLowerCase();
+  }
+
+  function publicURL(path) {
+    return new URL(path, PUBLIC_SITE_URL).href;
   }
 
   function nameFromProfile(profile, authUser) {
@@ -137,7 +142,7 @@ window.KridiyaAuth = (function () {
       email: email,
       password: opts.password,
       options: {
-        emailRedirectTo: new URL("account.html", location.href).href,
+        emailRedirectTo: publicURL("account.html"),
         data: {
           full_name: name,
           phone: phone,
@@ -189,7 +194,7 @@ window.KridiyaAuth = (function () {
   async function resetPassword(email) {
     const sb = await client();
     const result = await sb.auth.resetPasswordForEmail(cleanEmail(email), {
-      redirectTo: new URL("reset-password.html", location.href).href
+      redirectTo: publicURL("reset-password.html")
     });
     if (result.error) throw result.error;
   }
@@ -840,7 +845,7 @@ window.KridiyaAuth = (function () {
         return;
       }
 
-      document.getElementById("acc-avatar").textContent = (user.name || "?").trim().charAt(0).toUpperCase();
+      document.getElementById("acc-avatar").textContent = (user.name || "T").trim().charAt(0).toUpperCase();
       document.getElementById("acc-name").textContent = user.name;
       document.getElementById("acc-email").textContent = user.email;
       const since = user.createdAt ? new Date(user.createdAt) : null;
