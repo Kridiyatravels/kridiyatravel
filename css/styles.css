@@ -1729,24 +1729,24 @@ a:hover { text-decoration: underline; }
   margin-top: 3rem;
 }
 .footer-grid {
-  display: grid; gap: 2rem 2.6rem; align-items: start;
-  padding: 2.25rem 0 1.6rem;
+  display: grid; gap: 1.55rem 2.25rem; align-items: start;
+  padding: 1.6rem 0 1.05rem;
   grid-template-columns: minmax(220px, 1.05fr) minmax(145px, 0.72fr) minmax(145px, 0.72fr) minmax(280px, 1.1fr);
 }
-.site-footer h4 { color: var(--ink); font-size: 0.95rem; margin: 0 0 0.85rem; }
-.footer-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.55rem; }
-.footer-links a { color: var(--text-muted); font-size: 0.92rem; }
+.site-footer h4 { color: var(--ink); font-size: 0.92rem; margin: 0 0 0.65rem; }
+.footer-links { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+.footer-links a { color: var(--text-muted); font-size: 0.88rem; }
 .footer-links a:hover { color: var(--blue); }
-.footer-brand { display: grid; align-content: start; justify-items: start; gap: 0.85rem; }
+.footer-brand { display: grid; align-content: start; justify-items: start; gap: 0.65rem; }
 .footer-brand .logo { justify-content: flex-start; margin-right: 0; width: fit-content; }
-.footer-brand .logo-art { width: 92px; height: 92px; border-radius: 0; object-fit: contain; }
+.footer-brand .logo-art { width: 84px; height: 72px; border-radius: 0; object-fit: contain; }
 .footer-brand p {
-  max-width: 32ch; margin: 0; font-size: 0.9rem; line-height: 1.55;
+  max-width: 32ch; margin: 0; font-size: 0.88rem; line-height: 1.45;
 }
-.footer-contact { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: 0.7rem; font-size: 0.92rem; }
-.footer-contact li { display: flex; gap: 0.65rem; align-items: flex-start; min-width: 0; }
+.footer-contact { list-style: none; padding: 0; margin: 0 0 0.75rem; display: grid; gap: 0.5rem; font-size: 0.88rem; }
+.footer-contact li { display: flex; gap: 0.55rem; align-items: flex-start; min-width: 0; }
 .footer-contact svg {
-  width: 26px; height: 26px; flex: none; box-sizing: border-box;
+  width: 24px; height: 24px; flex: none; box-sizing: border-box;
   fill: var(--brand-deep); background: var(--brand-soft); background-image: var(--grad-mild);
   border-radius: 8px; padding: 5px;
 }
@@ -1755,24 +1755,24 @@ a:hover { text-decoration: underline; }
 .footer-contact a { color: var(--ink); font-weight: 600; }
 .newsletter-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.5rem; align-items: stretch; }
 .newsletter-form input {
-  width: 100%; min-width: 0; font: 500 0.92rem/1 var(--font);
+  width: 100%; min-width: 0; font: 500 0.88rem/1 var(--font);
   background: var(--surface); color: var(--ink);
-  border: 1.5px solid var(--line-strong); border-radius: var(--r-sm); padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--line-strong); border-radius: var(--r-sm); padding: 0.6rem 0.8rem;
 }
-.newsletter-form .btn { min-height: 44px; padding-inline: 1.15rem; }
+.newsletter-form .btn { min-height: 40px; padding-inline: 1rem; }
 .newsletter-form input::placeholder { color: var(--text-muted); }
 .newsletter-form input:focus { border-color: var(--blue); outline: none; }
-.footer-social { display: flex; gap: 0.6rem; margin-top: 0.1rem; }
+.footer-social { display: flex; gap: 0.5rem; margin-top: 0.05rem; }
 .footer-social a {
-  display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
   background: linear-gradient(145deg, var(--brand-soft), oklch(0.92 0.06 78));
 }
 .footer-social a:hover { background: var(--brand); background-image: var(--grad-brand); }
-.footer-social svg { width: 17px; height: 17px; fill: var(--brand-deep); }
+.footer-social svg { width: 15px; height: 15px; fill: var(--brand-deep); }
 .footer-social a:hover svg { fill: var(--on-brand); }
-.footer-routes { border-top: 1px solid var(--line); padding: 1.2rem 0 0.6rem; }
-.footer-routes h4 { margin-bottom: 0.5rem; }
-.footer-routes p { max-width: none; font-size: 0.84rem; line-height: 1.9; }
+.footer-routes { border-top: 1px solid var(--line); padding: 0.8rem 0 0.45rem; }
+.footer-routes h4 { margin-bottom: 0.35rem; }
+.footer-routes p { max-width: none; font-size: 0.8rem; line-height: 1.65; }
 .footer-routes a { color: var(--text-muted); white-space: nowrap; }
 .footer-routes a:hover { color: var(--blue); }
 .footer-routes .dot { color: var(--line-strong); }
@@ -1782,7 +1782,7 @@ a:hover { text-decoration: underline; }
   }
 }
 @media (max-width: 540px) {
-  .footer-grid { grid-template-columns: 1fr; gap: 1.7rem; padding-top: 2rem; }
+  .footer-grid { grid-template-columns: 1fr; gap: 1.25rem; padding-top: 1.45rem; }
   .footer-brand p { max-width: 100%; }
 }
 .footer-bar {
@@ -1790,17 +1790,17 @@ a:hover { text-decoration: underline; }
   background-image:
     radial-gradient(30rem 14rem at 90% 0%, oklch(0.84 0.16 86 / 0.16), transparent 60%),
     var(--grad-dark);
-  color: var(--on-dark-muted); margin-top: 1rem;
+  color: var(--on-dark-muted); margin-top: 0.55rem;
 }
 .footer-legal {
-  padding: 0.9rem 0 1.1rem;
+  padding: 0.65rem 0 0.75rem;
   display: flex; justify-content: space-between; gap: 0.8rem; flex-wrap: wrap;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   /* Reserve room so the fixed WhatsApp button never sits over this text */
   padding-right: 12rem;
 }
 @media (max-width: 720px) { .footer-legal { padding-right: 4.5rem; } }
-.footer-legal .slogan-line { font: 700 1.05rem/1 var(--font-swash); font-style: italic; color: var(--gold); }
+.footer-legal .slogan-line { font: 700 0.96rem/1 var(--font-swash); font-style: italic; color: var(--gold); }
 
 /* ---------- WhatsApp float ---------- */
 .wa-float {
