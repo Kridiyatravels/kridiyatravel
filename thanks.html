@@ -29,7 +29,7 @@
       </div>
       <p class="slogan" style="font-family:var(--font-swash);color:var(--brand-deep);font-size:1.4rem;font-weight:700;font-style:italic">Your Journey, Our Passion.</p>
       <div style="display:grid;gap:0.6rem;margin-top:1.2rem">
-        <a class="btn btn-wa btn-block" id="thanks-wa" href="https://wa.me/971509413873?text=Hello%20Kridiya%20Travel!%20I%20just%20sent%20an%20enquiry%20from%20your%20website." target="_blank" rel="noopener">Chat now on WhatsApp</a>
+        <a class="btn btn-wa btn-block" id="thanks-wa" href="https://whatsapp.kridiyatravel.com?text=Hello%20Kridiya%20Travel!%20I%20just%20sent%20an%20enquiry%20from%20your%20website." target="_blank" rel="noopener">Chat now on WhatsApp</a>
         <a class="btn btn-outline btn-block" href="index.html">Back to home</a>
         <a class="btn btn-outline btn-block" id="thanks-track" href="register.html" hidden>Create an account to track this enquiry</a>
       </div>
@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("thanks-ref-summary").textContent = enq.summary || "";
 
   var waText = "Hello Kridiya Travel! My enquiry ID is " + enq.reference + ". " + (enq.summary || "");
-  document.getElementById("thanks-wa").href = "https://wa.me/971509413873?text=" + encodeURIComponent(waText);
+  document.getElementById("thanks-wa").href = "https://whatsapp.kridiyatravel.com?text=" + encodeURIComponent(waText);
 
   var session = window.KridiyaAuth ? KridiyaAuth.session() : null;
   if (!session) {
