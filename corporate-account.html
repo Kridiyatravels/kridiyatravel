@@ -11,7 +11,8 @@
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/favicon-180.png">
 <link rel="canonical" href="https://www.kridiyatravel.com/corporate-account.html">
-<link rel="stylesheet" href="css/styles.css?v=20260726b">
+<link rel="stylesheet" href="css/styles.css?v=20260728f">
+<link rel="stylesheet" href="css/corporate-portal.css?v=20260728a">
 </head>
 <body data-page="corporate-account">
 <header id="site-header" class="site-header"></header>
@@ -37,15 +38,57 @@
               <a href="account.html">My account</a>
             </div>
             <div class="account-summary">
-              <div><span id="corp-visible-items">0</span><b>Linked items</b><small>Visible in your customer account</small></div>
-              <div><span>OTP</span><b>Login model</b><small>Email login/magic-link ready path</small></div>
-              <div><span>Staff</span><b>Approval control</b><small>Booking, payment, and documents remain verified by Kridiya</small></div>
+              <div><span id="corp-visible-items">0</span><b>Company bookings</b><small>Visible through corporate access</small></div>
+              <div><span id="corp-company-count">0</span><b>Company account</b><small id="corp-company-name">Awaiting activation</small></div>
+              <div><span id="corp-member-role">Staff</span><b>Portal role</b><small>Permissions controlled by Kridiya admin</small></div>
             </div>
+            <div id="corp-company-list" class="corporate-company-list"></div>
           </div>
           <div class="account-main">
             <div class="account-section-head">
               <div>
-                <h2>Corporate operating flow</h2>
+                <h2>New portal request</h2>
+                <p>Send a request directly into the Kridiya admin system under your company.</p>
+              </div>
+            </div>
+            <form id="corp-portal-request-form" class="corporate-portal-request form-grid" novalidate>
+              <div class="form-banner" hidden></div>
+              <div class="field-row">
+                <div class="field col-6"><label for="corp-portal-service">SERVICE</label>
+                  <select id="corp-portal-service" name="service" required>
+                    <option value="">Choose...</option>
+                    <option value="flight">Flight</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="visa">Visa</option>
+                    <option value="holiday">Holiday</option>
+                    <option value="umrah">Umrah</option>
+                    <option value="cruise">Cruise</option>
+                    <option value="insurance">Insurance</option>
+                    <option value="other">Other / multiple services</option>
+                  </select>
+                </div>
+                <div class="field col-6"><label for="corp-portal-title">REQUEST TITLE</label><input id="corp-portal-title" name="title" required placeholder="e.g. Dubai to London staff trip"></div>
+                <div class="field col-6"><label for="corp-portal-route">ROUTE / DESTINATION</label><input id="corp-portal-route" name="route" placeholder="City, airport, hotel, country..."></div>
+                <div class="field col-3"><label for="corp-portal-start">START</label><input id="corp-portal-start" name="start" type="date"></div>
+                <div class="field col-3"><label for="corp-portal-end">END</label><input id="corp-portal-end" name="end" type="date"></div>
+                <div class="field"><label for="corp-portal-notes">NOTES</label><textarea id="corp-portal-notes" name="notes" placeholder="Travellers, deadline, approver, LPO/payment details, urgency..."></textarea></div>
+              </div>
+              <button class="btn btn-primary btn-lg" type="submit" data-label="Submit portal request">Submit portal request</button>
+            </form>
+          </div>
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Company bookings</h2>
+                <p>Portal-safe status view. Supplier cost, profit, and staff notes stay internal.</p>
+              </div>
+            </div>
+            <div id="corp-booking-list" class="corporate-booking-list"><p class="muted">Loading bookings...</p></div>
+          </div>
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
+                <h2>Operating flow</h2>
                 <p>Use this process for every company travel request.</p>
               </div>
             </div>
@@ -57,42 +100,13 @@
               <li><b>Handover</b><span>Invoice, receipt, ticket, voucher, visa note, or refund/cancellation update is shared.</span></li>
             </ol>
           </div>
-          <div class="account-main">
-            <div class="account-section-head">
-              <div>
-                <h2>Need from company</h2>
-                <p>Keep these ready so approvals do not delay supplier confirmation.</p>
-              </div>
-            </div>
-            <div class="corporate-portal-checks">
-              <span>Authorized requester name</span>
-              <span>Billing/accounts email</span>
-              <span>LPO or approval person</span>
-              <span>Traveller passport details</span>
-              <span>Payment proof or credit approval</span>
-              <span>Urgency and supplier preference</span>
-            </div>
-          </div>
-          <div class="account-main">
-            <div class="account-section-head">
-              <div>
-                <h2>Support</h2>
-                <p>For urgent business travel, WhatsApp is fastest.</p>
-              </div>
-            </div>
-            <div class="account-actions">
-              <a class="btn btn-primary" href="https://whatsapp.kridiyatravel.com?text=Hello%20Kridiya%20Travel!%20I%20need%20corporate%20travel%20support." target="_blank" rel="noopener">WhatsApp corporate desk</a>
-              <a class="btn btn-outline" href="mailto:enquiry@kridiyatravel.com">Email enquiry team</a>
-              <a class="btn btn-outline" href="corporate-booking.html">New request</a>
-            </div>
-          </div>
         </div>
       </div>
     </div>
   </section>
 </main>
 <footer id="site-footer" class="site-footer"></footer>
-<script src="js/main.js" defer></script>
+<script src="js/main.js?v=20260728f" defer></script>
 <script src="js/auth.js?v=20260726f" defer></script>
 </body>
 </html>

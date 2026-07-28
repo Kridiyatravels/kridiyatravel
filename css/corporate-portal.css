@@ -1,0 +1,84 @@
+/* Kridiya corporate client portal - live Supabase dashboard styles. */
+.corporate-company-list,
+.corporate-booking-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.corporate-company-card,
+.corporate-booking-card {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg);
+  padding: 0.85rem;
+}
+
+.corporate-company-card b,
+.corporate-booking-card b {
+  color: var(--ink);
+}
+
+.corporate-company-card p,
+.corporate-booking-card p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.corporate-company-card div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.7rem;
+}
+
+.corporate-company-card span,
+.corporate-booking-card span {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-deep);
+  padding: 0.22rem 0.55rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.corporate-booking-card {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.corporate-booking-card > div,
+.corporate-booking-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.corporate-booking-card h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.corporate-booking-card footer {
+  padding-top: 0.55rem;
+  border-top: 1px dashed var(--line);
+}
+
+.corporate-booking-card small {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.corporate-booking-card strong {
+  color: var(--ink);
+}
+
+.corporate-portal-request .field-row {
+  margin: 0;
+}

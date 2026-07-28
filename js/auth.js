@@ -386,6 +386,44 @@ window.KridiyaAuth = (function () {
     return result.data;
   }
 
+  async function getMyCorporatePortal() {
+    const user = await currentUser();
+    if (!user) return [];
+    const sb = await client();
+    const result = await sb.rpc("get_my_corporate_portal");
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
+  async function listMyCorporateBookings(corporateAccountId) {
+    const user = await currentUser();
+    if (!user) return [];
+    const sb = await client();
+    const result = await sb.rpc("list_my_corporate_bookings", {
+      p_corporate_account_id: corporateAccountId || null,
+      p_limit: 100
+    });
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
+  async function createMyCorporateRequest(payload) {
+    const user = await currentUser();
+    if (!user) throw new Error("Please log in again.");
+    const sb = await client();
+    const result = await sb.rpc("create_my_corporate_request", {
+      p_corporate_account_id: payload.corporateAccountId,
+      p_title: payload.title,
+      p_service_type: payload.serviceType,
+      p_route_or_destination: payload.route || null,
+      p_travel_start: payload.travelStart || null,
+      p_travel_end: payload.travelEnd || null,
+      p_customer_notes: payload.notes || null
+    });
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
   function getUser(email) {
     const cached = session();
     if (!cached) return null;
@@ -444,6 +482,9 @@ window.KridiyaAuth = (function () {
     respondToTextRequest: respondToTextRequest,
     respondToFileRequest: respondToFileRequest,
     respondToQuote: respondToQuote,
+    getMyCorporatePortal: getMyCorporatePortal,
+    listMyCorporateBookings: listMyCorporateBookings,
+    createMyCorporateRequest: createMyCorporateRequest,
     passwordIssue: passwordIssue,
     passwordStrength: passwordStrength,
     escapeHTML: escapeHTML,
@@ -1042,19 +1083,99 @@ window.KridiyaAuth = (function () {
       const gate = document.getElementById("corporate-account-gate");
       const app = document.getElementById("corporate-account-app");
       try {
-        const bookings = await KridiyaAuth.listBookings();
-        const companyLike = bookings.filter(function (b) {
-          return /corporate|business|company|lpo/i.test([b.service_type, b.title, b.route_or_destination, b.status].join(" "));
+        const companies = await KridiyaAuth.getMyCorporatePortal();
+        if (!companies.length) {
+          gate.innerHTML =
+            '<div class="form-banner error" role="alert"><b>Corporate portal not activated yet.</b><br>Kridiya must approve your company and link your login before private company records appear here. You can still send a request below.</div>' +
+            '<p><a class="btn btn-primary" href="corporate-booking.html">Send corporate request</a> <a class="btn btn-outline" href="https://whatsapp.kridiyatravel.com?text=Hello%20Kridiya%20Travel!%20Please%20activate%20my%20corporate%20portal%20access." target="_blank" rel="noopener">WhatsApp support</a></p>';
+          return;
+        }
+        const activeCompany = companies[0];
+        const bookings = await KridiyaAuth.listMyCorporateBookings(activeCompany.corporate_account_id);
+        renderCorporatePortal(companies, bookings, activeCompany);
+        initCorporatePortalRequest(activeCompany, function () {
+          return KridiyaAuth.listMyCorporateBookings(activeCompany.corporate_account_id).then(function (fresh) {
+            renderCorporatePortal(companies, fresh, activeCompany);
+          });
         });
-        document.getElementById("corp-visible-items").textContent = String(companyLike.length || bookings.length);
-        document.getElementById("corp-access-copy").textContent = companyLike.length
-          ? "Your account has corporate-style travel activity visible. Kridiya staff still controls approval, payment, supplier, and document release."
-          : "Corporate account access is ready for requests. Company-specific booking visibility will expand after Kridiya links your company profile.";
         gate.hidden = true;
         app.hidden = false;
       } catch (err) {
         gate.innerHTML = '<div class="form-banner error" role="alert">Could not load corporate portal yet: ' + KridiyaAuth.escapeHTML(errorMessage(err, "Please refresh and try again.")) + "</div>";
       }
+    });
+  }
+
+  function renderCorporatePortal(companies, bookings, activeCompany) {
+    const companyList = document.getElementById("corp-company-list");
+    const bookingList = document.getElementById("corp-booking-list");
+    document.getElementById("corp-visible-items").textContent = String(bookings.length);
+    document.getElementById("corp-company-count").textContent = String(companies.length);
+    document.getElementById("corp-company-name").textContent = activeCompany.company_name || "Approved company";
+    document.getElementById("corp-member-role").textContent = KridiyaAuth.statusLabel(activeCompany.member_role || "Member");
+    document.getElementById("corp-access-copy").textContent =
+      (activeCompany.company_name || "Your company") + " is linked to this login. You can see portal-safe company booking status and create new requests.";
+
+    companyList.innerHTML = companies.map(function (company) {
+      const chips = [
+        company.can_request ? "Can request" : "Request locked",
+        company.can_approve_quotes ? "Can approve quotes" : "Approval by staff/company admin",
+        company.can_view_finance ? "Finance visible" : "Finance hidden",
+        company.lpo_required ? "LPO required" : "No LPO flag"
+      ];
+      return '<div class="corporate-company-card">' +
+        '<b>' + KridiyaAuth.escapeHTML(company.company_name || "Company") + '</b>' +
+        '<p>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(company.member_role || "member")) + ' access · ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(company.status || "active")) + '</p>' +
+        '<div>' + chips.map(function (chip) { return '<span>' + KridiyaAuth.escapeHTML(chip) + '</span>'; }).join("") + '</div>' +
+      '</div>';
+    }).join("");
+
+    if (!bookings.length) {
+      bookingList.innerHTML = '<div class="empty-state"><p>No corporate bookings are visible yet. Submit your first portal request or ask Kridiya to link existing company bookings.</p></div>';
+      return;
+    }
+
+    bookingList.innerHTML = bookings.map(function (booking) {
+      const amount = booking.amount ? '<strong>' + KridiyaAuth.escapeHTML(String(booking.currency || "AED")) + ' ' + KridiyaAuth.escapeHTML(String(booking.amount)) + '</strong>' : '<span>Finance restricted</span>';
+      return '<article class="corporate-booking-card">' +
+        '<div><b>' + KridiyaAuth.escapeHTML(booking.booking_reference || "Corporate request") + '</b><span>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(booking.status)) + '</span></div>' +
+        '<h3>' + KridiyaAuth.escapeHTML(booking.title || KridiyaAuth.statusLabel(booking.service_type)) + '</h3>' +
+        '<p>' + KridiyaAuth.escapeHTML([booking.service_type, booking.route_or_destination].filter(Boolean).map(KridiyaAuth.statusLabel).join(" · ") || "Corporate travel request") + '</p>' +
+        '<footer><small>Payment: ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(booking.payment_status || "not_requested")) + '</small><small>Docs: ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(booking.document_status || "not_started")) + '</small>' + amount + '</footer>' +
+      '</article>';
+    }).join("");
+  }
+
+  function initCorporatePortalRequest(activeCompany, refresh) {
+    const form = document.getElementById("corp-portal-request-form");
+    if (!form || form.dataset.ready === "true") return;
+    form.dataset.ready = "true";
+    if (!activeCompany.can_request) {
+      form.innerHTML = '<div class="form-banner error" role="alert">Your login can view this company, but request creation is not enabled. Ask Kridiya admin to enable request access.</div>';
+      return;
+    }
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (!validateForm(form)) return;
+      banner(form, "");
+      busy(form, true, "Submitting...");
+      try {
+        await KridiyaAuth.createMyCorporateRequest({
+          corporateAccountId: activeCompany.corporate_account_id,
+          serviceType: form.service.value,
+          title: form.title.value,
+          route: form.route.value,
+          travelStart: form.start.value,
+          travelEnd: form.end.value,
+          notes: form.notes.value
+        });
+        banner(form, "Corporate request submitted. Kridiya admin can now see it under your company.", "success");
+        form.reset();
+        if (typeof refresh === "function") await refresh();
+      } catch (err) {
+        banner(form, errorMessage(err, "Could not submit corporate request."), "error");
+      }
+      busy(form, false);
     });
   }
 
