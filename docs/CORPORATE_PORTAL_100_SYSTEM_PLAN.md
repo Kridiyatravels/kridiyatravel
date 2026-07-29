@@ -75,8 +75,9 @@ The public corporate site should sell trust and collect requests. The private co
 ### Already Prepared
 
 - Local migration: `supabase/migrations/20260728_corporate_portal_access_layer.sql`
+- Local migration: `supabase/migrations/20260728_corporate_application_approval_rpc.sql`
 
-It adds:
+The portal access layer adds:
 
 - `corporate_portal_members`
 - company membership checks
@@ -87,21 +88,35 @@ It adds:
 - corporate user request creation
 - audit logging for member creation and request creation
 
-### Next Build Tasks
+The application approval layer adds:
 
-1. Connect `corporate.kridiyatravel.com` login to Supabase Auth.
-2. Create a real `portal.html` dashboard using:
+- `approve_corporate_application`
+- one staff/admin RPC to convert a corporate application enquiry into a corporate account/booking
+- optional portal-user activation when a Supabase Auth user id is provided
+- audit logging for corporate application approval
+
+### Completed Build Tasks
+
+1. Connected the corporate portal login page to Supabase Auth.
+2. Created a real `corporate-account.html` dashboard using:
    - `get_my_corporate_portal`
    - `list_my_corporate_bookings`
    - `get_my_corporate_booking_detail`
    - `create_my_corporate_request`
-3. Replace demo portal data with live Supabase data.
-4. Add role-aware UI:
+3. Replaced demo portal data with live Supabase data.
+4. Added role-aware UI:
    - finance cards only when `can_view_finance`
    - request button only when `can_request`
    - approval controls only when `can_approve_quotes`
-5. Add clear locked/approval states.
-6. Add corporate portal manual for staff.
+5. Added a backend approval bridge for staff/admin.
+
+### Next Build Tasks
+
+1. Add an admin UI button for `Approve corporate application`.
+2. Add an admin UI field for linking the company's Supabase Auth user id.
+3. Add corporate quote approval controls.
+4. Add monthly statement documents and corporate download view.
+5. Add email/WhatsApp notification templates.
 
 ## Your Manual Side
 
@@ -119,6 +134,8 @@ It adds:
    - `supabase/migrations/20260728_corporate_portal_access_layer.sql`
 4. Check there are no SQL errors.
 5. Confirm RLS is enabled on `corporate_portal_members`.
+6. Apply the approval migration:
+   - `supabase/migrations/20260728_corporate_application_approval_rpc.sql`
 
 ### Admin
 
@@ -127,6 +144,38 @@ It adds:
 3. Confirm you can see corporate accounts.
 4. Confirm you can see operations bookings.
 5. Confirm you can convert corporate enquiries.
+
+### Corporate Application Approval Test
+
+Use this test after applying both corporate migrations.
+
+1. Open Supabase Auth.
+2. Create a user for the company contact.
+3. Copy that Auth user id.
+4. Open `public.enquiries`.
+5. Copy the corporate application enquiry id.
+6. Run:
+
+```sql
+select public.approve_corporate_application(
+  '<enquiry_id>',
+  '<auth_user_id>',
+  'travel_coordinator',
+  true,
+  false,
+  false,
+  true,
+  'Approved test corporate portal account'
+);
+```
+
+7. Check the result contains:
+   - `ok: true`
+   - `corporate_account_id`
+   - `booking_id`
+   - `portal_member_id`
+   - `portal_status: active`
+8. The company user can then sign in at the corporate portal.
 
 ### Corporate User Test
 
@@ -211,4 +260,4 @@ select public.manage_corporate_portal_member(
 
 ## Current Best Next Step
 
-Apply the portal access migration in Supabase after confirming the existing corporate tables. Then I can connect the corporate portal UI to live data.
+Apply `20260728_corporate_application_approval_rpc.sql` in Supabase. Then create one corporate Auth user and run `approve_corporate_application` for the test enquiry `KD-COA-2026-VLXA9`.

@@ -26,6 +26,119 @@ const KRIDIYA = {
   }
 };
 
+/* ---------- Marketing attribution and event queue ----------
+   No personal information is stored here. A future GTM/GA4 container can
+   consume the same dataLayer events without changing the enquiry forms. */
+const ATTRIBUTION_KEYS = [
+  "utm_id", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+  "gclid", "fbclid", "msclkid", "ttclid"
+];
+const ATTRIBUTION_FIRST_KEY = "kridiya_first_touch";
+const ATTRIBUTION_LAST_KEY = "kridiya_last_touch";
+
+function safeStorage(storage, action, key, value) {
+  try {
+    if (action === "get") return storage.getItem(key);
+    storage.setItem(key, value);
+  } catch (e) { /* Storage may be blocked; attribution stays best-effort. */ }
+  return null;
+}
+
+function readStoredJSON(storage, key) {
+  const raw = safeStorage(storage, "get", key);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch (e) { return null; }
+}
+
+function classifyTraffic(touch) {
+  const medium = String(touch.utm_medium || "").toLowerCase();
+  if (touch.gclid || touch.fbclid || touch.msclkid || touch.ttclid ||
+      /^(cpc|ppc|paid|paid_social|display|affiliate)$/.test(medium)) return "paid";
+  if (/^(organic|seo)$/.test(medium)) return "organic";
+  if (touch.referrer) return "referral";
+  return touch.utm_source ? "unknown" : "direct";
+}
+
+function sourceFromTouch(touch) {
+  if (touch.utm_source) return touch.utm_source;
+  if (touch.gclid) return "google";
+  if (touch.fbclid) return "meta";
+  if (touch.msclkid) return "microsoft";
+  if (touch.ttclid) return "tiktok";
+  if (touch.referrer) {
+    try { return new URL(touch.referrer).hostname.replace(/^www\./, ""); }
+    catch (e) { return "referral"; }
+  }
+  return "direct";
+}
+
+function captureAttribution() {
+  const params = new URLSearchParams(location.search);
+  const touch = {
+    landing_page: location.href.slice(0, 1000),
+    referrer: document.referrer ? document.referrer.slice(0, 1000) : "",
+    captured_at: new Date().toISOString()
+  };
+  ATTRIBUTION_KEYS.forEach(function (key) {
+    const value = params.get(key);
+    if (value) touch[key] = value.slice(0, 500);
+  });
+  touch.source = sourceFromTouch(touch);
+  touch.medium = touch.utm_medium || (touch.referrer ? "referral" : "none");
+  touch.campaign = touch.utm_campaign || "";
+  touch.traffic_type = classifyTraffic(touch);
+  touch.source_basis = touch.utm_source || ATTRIBUTION_KEYS.some(function (k) { return touch[k]; })
+    ? "campaign_parameter"
+    : (touch.referrer ? "referrer" : "direct");
+  touch.source_confidence = touch.source_basis === "campaign_parameter" ? "high" :
+    (touch.source_basis === "referrer" ? "medium" : "low");
+
+  if (!readStoredJSON(localStorage, ATTRIBUTION_FIRST_KEY)) {
+    safeStorage(localStorage, "set", ATTRIBUTION_FIRST_KEY, JSON.stringify(touch));
+  }
+  safeStorage(sessionStorage, "set", ATTRIBUTION_LAST_KEY, JSON.stringify(touch));
+  return touch;
+}
+
+function attributionPayload() {
+  const first = readStoredJSON(localStorage, ATTRIBUTION_FIRST_KEY) || captureAttribution();
+  const last = readStoredJSON(sessionStorage, ATTRIBUTION_LAST_KEY) || captureAttribution();
+  return {
+    first_touch_source: first.source || "direct",
+    first_touch_medium: first.medium || "none",
+    first_touch_campaign: first.campaign || null,
+    last_touch_source: last.source || "direct",
+    last_touch_medium: last.medium || "none",
+    last_touch_campaign: last.campaign || null,
+    utm_id: last.utm_id || null,
+    utm_source: last.utm_source || null,
+    utm_medium: last.utm_medium || null,
+    utm_campaign: last.utm_campaign || null,
+    utm_content: last.utm_content || null,
+    utm_term: last.utm_term || null,
+    gclid: last.gclid || null,
+    fbclid: last.fbclid || null,
+    msclkid: last.msclkid || null,
+    ttclid: last.ttclid || null,
+    landing_page: last.landing_page || location.href,
+    referrer: last.referrer || null,
+    traffic_type: last.traffic_type || "unknown",
+    source_basis: last.source_basis || "direct",
+    source_confidence: last.source_confidence || "low"
+  };
+}
+
+function trackEvent(name, properties) {
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push(Object.assign({
+    event: name,
+    page_type: document.body.dataset.page || "unknown",
+    service_type: document.body.dataset.widgetOnly || null
+  }, properties || {}));
+}
+
+captureAttribution();
+
 function waLink(message) {
   return "https://whatsapp.kridiyatravel.com" + (message ? "?text=" + encodeURIComponent(message) : "");
 }
@@ -123,7 +236,7 @@ function renderChrome() {
         "</ul></nav>" +
         '<div class="header-actions">' +
           '<a class="header-call" href="tel:' + KRIDIYA.phoneTel + '">' + icon("phone") +
-            "<span><small>24/7 support</small>" + KRIDIYA.phoneDisplay + "</span></a>" +
+            "<span><small>Call our team</small>" + KRIDIYA.phoneDisplay + "</span></a>" +
           '<a class="btn btn-primary" href="login.html" id="account-btn">Login</a>' +
         "</div>" +
       "</div>" +
@@ -161,7 +274,7 @@ function renderChrome() {
       '<div class="footer-grid">' +
         '<div class="footer-brand">' + logoHTML(true) +
           "<p>" + KRIDIYA.legal + " is a licensed travel house in " + KRIDIYA.address +
-          ". Flights, hotels, holidays, visas and Umrah — handled end to end by real travel experts, 24/7.</p>" +
+          ". Flights, hotels, holidays, visas and Umrah — handled end to end by real travel experts.</p>" +
           '<div class="footer-social">' +
             '<a class="icon-instagram" href="' + KRIDIYA.social.instagram + '" target="_blank" rel="noopener" aria-label="Instagram">' + icon("instagram") + "</a>" +
             '<a class="icon-facebook" href="' + KRIDIYA.social.facebook + '" target="_blank" rel="noopener" aria-label="Facebook">' + icon("facebook") + "</a>" +
@@ -200,6 +313,8 @@ function renderChrome() {
           '<input type="hidden" name="_template" value="table">' +
           '<input type="email" name="email" placeholder="Your email address" required aria-label="Email address for newsletter">' +
           '<button class="btn btn-primary" type="submit">Join</button>' +
+          '<label class="newsletter-consent"><input type="checkbox" name="Marketing_consent" value="Yes" required> ' +
+          'I agree to receive travel offers by email. I can opt out at any time. See the <a href="privacy.html">privacy policy</a>.</label>' +
         "</form></div>" +
       "</div>" +
       '<div class="footer-routes"><h4>Popular flight routes</h4><p>' +
@@ -290,6 +405,7 @@ function gatherEnquiryFields(form) {
     fullName: String(data.get("Name") || "").trim(),
     email: String(data.get("Email") || "").trim(),
     phone: String(data.get("Phone") || "").trim(),
+    marketingConsent: data.get("Marketing_consent") === "Yes",
     details: details,
     summary: parts.join(" · ")
   };
@@ -298,7 +414,8 @@ function gatherEnquiryFields(form) {
 async function submitEnquiryToSupabase(fields, serviceType, reference) {
   const sb = await KridiyaAuth.client();
   const session = KridiyaAuth.session();
-  const result = await sb.from("enquiries").insert({
+  const attribution = attributionPayload();
+  const baseRecord = {
     reference: reference,
     user_id: session ? session.id : null,
     service_type: serviceType,
@@ -306,7 +423,37 @@ async function submitEnquiryToSupabase(fields, serviceType, reference) {
     email: fields.email,
     phone: fields.phone || null,
     summary: fields.summary || "Enquiry",
-    details: fields.details
+    details: Object.assign({}, fields.details, { attribution: attribution })
+  };
+  let result = await sb.from("enquiries").insert(Object.assign({}, baseRecord, attribution, {
+    marketing_consent: fields.marketingConsent,
+    marketing_consent_at: fields.marketingConsent ? new Date().toISOString() : null,
+    marketing_consent_source: fields.marketingConsent ? "website_enquiry" : null,
+    marketing_consent_version: fields.marketingConsent ? "privacy-2026-07" : null
+  }));
+  if (result.error && (result.error.code === "PGRST204" || result.error.code === "42703")) {
+    console.warn("Kridiya: attribution migration is not applied yet; saving the legacy enquiry record.");
+    result = await sb.from("enquiries").insert(baseRecord);
+  }
+  if (result.error) throw result.error;
+}
+
+async function submitNewsletterConsent(email) {
+  const sb = await KridiyaAuth.client();
+  const a = attributionPayload();
+  const result = await sb.from("marketing_subscription_events").insert({
+    email: email,
+    consent: true,
+    consent_source: "website_footer",
+    consent_version: "privacy-2026-07",
+    first_touch_source: a.first_touch_source,
+    first_touch_medium: a.first_touch_medium,
+    first_touch_campaign: a.first_touch_campaign,
+    last_touch_source: a.last_touch_source,
+    last_touch_medium: a.last_touch_medium,
+    last_touch_campaign: a.last_touch_campaign,
+    landing_page: a.landing_page,
+    referrer: a.referrer
   });
   if (result.error) throw result.error;
 }
@@ -347,6 +494,16 @@ function stashEnquiryForThanksPage(reference, serviceType, summary, typeLabel, n
 
 function prepareFormSubmit(form) {
   if (!form) return;
+  if (form.dataset.kridiyaPrepared === "true") return;
+  form.dataset.kridiyaPrepared = "true";
+  if (form.dataset.enquiryType && !form.querySelector('input[name="Marketing_consent"]')) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+      submitButton.insertAdjacentHTML("beforebegin",
+        '<label class="form-consent"><input type="checkbox" name="Marketing_consent" value="Yes"> ' +
+        "Send me occasional travel offers by email. I can opt out at any time.</label>");
+    }
+  }
   let next = form.querySelector('input[name="_next"]');
   if (!next) {
     next = document.createElement("input");
@@ -356,11 +513,45 @@ function prepareFormSubmit(form) {
   }
   next.value = new URL("thanks.html", location.href).href;
 
+  let started = false;
+  form.addEventListener("focusin", function () {
+    if (started) return;
+    started = true;
+    trackEvent("start_enquiry", { enquiry_type: form.dataset.enquiryType || "newsletter" });
+  });
+
   form.addEventListener("submit", function (e) {
     if (!validateForm(form)) { e.preventDefault(); return; }
 
     const type = form.dataset.enquiryType;
-    if (!type) return; // newsletter form: submits natively, no reference needed
+    if (!type) {
+      e.preventDefault();
+      const emailInput = form.querySelector('input[type="email"]');
+      const newsletterButton = form.querySelector('button[type="submit"]');
+      const newsletterLabel = newsletterButton ? newsletterButton.textContent : "Join";
+      if (newsletterButton) newsletterButton.disabled = true;
+      Promise.allSettled([
+        submitNewsletterConsent(emailInput.value.trim()),
+        sendFormSubmitAjax(form, "NEWSLETTER")
+      ]).then(function (results) {
+        if (results[0].status === "rejected") {
+          console.error("Kridiya: could not record newsletter consent", results[0].reason);
+        }
+        if (results[1].status === "rejected") {
+          console.error("Kridiya: could not email newsletter consent", results[1].reason);
+        }
+        if (results.every(function (r) { return r.status === "rejected"; })) {
+          restoreSubmitButton(newsletterButton, newsletterLabel);
+          toast("We could not save your subscription. Please try again.");
+          return;
+        }
+        trackEvent("newsletter_signup", { method: "website_footer" });
+        form.reset();
+        restoreSubmitButton(newsletterButton, newsletterLabel);
+        toast("Thank you. Your email preferences have been recorded.");
+      });
+      return;
+    }
 
     e.preventDefault();
     const btn = form.querySelector('button[type="submit"]');
@@ -391,6 +582,12 @@ function prepareFormSubmit(form) {
         return;
       }
 
+      trackEvent("submit_enquiry", {
+        enquiry_type: type,
+        service_type: serviceType,
+        reference: reference,
+        saved_to_crm: savedToSupabase
+      });
       stashEnquiryForThanksPage(reference, serviceType, fields.summary, type, fields.fullName);
       location.href = dest;
     });
@@ -402,7 +599,7 @@ const RE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const RE_PHONE = /^\+?[0-9\s\-()]{7,17}$/;
 
 function setFieldError(input, msg) {
-  const field = input.closest(".field");
+  const field = input.closest(".field, .form-consent, .newsletter-consent");
   if (!field) return;
   let err = field.querySelector(".err");
   if (!err) {
@@ -425,7 +622,8 @@ function validateForm(form) {
     if (input.type === "hidden") return;
     let msg = "";
     const v = input.value.trim();
-    if (!v) msg = "This field is required.";
+    if (input.type === "checkbox" && !input.checked) msg = "Please confirm this choice.";
+    else if (!v) msg = "This field is required.";
     else if (input.type === "email" && !RE_EMAIL.test(v)) msg = "Enter a valid email address.";
     else if (input.type === "tel" && !RE_PHONE.test(v)) msg = "Enter a valid phone number (e.g. +971 50 941 3873).";
     setFieldError(input, msg);
@@ -486,4 +684,16 @@ document.addEventListener("DOMContentLoaded", function () {
   initDateMins();
   document.querySelectorAll("form[data-formsubmit]").forEach(prepareFormSubmit);
   initReveal();
+  trackEvent("view_service", {
+    service_type: document.body.dataset.widgetOnly || document.body.dataset.page || "general"
+  });
+});
+
+document.addEventListener("click", function (e) {
+  const link = e.target.closest("a[href]");
+  if (!link) return;
+  const href = link.getAttribute("href") || "";
+  if (/whatsapp/i.test(href)) trackEvent("click_whatsapp", { link_location: link.className || "content" });
+  else if (/^tel:/i.test(href)) trackEvent("click_call", { link_location: link.className || "content" });
+  else if (/^mailto:/i.test(href)) trackEvent("click_email", { link_location: link.className || "content" });
 });

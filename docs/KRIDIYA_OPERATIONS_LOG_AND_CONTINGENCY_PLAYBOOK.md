@@ -443,7 +443,7 @@ Answered/confirmed so far:
 8. Staff login method: PIN-only for staff login. Admin creates staff accounts with name/email/role and the system gives a PIN.
 9. Payment proof upload: staff-only for now. Customer upload can come later after customer portal security is hardened.
 10. Supplier invoice storage: store in Supabase private storage and also keep/copy to SharePoint when operationally needed.
-11. Corporate contact channel for now: +971 50 941 3873 and enquiry@kridiyatravel.com.
+11. Corporate contact channel for now: +971 50 941 3873 and corporate@kridiyatravel.com.
 12. Customer login should remain visible on the public site for profile, enquiries, quotes, and requested uploads. Staff still controls bookings/payments.
 
 Resolved decisions from owner:
