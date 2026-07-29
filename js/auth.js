@@ -1021,7 +1021,7 @@ window.KridiyaAuth = (function () {
           }).join("");
           wireEnquiryExtras(listEl);
         } else {
-          listEl.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z"/></svg><p><b>No bookings linked yet.</b><br>Send an enquiry while signed in, or ask our team to attach an existing booking to this account.</p><div class="empty-actions"><a class="btn btn-primary" href="index.html">Start planning</a><a class="btn btn-outline" href="https://whatsapp.kridiyatravel.com" target="_blank" rel="noopener">WhatsApp support</a></div></div>';
+          listEl.innerHTML = '<div class="empty-state"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 12h-4a3 3 0 0 1-6 0H5V5h14v10z"/></svg><p><b>No bookings linked yet.</b><br>Send an enquiry while signed in, or ask our team to attach an existing booking to this account.</p><div class="empty-actions"><a class="btn btn-primary" href="index.html">Start planning</a><a class="btn btn-outline" href="https://wa.me/971509413873" target="_blank" rel="noopener">WhatsApp support</a></div></div>';
         }
       } catch (err) {
         listEl.innerHTML = '<div class="form-banner error" role="alert">Could not load your enquiries yet: ' + KridiyaAuth.escapeHTML(errorMessage(err, "Please refresh and try again.")) + "</div>";
@@ -1090,7 +1090,7 @@ window.KridiyaAuth = (function () {
         if (!companies.length) {
           gate.innerHTML =
             '<div class="form-banner error" role="alert"><b>Corporate portal not activated yet.</b><br>Kridiya must approve your company and link your login before private company records appear here. You can still send a request below.</div>' +
-            '<p><a class="btn btn-primary" href="corporate-booking.html">Send corporate request</a> <a class="btn btn-outline" href="https://whatsapp.kridiyatravel.com?text=Hello%20Kridiya%20Travel!%20Please%20activate%20my%20corporate%20portal%20access." target="_blank" rel="noopener">WhatsApp support</a></p>';
+            '<p><a class="btn btn-primary" href="corporate-booking.html">Send corporate request</a> <a class="btn btn-outline" href="https://wa.me/971509413873?text=Hello%20Kridiya%20Travel!%20Please%20activate%20my%20corporate%20portal%20access." target="_blank" rel="noopener">WhatsApp support</a></p>';
           return;
         }
         const activeCompany = companies[0];
