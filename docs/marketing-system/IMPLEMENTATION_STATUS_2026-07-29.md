@@ -20,6 +20,13 @@ Scope: Public website, Supabase data model, staff CRM, domain endpoints, and bus
   - `newsletter_signup`
   - `register_account`
   - `login`
+- Google Analytics 4 account and property created:
+  - Account: `Kridiya Travel`
+  - Property: `Kridiya Travel Website`
+  - Web stream: `https://www.kridiyatravel.com`
+  - Measurement ID: `G-LB1TW8J03E`
+- Loads GA4 with Consent Mode, denies analytics storage by default, and records the visitor's explicit analytics choice in their browser.
+- Keeps advertising storage, user-data use, and ad personalisation denied.
 - Does not place names, email addresses, phone numbers, passport details, or payment data in analytics events.
 - Keeps a legacy Supabase insert fallback until the new migration is deployed.
 
@@ -30,6 +37,7 @@ Scope: Public website, Supabase data model, staff CRM, domain endpoints, and bus
 - Records consent source, timestamp, and policy version.
 - Adds an append-only newsletter consent event table with RLS.
 - Updates the public privacy policy to describe campaign attribution, analytics events, and consent records.
+- Adds a compact analytics choice banner with equally available decline and allow actions.
 
 ### CRM and revenue operations
 
@@ -66,6 +74,14 @@ Scope: Public website, Supabase data model, staff CRM, domain endpoints, and bus
 - `node --check C:\Users\Who\kridiya-admin\js\admin.js`
 - `git diff --check` in both repositories
 - Claim scan found no remaining lowest-price, best-live-fare, cheap-flight, or broad 24/7 wording in active HTML/JavaScript.
+- The updated public and staff-admin repositories were deployed to production.
+- A labelled production contact enquiry completed the full workflow on 29 July 2026:
+  - Thank-you page displayed successfully.
+  - Supabase created enquiry `KD-ENQ-97W3GK6J`.
+  - UTM attribution and first/last-touch fields were populated.
+  - Marketing consent was correctly stored as not granted.
+  - FormSubmit delivered the message to `contact@kridiyatravel.com`.
+  - Staff CRM fields saved successfully and were independently confirmed in the production database.
 
 ## Live infrastructure verified
 
@@ -85,7 +101,9 @@ Scope: Public website, Supabase data model, staff CRM, domain endpoints, and bus
 - `www.kridiyatravel.com` resolves through `kridiyatravels.github.io`.
 - The live public website returned HTTP 200.
 - `corporate.kridiyatravel.com` resolves to GitHub Pages and returned HTTP 200.
-- Instagram, Facebook, and WhatsApp redirect subdomains have DNS records.
+- Instagram, Facebook, and WhatsApp redirect subdomains have DNS records and permanent 301 forwarding configured in GoDaddy.
+- The official destinations were confirmed as the Kridiya Instagram profile, Kridiya Facebook profile, and WhatsApp number `+971 50 941 3873`.
+- Public website links now use the direct Instagram, Facebook, and WhatsApp destinations so customers are not dependent on redirect-subdomain TLS provisioning.
 - Instagram and WhatsApp redirect endpoints failed TLS negotiation during the live check.
 - Facebook redirect verification timed out and is not confirmed healthy.
 
@@ -95,39 +113,29 @@ Scope: Public website, Supabase data model, staff CRM, domain endpoints, and bus
 - `enquiry@kridiyatravel.com` is active and has received website flight, hotel, visa, and corporate enquiry submissions.
 - `deals@kridiyatravel.com` is active and has received newsletter submissions.
 - `info@kridiyatravel.com` is active and is receiving DMARC reports.
-- `contact@kridiyatravel.com` exists, but only activation messages were found; successful website contact delivery is not yet independently confirmed.
+- `contact@kridiyatravel.com` is active. The exact `www.kridiyatravel.com` FormSubmit origin was activated and two labelled production contact submissions were delivered successfully.
 - `corporate@kridiyatravel.com` exists but had no messages in the live check.
 
 ## Required live actions
 
 These items cannot be completed from local code alone.
 
-1. Deploy the updated public repository and the updated `kridiya-admin` repository.
-2. Run a real test enquiry after deployment and confirm:
-   - Supabase row created
-   - FormSubmit message received
-   - Attribution columns populated
-   - Consent value correct
-   - Staff CRM fields save correctly
-3. Activate and test the live contact FormSubmit destination if it is still awaiting activation.
-4. Repair HTTPS forwarding for:
+1. Repair HTTPS forwarding for:
    - `instagram.kridiyatravel.com`
    - `whatsapp.kridiyatravel.com`
    - `facebook.kridiyatravel.com`
-5. Confirm the exact official Instagram and Facebook profile URLs before changing the forwarding destinations.
-6. Supply the real GA4 Measurement ID and/or GTM Container ID.
-7. Supply the real Meta Pixel ID and advertising account/business manager access if Meta conversion tracking will be enabled.
-8. Configure GA4/Meta destinations to consume the implemented event names and test them in platform diagnostics.
-9. Confirm the production marketing unsubscribe process and suppression-list owner.
-10. Verify Google Business Profile ownership and connect website, phone, service categories, and review workflow.
-11. Review the pre-existing Supabase security-advisor warnings and test each affected production caller before changing grants.
-12. Approve real campaign budgets, audiences, destinations, offer terms, and creative before publishing ads.
+2. Verify the deployed GA4 tag and implemented events in GA4 Realtime and DebugView.
+3. Supply the real Meta Pixel ID and advertising account/business manager access if Meta conversion tracking will be enabled.
+4. Configure Meta to consume the implemented event names and test them in platform diagnostics.
+5. Confirm the production marketing unsubscribe process and suppression-list owner.
+6. Verify Google Business Profile ownership and connect website, phone, service categories, and review workflow.
+7. Review the pre-existing Supabase security-advisor warnings and test each affected production caller before changing grants.
+8. Approve real campaign budgets, audiences, destinations, offer terms, and creative before publishing ads.
 
-## Deployment order
+## Remaining implementation order
 
-1. Deploy the staff admin repository.
-2. Deploy the public website.
-3. Run end-to-end enquiry and newsletter tests.
-4. Repair social redirect HTTPS.
-5. Add real analytics and ad-platform IDs.
-6. Launch campaigns only after conversion diagnostics pass.
+1. Allow GoDaddy HTTPS certificates for the three forwarding subdomains to finish provisioning, then retest.
+2. Deploy and test GA4 in Realtime and DebugView.
+3. Add the real Meta ad-platform ID and test its conversion destination.
+4. Complete unsubscribe, Google Business Profile, and Supabase permission reviews.
+5. Launch campaigns only after conversion diagnostics and commercial approvals pass.
