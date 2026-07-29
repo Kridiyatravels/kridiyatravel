@@ -82,6 +82,13 @@ Scope: Public website, Supabase data model, staff CRM, domain endpoints, and bus
   - Marketing consent was correctly stored as not granted.
   - FormSubmit delivered the message to `contact@kridiyatravel.com`.
   - Staff CRM fields saved successfully and were independently confirmed in the production database.
+- The consent-aware GA4 implementation was deployed through GitHub Pages on 29 July 2026.
+- Production verification confirmed:
+  - `js/main.js?v=20260729e` and `css/styles.css?v=20260729e` loaded successfully.
+  - The website loaded `https://www.googletagmanager.com/gtag/js?id=G-LB1TW8J03E`.
+  - The analytics choice banner displayed correctly and the granted choice persisted after reload.
+  - No browser errors were reported.
+  - GA4 Realtime showed one active user from the United Arab Emirates during the labelled production test.
 
 ## Live infrastructure verified
 
@@ -124,7 +131,7 @@ These items cannot be completed from local code alone.
    - `instagram.kridiyatravel.com`
    - `whatsapp.kridiyatravel.com`
    - `facebook.kridiyatravel.com`
-2. Verify the deployed GA4 tag and implemented events in GA4 Realtime and DebugView.
+2. Review implemented events in GA4 DebugView and designate approved business events as key events after enough production data is available.
 3. Supply the real Meta Pixel ID and advertising account/business manager access if Meta conversion tracking will be enabled.
 4. Configure Meta to consume the implemented event names and test them in platform diagnostics.
 5. Confirm the production marketing unsubscribe process and suppression-list owner.
@@ -135,7 +142,7 @@ These items cannot be completed from local code alone.
 ## Remaining implementation order
 
 1. Allow GoDaddy HTTPS certificates for the three forwarding subdomains to finish provisioning, then retest.
-2. Deploy and test GA4 in Realtime and DebugView.
+2. Review GA4 event quality in DebugView and approve the key-event list.
 3. Add the real Meta ad-platform ID and test its conversion destination.
 4. Complete unsubscribe, Google Business Profile, and Supabase permission reviews.
 5. Launch campaigns only after conversion diagnostics and commercial approvals pass.
