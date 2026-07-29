@@ -26,8 +26,11 @@ const KRIDIYA = {
   }
 };
 
+const KRIDIYA_GA4_MEASUREMENT_ID = "G-LB1TW8J03E";
+const ANALYTICS_CONSENT_KEY = "kridiya_analytics_consent";
+
 /* ---------- Marketing attribution and event queue ----------
-   No personal information is stored here. A future GTM/GA4 container can
+   No personal information is stored here. GA4 and any future GTM container
    consume the same dataLayer events without changing the enquiry forms. */
 const ATTRIBUTION_KEYS = [
   "utm_id", "utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
@@ -42,6 +45,72 @@ function safeStorage(storage, action, key, value) {
     storage.setItem(key, value);
   } catch (e) { /* Storage may be blocked; attribution stays best-effort. */ }
   return null;
+}
+
+function setAnalyticsConsent(value, persist) {
+  const granted = value === "granted";
+  window.gtag("consent", "update", {
+    analytics_storage: granted ? "granted" : "denied",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied"
+  });
+  if (persist) safeStorage(localStorage, "set", ANALYTICS_CONSENT_KEY, granted ? "granted" : "denied");
+}
+
+function initGoogleAnalytics() {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+
+  window.gtag("consent", "default", {
+    analytics_storage: "denied",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    wait_for_update: 500
+  });
+
+  const savedConsent = safeStorage(localStorage, "get", ANALYTICS_CONSENT_KEY);
+  if (savedConsent === "granted" || savedConsent === "denied") {
+    setAnalyticsConsent(savedConsent, false);
+  }
+
+  window.gtag("js", new Date());
+  window.gtag("config", KRIDIYA_GA4_MEASUREMENT_ID, {
+    send_page_view: true
+  });
+
+  if (!document.querySelector('script[data-kridiya-ga4]')) {
+    const script = document.createElement("script");
+    script.async = true;
+    script.dataset.kridiyaGa4 = "true";
+    script.src = "https://www.googletagmanager.com/gtag/js?id=" +
+      encodeURIComponent(KRIDIYA_GA4_MEASUREMENT_ID);
+    document.head.appendChild(script);
+  }
+}
+
+function initAnalyticsConsentBanner() {
+  if (safeStorage(localStorage, "get", ANALYTICS_CONSENT_KEY)) return;
+
+  const banner = document.createElement("aside");
+  banner.className = "analytics-consent";
+  banner.setAttribute("aria-label", "Analytics privacy choice");
+  banner.innerHTML =
+    '<div><b>Website analytics</b><p>Allow privacy-safe analytics to help Kridiya improve its website. We do not send names, email addresses, phone numbers, passport details, or payment details to analytics.</p></div>' +
+    '<div class="analytics-consent-actions">' +
+      '<button class="btn btn-outline" type="button" data-analytics-consent="denied">No thanks</button>' +
+      '<button class="btn btn-primary" type="button" data-analytics-consent="granted">Allow analytics</button>' +
+    "</div>";
+
+  banner.addEventListener("click", function (event) {
+    const button = event.target.closest("[data-analytics-consent]");
+    if (!button) return;
+    setAnalyticsConsent(button.dataset.analyticsConsent, true);
+    banner.remove();
+  });
+
+  document.body.appendChild(banner);
 }
 
 function readStoredJSON(storage, key) {
@@ -129,14 +198,14 @@ function attributionPayload() {
 }
 
 function trackEvent(name, properties) {
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push(Object.assign({
-    event: name,
+  const payload = Object.assign({
     page_type: document.body.dataset.page || "unknown",
     service_type: document.body.dataset.widgetOnly || null
-  }, properties || {}));
+  }, properties || {});
+  window.gtag("event", name, payload);
 }
 
+initGoogleAnalytics();
 captureAttribution();
 
 function waLink(message) {
@@ -681,6 +750,7 @@ function fmtDate(iso) {
 /* ---------- Boot ---------- */
 document.addEventListener("DOMContentLoaded", function () {
   renderChrome();
+  initAnalyticsConsentBanner();
   initDateMins();
   document.querySelectorAll("form[data-formsubmit]").forEach(prepareFormSubmit);
   initReveal();
