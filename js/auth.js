@@ -599,6 +599,7 @@ window.KridiyaAuth = (function () {
         busy(form, true, "Signing in...");
         try {
           const user = await KridiyaAuth.login(form.email.value, form.password.value);
+          if (typeof trackEvent === "function") trackEvent("login", { method: "email" });
           toast("Welcome back, " + user.name.split(" ")[0] + "!");
           location.href = loginRedirectTarget();
         } catch (err) {
@@ -675,6 +676,7 @@ window.KridiyaAuth = (function () {
           });
 
           if (user.needsEmailConfirmation) {
+            if (typeof trackEvent === "function") trackEvent("register_account", { method: "email", confirmation_required: true });
             banner(form, "Account created. Check your email and click the confirmation link before logging in.", "success");
             form.reset();
             meter.style.width = "0";
@@ -682,6 +684,7 @@ window.KridiyaAuth = (function () {
             return;
           }
 
+          if (typeof trackEvent === "function") trackEvent("register_account", { method: "email", confirmation_required: false });
           toast("Welcome to Kridiya Travel, " + user.name.split(" ")[0] + "!");
           location.href = "account.html";
         } catch (err) {

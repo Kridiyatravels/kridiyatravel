@@ -362,9 +362,11 @@ a:hover { text-decoration: underline; }
 }
 .hero h1 { color: var(--on-dark); margin-bottom: 0.15rem; }
 .hero .slogan {
+  display: block !important;
+  margin: 0.12rem 0 0 !important;
   font: 700 1.2rem/1.3 var(--font-swash);
   font-style: italic;
-  color: var(--gold); margin: 0 0 0.4rem;
+  color: var(--gold);
 }
 .hero p.lede { color: var(--on-dark-muted); font-size: 0.92rem; max-width: 62ch; margin-bottom: 0; }
 .hero-plane {
@@ -595,6 +597,13 @@ a:hover { text-decoration: underline; }
 .field.invalid input, .field.invalid select, .field.invalid textarea { border-color: var(--error); }
 .field .err { display: none; font: 600 0.78rem/1.3 var(--font); color: var(--error); margin-top: 0.3rem; }
 .field.invalid .err { display: block; }
+.form-consent {
+  grid-column: span 12;
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  font-size: 0.82rem; line-height: 1.45; color: var(--text-muted);
+}
+.form-consent input { width: auto; margin-top: 0.18rem; accent-color: var(--brand); }
+.form-consent.invalid { color: var(--error); }
 
 @media (min-width: 720px) {
   .col-3 { grid-column: span 3; }
@@ -777,6 +786,12 @@ a:hover { text-decoration: underline; }
 .section-head p { margin: 0.2rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
 .section-link { font-weight: 700; white-space: nowrap; font-size: 0.9rem; }
 
+@media (prefers-reduced-motion: no-preference) {
+  .visa-card:hover .visa-flag {
+    transform: translateY(-2px) rotate(0deg);
+  }
+}
+
 /* ---------- Service icon strip (portal quick links) ---------- */
 .svc-row {
   display: flex; gap: 0.6rem; overflow-x: auto; padding: 0.9rem 0 0.2rem;
@@ -799,6 +814,7 @@ a:hover { text-decoration: underline; }
 .offer-card {
   display: flex; align-items: stretch; background: var(--surface);
   border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden;
+  position: relative;
 }
 .offer-left {
   flex: none; width: 86px; display: grid; place-items: center; text-align: center;
@@ -898,6 +914,7 @@ a:hover { text-decoration: underline; }
   flex: none; width: 40px; height: 40px; display: grid; place-items: center;
   border-radius: 10px; background: var(--surface); background-image: none;
   box-shadow: inset 0 0 0 1px var(--line-strong);
+  transition: transform 0.18s var(--ease-out);
 }
 .visa-flag svg { width: 20px; height: 20px; fill: var(--brand-deep); }
 .visa-card b { display: block; color: var(--ink); font-size: 0.95rem; }
@@ -1760,6 +1777,17 @@ a:hover { text-decoration: underline; }
   border: 1.5px solid var(--line-strong); border-radius: var(--r-sm); padding: 0.6rem 0.8rem;
 }
 .newsletter-form .btn { min-height: 40px; padding-inline: 1rem; }
+.newsletter-form .newsletter-consent {
+  grid-column: 1 / -1;
+  display: flex; align-items: flex-start; gap: 0.45rem;
+  font-size: 0.75rem; line-height: 1.45; color: var(--text-muted);
+}
+.newsletter-form .newsletter-consent input {
+  width: auto; min-width: auto; margin-top: 0.15rem; padding: 0; accent-color: var(--brand);
+}
+.newsletter-form .newsletter-consent.invalid { color: var(--error); }
+.newsletter-form .newsletter-consent .err { display: none; }
+.newsletter-form .newsletter-consent.invalid .err { display: block; }
 .newsletter-form input::placeholder { color: var(--text-muted); }
 .newsletter-form input:focus { border-color: var(--blue); outline: none; }
 .footer-social { display: flex; gap: 0.5rem; margin-top: 0.05rem; }

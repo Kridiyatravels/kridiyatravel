@@ -1,10 +1,11 @@
 # Kridiya Current System Memory
 
-Last updated: 2026-07-28
+Last updated: 2026-07-29
+Last reviewed: 2026-07-29
 
 Use this file as the handoff memory for a new Codex or Claude chat.
 
-## 2026-07-28 Resume Checkpoint
+## 2026-07-29 Resume Checkpoint
 
 This is the canonical place to resume Kridiya work. Read this file first, then
 check both repositories with `git status` and recent `git log` before editing.
@@ -39,25 +40,29 @@ This handoff covers the complete known Kridiya scope:
 
 ### Exact stopping point
 
-- Public repository HEAD: `79b85eb` (`Tighten main footer spacing`).
-- Admin repository HEAD: `277b38e` (`Simplify dashboard focus`).
-- The admin repository has no unfinished application-code edits. Its only
-  untracked items at this checkpoint are `.impeccable/` and `PRODUCT.md`.
-- The public repository has an unfinished, uncommitted visual enhancement:
-  a contextual Kridiya travel illustration system across the home page and
-  the main service, account, authentication, legal, contact, and corporate
-  pages.
-- The illustration work currently changes 21 tracked files and adds:
-  - `assets/characters/`
-  - `assets/illustrations/`
-  - `assets/kridiya-illustrations.svg`
-  - generated visual references under `output/`
-- The implementation uses optimized PNG scenes and mini travel objects,
-  contextual injection from `js/main.js`, responsive rules in
-  `css/styles.css`, decorative empty-alt images, and reduced-motion-aware
-  floating treatment.
-- Do not discard or overwrite these public-site changes. They are the active
-  work to validate and finish.
+- Main public repository HEAD: `cf98abb` (`Add corporate application approval
+  RPC`). Its `origin/main` is `8fca3e2`, so two commits are local-only:
+  `0572905` (`Use corporate mailbox for corporate requests`) and `cf98abb`.
+- Admin repository HEAD: `277b38e` (`Simplify dashboard focus`), matching
+  `origin/main`. It has no unfinished application-code edits; its only
+  untracked items are `.impeccable/` and `PRODUCT.md`.
+- A separate nested corporate-site repository exists at
+  `C:\Users\Who\kridiya1\kridiya-corporate-live`, with remote
+  `Kridiyatravels/kridiya-corporate`. Its HEAD is `22dae81` (`Upgrade corporate
+  portal dashboard`), one commit ahead of `origin/main` (`76d72d3`), with
+  uncommitted changes to `css/corporate.css` and `services.html` plus an
+  untracked local preview server.
+- The main public repository still has an unfinished, uncommitted contextual
+  travel-illustration enhancement across 19 tracked HTML/CSS/JS files. It adds
+  production candidates under `assets/illustrations/`, older/alternate
+  character art under `assets/characters/`, a source SVG, and generated visual
+  references under `output/`.
+- The main public worktree also contains untracked proposed marketing-plan
+  material under `docs/marketing-system/`, an untracked linked worktree under
+  `.codex-worktrees/corporate-approval/`, and the nested corporate repository.
+  These are not part of the main public repository's current commit history.
+- Do not discard, overwrite, or accidentally include these unrelated active
+  worktrees and generated/reference assets. Review each repository separately.
 
 ### Continue from here
 
@@ -80,17 +85,28 @@ Visual QA completed on 2026-07-28:
 - `git diff --check` reported only the repository's existing LF-to-CRLF
   conversion warnings and no whitespace errors.
 
+The visual QA above predates the later corporate portal commits and the separate
+corporate-site dashboard work. It must not be treated as verification of the
+new corporate membership/RPC path, the corporate subdomain, or the latest
+uncommitted corporate styling.
+
 Next action:
 
-1. Review the final public `git diff` and decide whether generated/reference
-   material under `output/` belongs in the production commit.
-2. Keep all required production illustration assets under
+1. Owner reviews the two local-only main-public commits and the one local-only
+   corporate-site commit, and decides which release branch/repository is the
+   canonical customer-facing corporate portal.
+2. Before any corporate launch, apply or confirm both July 28 corporate
+   migrations in the live Supabase project, confirm RLS, create one test company
+   and Auth user, and test allowed access plus cross-company denial. This
+   checkpoint did not mutate or verify live Supabase.
+3. Add the missing admin UI for approving a corporate application and linking
+   its Auth user; until then `approve_corporate_application` is backend-only.
+4. Separately review the main public illustration diff and decide whether
+   `output/`, alternate character art, marketing artifacts, and local worktree
+   folders are production inputs. Keep required production images under
    `assets/illustrations/`.
-3. If the owner explicitly asks to publish, commit the intended public-site
-   illustration files plus this memory update, push `main`, and verify the live
-   site at desktop and mobile sizes.
-4. After publication, return to the broader launch checklist and perform an
-   authenticated customer-account QA pass with a test account.
+5. Only after those owner decisions, publish the intended commits and perform
+   desktop/mobile plus authenticated retail and corporate portal QA.
 
 ### Major work completed after the previous July 25 snapshot
 
@@ -106,6 +122,15 @@ Public/customer system:
 - SEO, Supabase auth email templates, and enquiry reliability were improved.
 - Homepage search tabs, Corporate entry point, local optimized imagery, and
   compact controls were completed.
+- A company-membership model, portal-safe booking/request RPCs, a
+  Supabase-backed corporate dashboard, and a staff approval RPC have been added
+  to repository code. Live migration/deployment and isolation testing remain
+  unverified.
+- The corporate public form now targets `corporate@kridiyatravel.com` in local
+  commit `0572905`; that commit is not yet on `origin/main`.
+- The separate `kridiya-corporate` site now contains a corporate marketing
+  front door, application/request forms, login, and an upgraded private portal
+  shell. Documents, finance, and statement areas remain partial/placeholders.
 
 Admin/staff system:
 
@@ -135,7 +160,11 @@ Admin/staff system:
 - Proposed positioning, CRM attribution, channel strategy, campaigns, content,
   measurement, retention, privacy, and 90-day growth rollout:
   `docs/KRIDIYA_DIGITAL_MARKETING_AND_GROWTH_SYSTEM_PLAN.md`.
+- Corporate portal target architecture, access roles, rollout, and manual
+  validation gates: `docs/CORPORATE_PORTAL_100_SYSTEM_PLAN.md`.
 - Public implementation: `C:\Users\Who\kridiya1`.
+- Separate corporate-site implementation:
+  `C:\Users\Who\kridiya1\kridiya-corporate-live`.
 - Admin implementation: `C:\Users\Who\kridiya-admin`.
 - Database/storage changes: `C:\Users\Who\kridiya1\supabase`.
 - Never treat chat-only recollection as more current than repository state,
@@ -183,17 +212,24 @@ Admin/staff system:
 
 ## Corporate Travel and B2B - Complete Current Memory
 
-Corporate travel is part of the current Kridiya operating system, but it has
-two different maturity levels:
+Corporate travel is part of the current Kridiya operating system, but its
+implemented layers and release state must be distinguished:
 
 - The public corporate enquiry, staff conversion, company/contact management,
   corporate booking, LPO/approval, finance, document, accounting, and backup
   workflow is implemented.
-- The customer-facing corporate portal is currently a safe login-gated
-  overview/request surface. It is not yet a full company-wide self-service
-  portal because strict corporate-user-to-company linking and RLS must be
-  confirmed before exposing all company bookings, invoices, payments, and
-  traveller documents.
+- Repository code now implements a membership-gated corporate portal base:
+  company membership, role flags, portal-safe company/booking reads, and new
+  request creation. The frontend uses the signed-in Supabase customer session.
+- This does not yet establish a live, production-ready company portal. The two
+  July 28 migrations are documented as requiring manual application and
+  validation, live state was not checked in this review, and cross-company
+  isolation has not been recorded as passed.
+- Quote approval, released-document downloads, LPO/payment-proof upload,
+  monthly statements, and broader finance views remain proposed or partial.
+- Two customer-facing implementations currently coexist: the main-site
+  `corporate-account.html` and the separate `kridiya-corporate` subdomain
+  repository. The owner must confirm the canonical route before release.
 
 ### Corporate commercial rules
 
@@ -391,36 +427,54 @@ booking files.
   backup layer. Corporate client folders must not replace Supabase as the live
   operational source of truth.
 
-### Public corporate portal - current safe scope
+### Corporate portal - implemented repository scope
 
 Page: `corporate-account.html`.
 
 - Requires a signed-in customer account.
 - Uses the public/customer Supabase session, not the staff PIN session.
-- Shows company-access status, the request-to-handover operating flow, the
-  company readiness checklist, and direct support/new-request actions.
-- It may recognize corporate-like activity already visible to the signed-in
-  customer.
+- Calls `get_my_corporate_portal`, `list_my_corporate_bookings`, and
+  `create_my_corporate_request`.
+- Shows only companies linked through `corporate_portal_members`.
+- Supports portal roles/flags for request creation, finance visibility, quote
+  approval eligibility, and document visibility.
+- Lists portal-safe company booking/request summaries and permits a linked
+  member to create a new corporate request.
 - It does not expose supplier cost, profit, staff notes, unrelated customers,
   or another company's data.
-- It currently does not provide verified company-wide booking visibility.
-- Future corporate login should use email OTP or magic link.
+- The access migration adds `corporate_portal_members`, RLS policies, staff
+  member management, membership checks, portal summary/list/detail RPCs, and
+  request creation. Anonymous/public execution is revoked and authenticated
+  execution is granted; the functions still rely on membership/permission
+  checks.
+- The approval migration adds `approve_corporate_application`, which can
+  convert an application enquiry, create/reuse the corporate account/contact
+  and booking, and optionally activate a linked Auth user. No admin UI invokes
+  this RPC yet.
+- Preferred future login remains email OTP/magic link or proper individual
+  password authentication; never use a shared company password.
+- Repository implementation is complete only for the secure base/request
+  slice. Live migration, Auth linking, RLS behavior, and cross-company denial
+  are pending verification.
 
 ### Corporate portal - remaining work
 
-Before expanding the portal:
+Before expanding or launching the portal:
 
-1. Define and verify the corporate-user membership/linking model.
-2. Add strict RLS so a corporate user can access only their company.
-3. Confirm roles such as requester, authorized approver, accounts contact, and
-   traveller.
-4. Expose only safe company bookings, payment due, invoices/receipts, released
-   documents, and request status.
-5. Allow payment-proof and traveller-document upload through private storage
-   and signed URLs.
-6. Never expose supplier cost, gross profit, internal notes, other companies,
+1. Confirm/apply both July 28 migrations and verify
+   `corporate_portal_members` RLS in the live project.
+2. Test one approved user and a second company, proving allowed access and
+   cross-company denial for every portal RPC.
+3. Add an admin UI for application approval, Auth-user linking, portal roles,
+   status, and permission flags.
+4. Decide whether the main-site portal or the separate corporate subdomain is
+   canonical, then remove or redirect duplicate/stale entry points.
+5. Implement quote approval/rejection with approver and timestamp.
+6. Expose only approved documents, invoices/receipts, payment due, and monthly
+   statements; use private storage and signed URLs.
+7. Add controlled LPO, payment-proof, and traveller-document upload.
+8. Never expose supplier cost, gross profit, internal notes, other companies,
    staff/security information, or unrestricted storage paths.
-7. Test cross-company isolation before launch.
 
 ### Supplier B2B portals
 
@@ -450,6 +504,13 @@ Admin/staff site:
 
 - Local path: `C:\Users\Who\kridiya-admin`
 - GitHub: `Kridiyatravels/kridiya-admin`
+
+Corporate public/portal site:
+
+- Local path: `C:\Users\Who\kridiya1\kridiya-corporate-live`
+- GitHub: `Kridiyatravels/kridiya-corporate`
+- This is a separate nested Git repository, not tracked by the main public
+  repository.
 
 Supabase:
 
@@ -494,8 +555,18 @@ Completed:
 
 Recent public commits:
 
-- `5c5eea9` - Add corporate booking request page
-- `a269f25` - Add corporate enquiry conversion RPC
+- `6984032` - Add corporate portal access plan and migration
+- `8fca3e2` - Connect corporate portal to Supabase
+- `0572905` - Use corporate mailbox for corporate requests (local-only)
+- `cf98abb` - Add corporate application approval RPC (local-only)
+
+Separate corporate-site state:
+
+- `76d72d3` - Create private corporate portal shell (on `origin/main`)
+- `22dae81` - Upgrade corporate portal dashboard (local-only)
+- The local corporate site also has unfinished service-page/CSS polish.
+- Portal documents, finance, and statement panels are not yet complete live
+  features even where the UI presents them as roadmap/workspace areas.
 
 ## Current Admin/Staff System
 
@@ -573,6 +644,10 @@ Current backend includes:
   - `supabase/migrations/20260725_payment_proofs_and_bank_defaults.sql`
 - applied live migration for supplier invoice storage/backend:
   - `supabase/migrations/20260725_supplier_invoice_storage.sql`
+- prepared local corporate portal migrations whose live application is not
+  confirmed in this checkpoint:
+  - `supabase/migrations/20260728_corporate_portal_access_layer.sql`
+  - `supabase/migrations/20260728_corporate_application_approval_rpc.sql`
 
 Important RPCs/functions include:
 
@@ -587,6 +662,25 @@ Important RPCs/functions include:
 - `create_corporate_account`
 - `create_corporate_contact`
 - `convert_corporate_enquiry_to_booking`
+- `manage_corporate_portal_member`
+- `get_my_corporate_portal`
+- `list_my_corporate_bookings`
+- `get_my_corporate_booking_detail`
+- `create_my_corporate_request`
+- `approve_corporate_application`
+
+Corporate portal backend status:
+
+- The July 28 SQL is implemented and committed locally.
+- Execute is revoked from `public` and `anon` and granted to
+  `authenticated`/`service_role`; staff-only functions also perform internal
+  staff permission checks, while customer-facing functions enforce linked
+  corporate membership.
+- The migration plan explicitly requires manual application, RLS confirmation,
+  Auth-user linking, and cross-company tests. None is recorded as completed in
+  this review.
+- `approve_corporate_application` is backend-only until the admin approval and
+  Auth-linking UI is added.
 
 Corporate conversion RPC:
 
@@ -704,7 +798,7 @@ Core target workflow:
 ## Historical Work Plan (July 25 Baseline)
 
 This section preserves the original implementation sequence for history. Many
-items below have since been implemented. Use the 2026-07-28 Resume Checkpoint,
+items below have since been implemented. Use the 2026-07-29 Resume Checkpoint,
 the Corporate Travel and B2B section, repository state, and recent commit logs
 to determine current work; do not assume every item below is still pending.
 
@@ -1069,6 +1163,10 @@ Current owner decisions as of 2026-07-25:
 - Public customer account now has a Portal Overview card with live counts for bookings/enquiries, active quotes, open requests, and a next-action strip that points customers to requests, quotes, new enquiry, or WhatsApp support.
 - Public customer account booking/enquiry list now renders as structured portal cards with item type badges, reference, status, details, amount, traveller count, and request/quote alert chips.
 - Customer portal now shows safe booking payment/document status fields where available, and the first login-gated Corporate Portal surface exists at `corporate-account.html` with company access status, corporate operating flow, required company checklist, and support/request links. Full company-wide booking data still requires strict corporate RLS/data linking confirmation before exposing more.
+- Historical-status correction as of 2026-07-29: repository code now includes a
+  corporate membership/RPC access layer and live-data dashboard, but live
+  migration state and cross-company isolation remain unverified; do not call
+  the portal production-ready.
 - Future customer/corporate portal login should use email OTP or magic-link.
 - Corporate public contact for now is `+971 50 941 3873` and `corporate@kridiyatravel.com`.
 - Customer login should remain visible on the public site.

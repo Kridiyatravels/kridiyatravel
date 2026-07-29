@@ -670,7 +670,7 @@ function initSearchWidget(root) {
 /* ---------- Widget HTML (shared across pages) ---------- */
 const WIDGET_TABS = [
   ["flights", "Flights", "plane", "Search Flights",
-    "We compare live fares across 40+ airlines and send you the lowest price — you pay only after you approve it."],
+    "We compare available fare options and send clear prices and conditions for your approval."],
   ["hotels", "Hotels", "hotel", "Search Hotels",
     "We shortlist trade-rate stays with photos and honest advice — from RAK beach resorts to hotels worldwide."],
   ["holidays", "Holidays", "suitcase", "Find Packages",
@@ -912,6 +912,7 @@ function enquiryFormHTML(opts) {
       '<div class="field"><label>EMAIL</label><input name="Email" type="email" placeholder="you@example.com" required value="' + (u ? u.email : "") + '"></div>' +
       '<div class="field"><label>PHONE / WHATSAPP</label><input name="Phone" type="tel" placeholder="+971 …" required value="' + (u && u.phone ? u.phone : "") + '"></div>' +
       '<div class="field"><label>ANYTHING ELSE? (OPTIONAL)</label><textarea name="Notes" placeholder="Preferred airline, budget, flexible dates…"></textarea></div>' +
+      '<label class="form-consent"><input type="checkbox" name="Marketing_consent" value="Yes"> Send me occasional travel offers by email. I can opt out at any time.</label>' +
       '<button class="btn btn-primary btn-block" type="submit">' + icon("mail") + " Send email</button>" +
       '<p class="form-note">Goes straight to our travel experts. We reply within business hours, usually much faster.</p>' +
     "</form>" +
@@ -922,7 +923,7 @@ function enquiryFormHTML(opts) {
 
 const SORT_PILLS = [
   ["best", "Best", "Balanced price and duration across airlines"],
-  ["cheapest", "Cheapest", "Lowest total fare, including budget and consolidated options"],
+  ["cheapest", "Lower price", "Lower-priced available options, with baggage and fare conditions shown"],
   ["fastest", "Fastest", "Shortest total travel time — direct and single-stop options first"]
 ];
 
@@ -956,7 +957,7 @@ function renderResultPanel(mount, opts) {
       '<div class="result-body">' +
         "<div><h3>" + opts.bodyTitle + "</h3><p>" + opts.bodyText + "</p>" + (opts.extra || "") + "</div>" +
         '<div class="enquiry-side"><h3>Get your quote</h3>' +
-        '<p class="form-note" style="margin-bottom:0.9rem">No payment now — we confirm the best price with you first.</p>' +
+        '<p class="form-note" style="margin-bottom:0.9rem">No payment now — we confirm current price and conditions with you first.</p>' +
         enquiryFormHTML(opts) + "</div>" +
       "</div>" +
     "</div>";
@@ -1007,7 +1008,7 @@ function initFlightResults() {
       meta: [legs.length + " flights", paxBits.join(", "), p.get("cabin")],
       sortPills: true,
       bodyTitle: "Multi-city fares, quoted as one itinerary",
-      bodyText: "Multi-city trips are rarely priced well by booking sites — each leg gets shopped separately and the total balloons. Send us the full route below and we'll quote it as one connected itinerary across 40+ airlines.",
+      bodyText: "Multi-city pricing can vary significantly by routing and ticket combination. Send the full route below and we will check connected itinerary options and explain the conditions.",
       extra: '<p style="font-size:0.9rem;color:var(--text-muted);margin:0.6rem 0 0">' + routeFull + "</p>" + airlinesHTML(),
       subject: "Multi-City Flight Enquiry: " + routeShort,
       waText: waText,
@@ -1037,8 +1038,8 @@ function initFlightResults() {
     title: route,
     meta: [dates, paxBits.join(", "), p.get("cabin")],
     sortPills: true,
-    bodyTitle: "We're on it — fares compared across 40+ airlines",
-    bodyText: "Kridiya Travel checks published and consolidated fares that don't always appear on booking sites. Send this search and a travel expert will reply with the lowest live fare, baggage details and payment options.",
+    bodyTitle: "We're on it — suitable fare options compared",
+    bodyText: "Kridiya Travel checks published and available consolidated fares. Send this search and a travel expert will reply with suitable fare options, baggage details and payment conditions.",
     extra: airlinesHTML(),
     subject: "Flight Enquiry: " + route + " · " + dates,
     waText: waText,
