@@ -21,8 +21,8 @@ const KRIDIYA = {
     deals: "deals@kridiyatravel.com"
   },
   social: {
-    instagram: "https://instagram.kridiyatravel.com",
-    facebook: "https://facebook.kridiyatravel.com"
+    instagram: "https://www.instagram.com/kridiyatravel/",
+    facebook: "https://www.facebook.com/profile.php?id=61592086520680"
   }
 };
 
@@ -140,7 +140,7 @@ function trackEvent(name, properties) {
 captureAttribution();
 
 function waLink(message) {
-  return "https://whatsapp.kridiyatravel.com" + (message ? "?text=" + encodeURIComponent(message) : "");
+  return "https://wa.me/" + KRIDIYA.waNumber + (message ? "?text=" + encodeURIComponent(message) : "");
 }
 
 /* ---------- SVG icon paths (24x24 viewBox) ---------- */
