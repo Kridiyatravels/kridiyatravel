@@ -3,110 +3,56 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Corporate Portal - Kridiya Travel and Tourism</title>
-<meta name="description" content="Corporate travel portal for company travel requests, approvals, LPO guidance, booking visibility, and Kridiya support.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<meta name="robots" content="noindex, follow">
+<meta http-equiv="refresh" content="0; url=https://corporate.kridiyatravel.com/login.html?next=corporate-account.html">
+<title>Corporate Portal | Kridiya Travel</title>
+<link rel="canonical" href="https://corporate.kridiyatravel.com/login.html?next=corporate-account.html">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32">
-<link rel="apple-touch-icon" href="assets/favicon-180.png">
-<link rel="canonical" href="https://www.kridiyatravel.com/corporate-account.html">
-<link rel="stylesheet" href="css/styles.css?v=20260729e">
-<link rel="stylesheet" href="css/corporate-portal.css?v=20260728a">
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    background: #fffaf2;
+    color: #241b13;
+    font-family: Arial, sans-serif;
+  }
+
+  main {
+    width: min(92vw, 460px);
+    border: 1px solid #eadfce;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 16px 40px rgb(36 27 19 / 0.08);
+    padding: 28px;
+  }
+
+  h1 {
+    margin: 0 0 8px;
+    font-size: 22px;
+  }
+
+  p {
+    margin: 0 0 18px;
+    color: #776a5d;
+    line-height: 1.5;
+  }
+
+  a {
+    color: #241b13;
+    font-weight: 700;
+  }
+</style>
 </head>
-<body data-page="corporate-account">
-<header id="site-header" class="site-header"></header>
+<body>
 <main>
-  <section class="section">
-    <div class="container">
-      <div class="account-head">
-        <div>
-          <h1>Corporate portal</h1>
-          <p>Company travel requests, approvals, booking visibility, and billing coordination.</p>
-        </div>
-        <a class="btn btn-primary" href="corporate-booking.html">New corporate request</a>
-      </div>
-      <div id="corporate-account-gate" class="account-main empty-state"><p>Checking access...</p></div>
-      <div id="corporate-account-app" hidden>
-        <div class="corporate-portal-grid">
-          <div class="account-main">
-            <div class="account-section-head">
-              <div>
-                <h2>Company access</h2>
-                <p id="corp-access-copy">Loading your account status...</p>
-              </div>
-              <a href="account.html">My account</a>
-            </div>
-            <div class="account-summary">
-              <div><span id="corp-visible-items">0</span><b>Company bookings</b><small>Visible through corporate access</small></div>
-              <div><span id="corp-company-count">0</span><b>Company account</b><small id="corp-company-name">Awaiting activation</small></div>
-              <div><span id="corp-member-role">Staff</span><b>Portal role</b><small>Permissions controlled by Kridiya admin</small></div>
-            </div>
-            <div id="corp-company-list" class="corporate-company-list"></div>
-          </div>
-          <div class="account-main">
-            <div class="account-section-head">
-              <div>
-                <h2>New portal request</h2>
-                <p>Send a request directly into the Kridiya admin system under your company.</p>
-              </div>
-            </div>
-            <form id="corp-portal-request-form" class="corporate-portal-request form-grid" novalidate>
-              <div class="form-banner" hidden></div>
-              <div class="field-row">
-                <div class="field col-6"><label for="corp-portal-service">SERVICE</label>
-                  <select id="corp-portal-service" name="service" required>
-                    <option value="">Choose...</option>
-                    <option value="flight">Flight</option>
-                    <option value="hotel">Hotel</option>
-                    <option value="visa">Visa</option>
-                    <option value="holiday">Holiday</option>
-                    <option value="umrah">Umrah</option>
-                    <option value="cruise">Cruise</option>
-                    <option value="insurance">Insurance</option>
-                    <option value="other">Other / multiple services</option>
-                  </select>
-                </div>
-                <div class="field col-6"><label for="corp-portal-title">REQUEST TITLE</label><input id="corp-portal-title" name="title" required placeholder="e.g. Dubai to London staff trip"></div>
-                <div class="field col-6"><label for="corp-portal-route">ROUTE / DESTINATION</label><input id="corp-portal-route" name="route" placeholder="City, airport, hotel, country..."></div>
-                <div class="field col-3"><label for="corp-portal-start">START</label><input id="corp-portal-start" name="start" type="date"></div>
-                <div class="field col-3"><label for="corp-portal-end">END</label><input id="corp-portal-end" name="end" type="date"></div>
-                <div class="field"><label for="corp-portal-notes">NOTES</label><textarea id="corp-portal-notes" name="notes" placeholder="Travellers, deadline, approver, LPO/payment details, urgency..."></textarea></div>
-              </div>
-              <button class="btn btn-primary btn-lg" type="submit" data-label="Submit portal request">Submit portal request</button>
-            </form>
-          </div>
-          <div class="account-main">
-            <div class="account-section-head">
-              <div>
-                <h2>Company bookings</h2>
-                <p>Portal-safe status view. Supplier cost, profit, and staff notes stay internal.</p>
-              </div>
-            </div>
-            <div id="corp-booking-list" class="corporate-booking-list"><p class="muted">Loading bookings...</p></div>
-          </div>
-          <div class="account-main">
-            <div class="account-section-head">
-              <div>
-                <h2>Operating flow</h2>
-                <p>Use this process for every company travel request.</p>
-              </div>
-            </div>
-            <ol class="corporate-portal-flow">
-              <li><b>Request</b><span>Company submits route, travellers, dates, payment/LPO needs, and approval person.</span></li>
-              <li><b>Quote</b><span>Kridiya checks suppliers and sends options with rules, deadline, and total cost.</span></li>
-              <li><b>Approval</b><span>Company confirms written approval, payment, credit terms, or LPO before booking.</span></li>
-              <li><b>Booking</b><span>Kridiya creates the booking, tracks supplier cost, and prepares documents.</span></li>
-              <li><b>Handover</b><span>Invoice, receipt, ticket, voucher, visa note, or refund/cancellation update is shared.</span></li>
-            </ol>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <h1>Opening Kridiya Corporate Portal</h1>
+  <p>The approved company portal now lives on the dedicated corporate site.</p>
+  <a href="https://corporate.kridiyatravel.com/login.html?next=corporate-account.html">Continue to corporate portal</a>
 </main>
-<footer id="site-footer" class="site-footer"></footer>
-<script src="js/main.js?v=20260729e" defer></script>
-<script src="js/auth.js?v=20260726f" defer></script>
+<script>
+  location.replace("https://corporate.kridiyatravel.com/login.html?next=corporate-account.html");
+</script>
 </body>
 </html>
