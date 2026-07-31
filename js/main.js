@@ -251,16 +251,16 @@ function attributionPayload() {
   };
 }
 
-function trackEvent(name, properties) {
+function trackEvent(name, properties, meta) {
   const payload = Object.assign({
     page_type: document.body.dataset.page || "unknown",
     service_type: document.body.dataset.widgetOnly || null
   }, properties || {});
   window.gtag("event", name, payload);
-  trackMetaEvent(name, payload);
+  trackMetaEvent(name, payload, meta);
 }
 
-function trackMetaEvent(name, properties) {
+function trackMetaEvent(name, properties, meta) {
   if (safeStorage(localStorage, "get", MARKETING_CONSENT_KEY) !== "granted" ||
       typeof window.fbq !== "function") return;
 
@@ -281,8 +281,43 @@ function trackMetaEvent(name, properties) {
     click_email: "Contact"
   };
   const standardName = standardEvents[name];
-  if (standardName) window.fbq("track", standardName, safe);
-  else window.fbq("trackCustom", name, safe);
+  const eventOptions = meta && meta.eventId ? { eventID: meta.eventId } : undefined;
+  if (standardName) window.fbq("track", standardName, safe, eventOptions);
+  else window.fbq("trackCustom", name, safe, eventOptions);
+}
+
+function generateMetaEventId(prefix) {
+  const random = window.crypto && typeof window.crypto.randomUUID === "function"
+    ? window.crypto.randomUUID()
+    : Date.now().toString(36) + "-" + Math.random().toString(36).slice(2);
+  return (prefix || "event") + "-" + random;
+}
+
+function readCookie(name) {
+  const prefix = encodeURIComponent(name) + "=";
+  const match = document.cookie.split(";").map(function (part) { return part.trim(); })
+    .find(function (part) { return part.indexOf(prefix) === 0; });
+  return match ? decodeURIComponent(match.slice(prefix.length)) : null;
+}
+
+async function sendMetaLeadServerEvent(eventId, serviceType, enquiryType) {
+  if (safeStorage(localStorage, "get", MARKETING_CONSENT_KEY) !== "granted") return;
+  const sb = await KridiyaAuth.client();
+  const result = await sb.functions.invoke("meta-conversions", {
+    body: {
+      event_name: "Lead",
+      event_id: eventId,
+      event_source_url: location.href,
+      client_user_agent: navigator.userAgent,
+      fbp: readCookie("_fbp"),
+      fbc: readCookie("_fbc"),
+      custom_data: {
+        content_name: serviceType || enquiryType || "general",
+        content_category: document.body.dataset.page || "website"
+      }
+    }
+  });
+  if (result.error) throw result.error;
 }
 
 initGoogleAnalytics();
@@ -718,7 +753,7 @@ function prepareFormSubmit(form) {
     Promise.allSettled([
       submitEnquiryToSupabase(fields, serviceType, reference),
       sendFormSubmitAjax(form, reference)
-    ]).then(function (results) {
+    ]).then(async function (results) {
       const savedToSupabase = results[0].status === "fulfilled";
       const emailedToTeam = results[1].status === "fulfilled";
 
@@ -731,12 +766,18 @@ function prepareFormSubmit(form) {
         return;
       }
 
+      const metaEventId = generateMetaEventId("lead");
       trackEvent("submit_enquiry", {
         enquiry_type: type,
         service_type: serviceType,
         reference: reference,
         saved_to_crm: savedToSupabase
-      });
+      }, { eventId: metaEventId });
+      try {
+        await sendMetaLeadServerEvent(metaEventId, serviceType, type);
+      } catch (error) {
+        console.warn("Kridiya: server-side Meta lead measurement was unavailable.", error);
+      }
       stashEnquiryForThanksPage(reference, serviceType, fields.summary, type, fields.fullName);
       location.href = dest;
     });
