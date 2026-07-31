@@ -2268,7 +2268,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  max-width: 760px;
+  max-width: 920px;
   margin: 0 auto;
   padding: 1rem;
   border: 1px solid var(--line-strong);
@@ -2290,6 +2290,7 @@ body {
 .analytics-consent-actions {
   display: flex;
   flex: 0 0 auto;
+  flex-wrap: wrap;
   gap: 0.6rem;
 }
 @media (max-width: 680px) {
@@ -2299,7 +2300,7 @@ body {
   }
   .analytics-consent-actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
