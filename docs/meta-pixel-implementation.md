@@ -47,3 +47,25 @@ After deployment:
    dataset.
 5. Visit a service page and submit a labelled test enquiry.
 6. Confirm `PageView`, `ViewContent`, and `Lead` appear without personal data.
+
+## Conversions API
+
+The `meta-conversions` Supabase Edge Function sends a server-side `Lead` event
+only after a website visitor has selected **Allow both** and a real enquiry has
+been delivered. The browser and server events share the same `event_id` so Meta
+can deduplicate them.
+
+The function accepts only Kridiya website origins and a valid Supabase
+publishable key. It allowlists the event type and fields, validates the source
+URL, and never accepts or sends customer names, email addresses, phone numbers,
+passport details, payment details, enquiry references, or enquiry content.
+
+Required production secret:
+
+- `META_CAPI_ACCESS_TOKEN` - generated in Meta Events Manager and stored only in
+  Supabase Edge Function secrets.
+
+Optional temporary testing secret:
+
+- `META_TEST_EVENT_CODE` - copied from Events Manager Test Events and removed
+  after production validation.
