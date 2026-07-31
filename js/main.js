@@ -27,7 +27,9 @@ const KRIDIYA = {
 };
 
 const KRIDIYA_GA4_MEASUREMENT_ID = "G-LB1TW8J03E";
+const KRIDIYA_META_DATASET_ID = "1584188866628210";
 const ANALYTICS_CONSENT_KEY = "kridiya_analytics_consent";
+const MARKETING_CONSENT_KEY = "kridiya_marketing_measurement_consent";
 
 /* ---------- Marketing attribution and event queue ----------
    No personal information is stored here. GA4 and any future GTM container
@@ -56,6 +58,52 @@ function setAnalyticsConsent(value, persist) {
     ad_personalization: "denied"
   });
   if (persist) safeStorage(localStorage, "set", ANALYTICS_CONSENT_KEY, granted ? "granted" : "denied");
+}
+
+function initMetaPixel() {
+  if (window.kridiyaMetaPixelLoaded) return;
+  window.kridiyaMetaPixelLoaded = true;
+
+  if (!window.fbq) {
+    const fbq = function () {
+      fbq.callMethod ? fbq.callMethod.apply(fbq, arguments) : fbq.queue.push(arguments);
+    };
+    if (!window._fbq) window._fbq = fbq;
+    fbq.push = fbq;
+    fbq.loaded = true;
+    fbq.version = "2.0";
+    fbq.queue = [];
+    window.fbq = fbq;
+  }
+
+  window.fbq("init", KRIDIYA_META_DATASET_ID);
+  window.fbq("consent", "grant");
+  window.fbq("track", "PageView");
+
+  if (!document.querySelector('script[data-kridiya-meta-pixel]')) {
+    const script = document.createElement("script");
+    script.async = true;
+    script.dataset.kridiyaMetaPixel = "true";
+    script.src = "https://connect.facebook.net/en_US/fbevents.js";
+    document.head.appendChild(script);
+  }
+}
+
+function setMarketingMeasurementConsent(value, persist) {
+  const granted = value === "granted";
+  if (persist) {
+    safeStorage(localStorage, "set", MARKETING_CONSENT_KEY, granted ? "granted" : "denied");
+  }
+  if (granted) initMetaPixel();
+  else if (window.fbq) window.fbq("consent", "revoke");
+}
+
+function resetMeasurementConsent() {
+  try {
+    localStorage.removeItem(ANALYTICS_CONSENT_KEY);
+    localStorage.removeItem(MARKETING_CONSENT_KEY);
+  } catch (e) { /* A reload still leaves the existing choice if storage is blocked. */ }
+  location.reload();
 }
 
 function initGoogleAnalytics() {
@@ -91,22 +139,28 @@ function initGoogleAnalytics() {
 }
 
 function initAnalyticsConsentBanner() {
-  if (safeStorage(localStorage, "get", ANALYTICS_CONSENT_KEY)) return;
+  const savedAnalytics = safeStorage(localStorage, "get", ANALYTICS_CONSENT_KEY);
+  const savedMarketing = safeStorage(localStorage, "get", MARKETING_CONSENT_KEY);
+  if (savedMarketing === "granted") initMetaPixel();
+  if (savedAnalytics && savedMarketing) return;
 
   const banner = document.createElement("aside");
   banner.className = "analytics-consent";
-  banner.setAttribute("aria-label", "Analytics privacy choice");
+  banner.setAttribute("aria-label", "Website measurement privacy choice");
   banner.innerHTML =
-    '<div><b>Website analytics</b><p>Allow privacy-safe analytics to help Kridiya improve its website. We do not send names, email addresses, phone numbers, passport details, or payment details to analytics.</p></div>' +
+    '<div><b>Website measurement</b><p>Choose whether Kridiya may use privacy-safe analytics and Meta advertising measurement. We never send names, contact details, passport information, or payment details in these events.</p></div>' +
     '<div class="analytics-consent-actions">' +
-      '<button class="btn btn-outline" type="button" data-analytics-consent="denied">No thanks</button>' +
-      '<button class="btn btn-primary" type="button" data-analytics-consent="granted">Allow analytics</button>' +
+      '<button class="btn btn-outline" type="button" data-measurement-choice="denied">No thanks</button>' +
+      '<button class="btn btn-outline" type="button" data-measurement-choice="analytics">Analytics only</button>' +
+      '<button class="btn btn-primary" type="button" data-measurement-choice="all">Allow both</button>' +
     "</div>";
 
   banner.addEventListener("click", function (event) {
-    const button = event.target.closest("[data-analytics-consent]");
+    const button = event.target.closest("[data-measurement-choice]");
     if (!button) return;
-    setAnalyticsConsent(button.dataset.analyticsConsent, true);
+    const choice = button.dataset.measurementChoice;
+    setAnalyticsConsent(choice === "denied" ? "denied" : "granted", true);
+    setMarketingMeasurementConsent(choice === "all" ? "granted" : "denied", true);
     banner.remove();
   });
 
@@ -203,6 +257,32 @@ function trackEvent(name, properties) {
     service_type: document.body.dataset.widgetOnly || null
   }, properties || {});
   window.gtag("event", name, payload);
+  trackMetaEvent(name, payload);
+}
+
+function trackMetaEvent(name, properties) {
+  if (safeStorage(localStorage, "get", MARKETING_CONSENT_KEY) !== "granted" ||
+      typeof window.fbq !== "function") return;
+
+  const safe = {
+    content_name: properties.service_type || properties.enquiry_type || properties.page_type || "general",
+    content_category: properties.page_type || "website"
+  };
+  if (properties.method) safe.method = properties.method;
+  if (properties.link_location) safe.link_location = String(properties.link_location).slice(0, 100);
+
+  const standardEvents = {
+    view_service: "ViewContent",
+    submit_enquiry: "Lead",
+    newsletter_signup: "Subscribe",
+    register_account: "CompleteRegistration",
+    click_whatsapp: "Contact",
+    click_call: "Contact",
+    click_email: "Contact"
+  };
+  const standardName = standardEvents[name];
+  if (standardName) window.fbq("track", standardName, safe);
+  else window.fbq("trackCustom", name, safe);
 }
 
 initGoogleAnalytics();
@@ -760,6 +840,11 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("click", function (e) {
+  const resetConsent = e.target.closest("[data-reset-measurement-consent]");
+  if (resetConsent) {
+    resetMeasurementConsent();
+    return;
+  }
   const link = e.target.closest("a[href]");
   if (!link) return;
   const href = link.getAttribute("href") || "";
