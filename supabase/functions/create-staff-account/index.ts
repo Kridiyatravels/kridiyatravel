@@ -23,6 +23,12 @@ function json(body: unknown, status: number, origin: string | null) {
   });
 }
 
+function strongInternalPassword() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return `Kridiya!A9-${Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("")}`;
+}
+
 async function findAuthUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
   for (let page = 1; page <= 10; page++) {
     const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage: 100 });
@@ -70,33 +76,21 @@ Deno.serve(async (req: Request) => {
   if (!validRoles.includes(role)) return json({ error: "Invalid role." }, 400, origin);
 
   const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
-  const anonClient = createClient(SUPABASE_URL, ANON_KEY);
-
   // Staff sign in with the PIN alone (no name picker), so a PIN has to
   // be unique across every active staff account — otherwise it would
   // be ambiguous whose account it logs into. Since PINs are stored only
   // as hashed Supabase Auth passwords, the sole way to check "is this
   // PIN already taken" is to try it against everyone else's email.
-  const { data: existingProfiles } = await adminClient.from("staff_profiles").select("user_id").eq("active", true);
-  const existingEmails: string[] = [];
-  for (const p of existingProfiles || []) {
-    const { data: u } = await adminClient.auth.admin.getUserById(p.user_id);
-    if (u?.user?.email) existingEmails.push(u.user.email);
-  }
-
   let pin = "";
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 10; attempt++) {
     const buf = new Uint32Array(1);
     crypto.getRandomValues(buf);
     // Range 100000-999999: always a true 6-digit PIN, never a leading
     // zero (a leading zero gets dropped when read aloud/copied and looks
     // like a 5-digit PIN).
     const candidate = String(100000 + (buf[0] % 900000));
-    let collision = false;
-    for (const existingEmail of existingEmails) {
-      const { data: probe, error: probeErr } = await anonClient.auth.signInWithPassword({ email: existingEmail, password: candidate });
-      if (!probeErr && probe?.session) { collision = true; break; }
-    }
+    const { data: collision, error: collisionError } = await adminClient.rpc("staff_pin_in_use", { p_pin: candidate, p_exclude_user_id: null });
+    if (collisionError) return json({ error: "Could not check PIN availability." }, 503, origin);
     if (!collision) { pin = candidate; break; }
   }
   if (!pin) {
@@ -105,7 +99,7 @@ Deno.serve(async (req: Request) => {
 
   const { data: created, error: createErr } = await adminClient.auth.admin.createUser({
     email,
-    password: pin,
+    password: strongInternalPassword(),
     email_confirm: true,
     user_metadata: { full_name: fullName }
   });
@@ -120,7 +114,7 @@ Deno.serve(async (req: Request) => {
     reusedExisting = true;
     newUserId = existing.id;
     const { error: passwordErr } = await adminClient.auth.admin.updateUserById(newUserId, {
-      password: pin,
+      password: strongInternalPassword(),
       email_confirm: true,
       user_metadata: { full_name: fullName }
     });
@@ -136,6 +130,12 @@ Deno.serve(async (req: Request) => {
   if (setup.error) {
     if (!reusedExisting) await adminClient.auth.admin.deleteUser(newUserId).catch(() => null);
     return json({ error: "Account auth was ready but staff setup failed: " + setup.error.message }, 500, origin);
+  }
+
+  const { error: pinError } = await adminClient.rpc("staff_set_pin", { p_user_id: newUserId, p_pin: pin });
+  if (pinError) {
+    if (!reusedExisting) await adminClient.auth.admin.deleteUser(newUserId).catch(() => null);
+    return json({ error: "Staff record was created but the PIN could not be saved." }, 500, origin);
   }
 
   return json({ user_id: newUserId, pin, email, reused_existing: reusedExisting }, 200, origin);
