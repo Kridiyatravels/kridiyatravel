@@ -1,0 +1,27 @@
+# GitHub Pages build configuration.
+#
+# Everything in this repository is published at www.kridiyatravel.com unless
+# it is excluded here. On 2026-08-02 the following were found to be publicly
+# readable and should not have been:
+#
+#   /supabase/migrations/*.sql        full database schema, RLS policies,
+#                                     grants, and function definitions
+#   /supabase/functions/*/index.ts    staff authentication source
+#   /docs/*                           internal operating procedure, bank
+#                                     details, and system architecture
+#
+# These paths must stay in the repository — the migrations are the source of
+# truth for the database — but they must never be served as web pages.
+#
+# Do NOT exclude CNAME: GitHub Pages needs it published for the custom domain.
+# templates/ holds the customer-facing booking documents. They stay in version
+# control because they are deliverables, but they carry bank details and sample
+# customer data and are rendered by the admin app, never served from this site.
+exclude:
+  - supabase
+  - docs
+  - templates
+  - scripts
+  - output
+  - PRODUCT.md
+  - _config.yml

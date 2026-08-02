@@ -3,6 +3,7 @@
 // browser) so it can create an auth user and set their PIN as the
 // password without disturbing the calling admin's own session.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { generateSixDigitPin, supabaseRuntimeKeys } from "../_shared/runtime.ts";
 
 const ALLOWED_ORIGINS = ["https://admin.kridiyatravel.com", "http://localhost:8138", "http://localhost:8137"];
 
@@ -45,9 +46,11 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(origin) });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, origin);
 
-  const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-  const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const { url: SUPABASE_URL, publishableKey: ANON_KEY, secretKey: SERVICE_ROLE_KEY } = supabaseRuntimeKeys();
+  if (!SUPABASE_URL || !ANON_KEY || !SERVICE_ROLE_KEY) {
+    console.error("create-staff-account: required Supabase runtime keys are unavailable");
+    return json({ error: "Staff account creation is temporarily unavailable." }, 503, origin);
+  }
 
   const authHeader = req.headers.get("Authorization") || "";
   const callerClient = createClient(SUPABASE_URL, ANON_KEY, {
@@ -69,6 +72,7 @@ Deno.serve(async (req: Request) => {
   const department = String(body.department || "").trim();
   const email = String(body.email || "").trim().toLowerCase();
   const role = String(body.role || "staff");
+  const allowExistingUser = body.allow_existing_user === true;
   const validRoles = ["owner", "admin", "staff", "support"];
 
   if (!fullName || fullName.length < 2) return json({ error: "Enter the staff member's name." }, 400, origin);
@@ -78,17 +82,14 @@ Deno.serve(async (req: Request) => {
   const adminClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
   // Staff sign in with the PIN alone (no name picker), so a PIN has to
   // be unique across every active staff account — otherwise it would
-  // be ambiguous whose account it logs into. Since PINs are stored only
-  // as hashed Supabase Auth passwords, the sole way to check "is this
-  // PIN already taken" is to try it against everyone else's email.
+  // be ambiguous whose account it logs into. staff_pin_in_use compares the
+  // submitted candidate against the separate bcrypt credential hashes.
   let pin = "";
   for (let attempt = 0; attempt < 10; attempt++) {
-    const buf = new Uint32Array(1);
-    crypto.getRandomValues(buf);
     // Range 100000-999999: always a true 6-digit PIN, never a leading
     // zero (a leading zero gets dropped when read aloud/copied and looks
     // like a 5-digit PIN).
-    const candidate = String(100000 + (buf[0] % 900000));
+    const candidate = generateSixDigitPin();
     const { data: collision, error: collisionError } = await adminClient.rpc("staff_pin_in_use", { p_pin: candidate, p_exclude_user_id: null });
     if (collisionError) return json({ error: "Could not check PIN availability." }, 503, origin);
     if (!collision) { pin = candidate; break; }
@@ -110,6 +111,9 @@ Deno.serve(async (req: Request) => {
     const existing = await findAuthUserByEmail(adminClient, email).catch(() => null);
     if (!existing?.id) {
       return json({ error: createErr?.message || "Could not create the account." }, 400, origin);
+    }
+    if (!allowExistingUser) {
+      return json({ error: "An account already uses this email.", existing_user: true }, 409, origin);
     }
     reusedExisting = true;
     newUserId = existing.id;
@@ -138,5 +142,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Staff record was created but the PIN could not be saved." }, 500, origin);
   }
 
+  // Sensitive: the plaintext PIN is returned once for the administrator to deliver securely.
+  // Do not add request/response body logging on this path.
   return json({ user_id: newUserId, pin, email, reused_existing: reusedExisting }, 200, origin);
 });

@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment Request - Kridiya Travel and Tourism FZ-LLC</title>
+<style>
+  /* ============================================================
+     Kridiya Travel - payment request document
+     Renders from generate_booking_payment_request_document.
+     Print target: single-page A4.
+     ============================================================ */
+  :root {
+    --brand-deep: #b6530f;
+    --brand-soft: #fff4e6;
+    --gold: #f6c445;
+    --ink: #2f2415;
+    --heading-ink: #1e1509;
+    --text: #574b3b;
+    --text-muted: #79694f;
+    --bg: #fdf8f0;
+    --surface: #ffffff;
+    --line: #f1e8d8;
+    --line-strong: #e3d5be;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 28px 16px;
+    background: var(--bg);
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .sheet {
+    max-width: 780px;
+    margin: 0 auto;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 34px 36px 28px;
+  }
+
+  /* ---------- header ---------- */
+  .head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--line-strong);
+  }
+  .brand-logo { height: 46px; width: auto; display: block; }
+  .brand-name { font-size: 17px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .brand-legal { font-size: 11px; color: var(--text-muted); margin: 3px 0 0; }
+  .doc-meta { text-align: right; flex-shrink: 0; }
+  .doc-kind {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--brand-deep); margin: 0 0 5px;
+  }
+  .doc-number { font-size: 20px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .doc-date { font-size: 12px; color: var(--text-muted); margin: 4px 0 0; }
+
+  /* ---------- amount due ---------- */
+  .amount-band {
+    margin: 22px 0 8px; padding: 22px;
+    background: var(--brand-deep); border-radius: 10px; color: #fff;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  }
+  .amount-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #ffe9d2; margin: 0 0 4px;
+  }
+  .amount-value { font-size: 32px; font-weight: 800; margin: 0; letter-spacing: -0.02em; line-height: 1.1; }
+  .amount-side { text-align: right; font-size: 12px; color: #ffe9d2; line-height: 1.5; }
+  .amount-side strong { display: block; color: #fff; font-size: 13px; }
+
+  .ledger {
+    margin: 0 0 22px; border: 1px solid var(--line); border-radius: 0 0 10px 10px;
+    border-top: 0; overflow: hidden;
+  }
+  .ledger table { width: 100%; border-collapse: collapse; }
+  .ledger td { padding: 9px 18px; font-size: 13px; border-bottom: 1px solid var(--line); }
+  .ledger tr:last-child td { border-bottom: 0; }
+  .ledger td:first-child { color: var(--text-muted); }
+  .ledger td:last-child { text-align: right; font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .ledger tr.balance td { background: var(--brand-soft); font-weight: 800; color: var(--heading-ink); }
+
+  /* ---------- sections ---------- */
+  .section-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin: 0 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+  }
+  .cols { display: flex; gap: 30px; margin-bottom: 22px; }
+  .col { flex: 1; min-width: 0; }
+
+  .rows { width: 100%; border-collapse: collapse; }
+  .rows th, .rows td { text-align: left; vertical-align: top; padding: 6px 0; font-size: 13px; line-height: 1.45; }
+  .rows th { font-weight: 500; color: var(--text-muted); width: 42%; padding-right: 12px; }
+  .rows td { color: var(--ink); font-weight: 600; word-break: break-word; }
+
+  /* ---------- bank block ---------- */
+  .bank {
+    margin: 0 0 22px; padding: 18px 20px;
+    background: var(--brand-soft); border-radius: 10px;
+  }
+  .bank .section-title { border-bottom-color: var(--line-strong); color: var(--brand-deep); }
+  .bank-grid { display: flex; gap: 30px; }
+  .bank-grid > div { flex: 1; min-width: 0; }
+  .bank .rows th { color: #9a7040; }
+  .bank .rows td { color: var(--heading-ink); }
+  .bank-note { margin: 12px 0 0; font-size: 12px; color: #8a6234; }
+
+  /* ---------- notes ---------- */
+  .notes {
+    margin: 0 0 20px; padding: 14px 16px; background: var(--bg);
+    border-radius: 9px; border-left: 3px solid var(--line-strong);
+    font-size: 13px; color: var(--text);
+  }
+  .notes strong { color: var(--heading-ink); }
+
+  .callout {
+    margin: 0 0 20px; padding: 13px 16px;
+    border: 1px solid var(--line-strong); border-radius: 9px;
+    font-size: 13px; color: var(--heading-ink); font-weight: 600;
+  }
+
+  /* ---------- terms + footer ---------- */
+  .terms {
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+    margin: 0 0 22px; padding-top: 16px; border-top: 1px solid var(--line);
+  }
+  .terms p { margin: 0 0 5px; }
+
+  .foot {
+    padding-top: 16px; border-top: 2px solid var(--line-strong);
+    display: flex; justify-content: space-between; gap: 24px;
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  }
+  .foot-block { flex: 1; min-width: 0; }
+  .foot-title { font-size: 11px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
+  .foot a { color: var(--brand-deep); text-decoration: none; }
+
+  .issued {
+    margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--text-muted);
+    display: flex; justify-content: space-between; gap: 16px;
+  }
+
+  /* ---------- screen-only ---------- */
+  .actions { max-width: 780px; margin: 0 auto 16px; display: flex; gap: 10px; justify-content: flex-end; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 13px; padding: 9px 18px;
+    border-radius: 8px; cursor: pointer; border: 1px solid var(--line-strong);
+    background: var(--surface); color: var(--brand-deep);
+  }
+  .btn.primary { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+
+  /* ---------- print ---------- */
+  @page { size: A4; margin: 13mm; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 12.5px; }
+    .sheet { max-width: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+    .actions { display: none !important; }
+    .amount-band { margin: 16px 0 8px; padding: 18px; }
+    .amount-value { font-size: 27px; }
+    .cols, .ledger, .bank { margin-bottom: 16px; }
+    .notes, .callout { margin-bottom: 14px; }
+    .terms { margin-bottom: 16px; }
+    .sheet, .cols, .foot, .amount-band, .ledger, .bank { break-inside: avoid; }
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 16px 10px; }
+    .sheet { padding: 22px 18px 20px; }
+    .head { flex-direction: column; gap: 16px; }
+    .doc-meta { text-align: left; }
+    .amount-band { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .amount-side { text-align: left; }
+    .cols, .bank-grid { flex-direction: column; gap: 18px; }
+    .foot { flex-direction: column; gap: 16px; }
+    .issued { flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="actions">
+  <button class="btn" type="button" onclick="window.close()">Close</button>
+  <button class="btn primary" type="button" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="sheet" id="paymentRequest">
+
+  <div class="head">
+    <div>
+      <img class="brand-logo" id="brandLogo" src="../../assets/brand/kridiya-logo-hd.png" alt="Kridiya Travel and Tourism">
+      <p class="brand-name" id="brandName" hidden>Kridiya Travel and Tourism</p>
+      <p class="brand-legal">Kridiya Travel and Tourism FZ-LLC &middot; Ras Al Khaimah, UAE</p>
+    </div>
+    <div class="doc-meta">
+      <p class="doc-kind">Payment Request</p>
+      <p class="doc-number" data-field="document_number">PRQ-2026-0001</p>
+      <p class="doc-date" data-field="issued_on">Issued 2 August 2026</p>
+    </div>
+  </div>
+
+  <div class="amount-band">
+    <div>
+      <p class="amount-label">Amount to pay now</p>
+      <p class="amount-value" data-field="amount_requested">AED 4,850.00</p>
+    </div>
+    <div class="amount-side">
+      <strong data-field="booking_reference">KRD-2026-0184</strong>
+      Quote your booking reference<br>with the transfer
+    </div>
+  </div>
+
+  <div class="ledger">
+    <table>
+      <tr><td>Booking total</td><td data-field="total_amount">AED 4,850.00</td></tr>
+      <tr><td>Already received</td><td data-field="received_amount">AED 0.00</td></tr>
+      <tr class="balance"><td>Balance outstanding</td><td data-field="amount_due">AED 4,850.00</td></tr>
+    </table>
+  </div>
+
+  <div class="callout" data-field="confirm_rule">
+    Your booking is confirmed only after this payment is received. Fares, availability and visa slots are not held until then.
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <p class="section-title">Billed to</p>
+      <table class="rows">
+        <tr><th>Name</th><td data-field="customer_name">Mahendran Kumar</td></tr>
+        <tr><th>Email</th><td data-field="customer_email">mahendran@example.com</td></tr>
+        <tr><th>Phone</th><td data-field="customer_phone">+971 50 000 0000</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Booking</p>
+      <table class="rows">
+        <tr><th>Reference</th><td data-field="booking_reference_2">KRD-2026-0184</td></tr>
+        <tr><th>Service</th><td data-field="service_type">Flight</td></tr>
+        <tr><th>Route / destination</th><td data-field="route_or_destination">DXB &rarr; CMB &rarr; DXB</td></tr>
+        <tr data-field="travel_dates_row"><th>Travel dates</th><td data-field="travel_dates">12 September 2026 &ndash; 26 September 2026</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="bank">
+    <p class="section-title">How to pay</p>
+    <div class="bank-grid">
+      <div>
+        <table class="rows">
+          <tr><th>Account holder</th><td>KRIDIYA Travel and Tourism FZ-LLC</td></tr>
+          <tr><th>IBAN</th><td>AE540860000009813682904</td></tr>
+          <tr><th>BIC / SWIFT</th><td>WIOBAEADXXX</td></tr>
+        </table>
+      </div>
+      <div>
+        <table class="rows">
+          <tr><th>Bank address</th><td>Etihad Airways Centre, 5th Floor, Abu Dhabi, UAE</td></tr>
+          <tr><th>Currency</th><td data-field="currency_name">AED</td></tr>
+          <tr><th>Other methods</th><td>Cash or payment link on request</td></tr>
+        </table>
+      </div>
+    </div>
+    <p class="bank-note">Please send the transfer confirmation or receipt to contact@kridiyatravel.com or on WhatsApp to +971 50 941 3873 so we can verify and confirm your booking without delay.</p>
+  </div>
+
+  <div class="notes" data-field="notes_block">
+    <strong>Note:</strong> <span data-field="notes">Payment requested against the accepted quote.</span>
+  </div>
+
+  <div class="terms">
+    <p>This is a request for payment and is not a receipt. A receipt is issued once the payment has been received and verified.</p>
+    <p>Kridiya Travel and Tourism FZ-LLC is not registered for VAT. No VAT has been charged and no tax registration number applies to this document.</p>
+    <p>Tickets, visas, and supplier services remain subject to the terms, fare rules, and cancellation conditions of the issuing airline, consulate, or supplier. Fares and availability may change until the booking is issued.</p>
+  </div>
+
+  <div class="foot">
+    <div class="foot-block">
+      <p class="foot-title">Kridiya Travel and Tourism FZ-LLC</p>
+      FDRK7105, Compass Building, Al Shohada Road,<br>
+      Al Hamra Industrial Zone-FZ, Ras Al Khaimah, UAE
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Contact</p>
+      +971 50 941 3873<br>
+      <a href="mailto:contact@kridiyatravel.com">contact@kridiyatravel.com</a><br>
+      <a href="https://www.kridiyatravel.com">www.kridiyatravel.com</a>
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Licence</p>
+      Trade licence 5033347<br>
+      RAK Freezone, United Arab Emirates
+    </div>
+  </div>
+
+  <div class="issued">
+    <span>Issued by <span data-field="issued_by">Kridiya Travel</span></span>
+    <span data-field="generated_stamp">Generated 2 August 2026</span>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   renderPaymentRequest(doc)
+
+   Pass the object returned by generate_booking_payment_request_document
+   exactly as received:
+
+   {
+     document_number, customer_name, customer_email,
+     amount_total, currency, created_at,
+     payload: {
+       booking_reference, booking_title, service_type,
+       route_or_destination, travel_start, travel_end,
+       total_amount, received_amount, amount_due, amount_requested,
+       customer_name, customer_email, customer_phone, notes
+     }
+   }
+   ------------------------------------------------------------------ */
+
+function textOrDash(value) {
+  const clean = value === null || value === undefined ? "" : String(value).trim();
+  return clean || "—";
+}
+
+function formatMoney(amount, currency) {
+  // Number(null) and Number("") are both 0, which would show a request
+  // for AED 0.00 rather than revealing that the amount is missing.
+  if (amount === null || amount === undefined || String(amount).trim() === "") return "—";
+  const value = Number(amount);
+  if (!isFinite(value)) return "—";
+  return (currency || "AED") + " " + value.toLocaleString("en-AE", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+// Returns "" rather than a dash so the caller can drop the whole row.
+// Uses the same long month form as every other date on the document —
+// short form renders September as "Sept", which reads inconsistently
+// next to three-letter months.
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function formatLongDate(value) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "—";
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function humanise(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return "—";
+  return clean.charAt(0).toUpperCase() + clean.slice(1).replace(/_/g, " ");
+}
+
+function setField(name, value) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (node) {
+    node.textContent = value;
+  });
+}
+
+function renderPaymentRequest(doc) {
+  const payload = (doc && doc.payload) || {};
+  const currency = doc.currency || "AED";
+
+  setField("document_number", textOrDash(doc.document_number));
+  setField("issued_on", "Issued " + formatLongDate(doc.created_at));
+  setField("generated_stamp", "Generated " + formatLongDate(doc.created_at));
+  setField("currency_name", currency);
+
+  // The requested amount is the figure being asked for now, which is not
+  // always the full outstanding balance on a part-payment.
+  const requested = payload.amount_requested !== undefined && payload.amount_requested !== null
+    ? payload.amount_requested
+    : doc.amount_total;
+  setField("amount_requested", formatMoney(requested, currency));
+  setField("total_amount", formatMoney(payload.total_amount, currency));
+  setField("received_amount", formatMoney(payload.received_amount, currency));
+  setField("amount_due", formatMoney(payload.amount_due, currency));
+
+  setField("customer_name", textOrDash(payload.customer_name || doc.customer_name));
+  setField("customer_email", textOrDash(payload.customer_email || doc.customer_email));
+  setField("customer_phone", textOrDash(payload.customer_phone));
+
+  setField("booking_reference", textOrDash(payload.booking_reference));
+  setField("booking_reference_2", textOrDash(payload.booking_reference));
+  setField("service_type", humanise(payload.service_type));
+  setField("route_or_destination", textOrDash(payload.route_or_destination));
+
+  // Travel dates are optional on the booking, so the row is dropped
+  // rather than printing an empty or half-formed range.
+  const start = formatDate(payload.travel_start);
+  const end = formatDate(payload.travel_end);
+  const datesRow = document.querySelector('tr[data-field="travel_dates_row"]');
+  if (datesRow) {
+    if (start && end) setField("travel_dates", start + " – " + end);
+    else if (start) setField("travel_dates", "From " + start);
+    else if (end) setField("travel_dates", "Until " + end);
+    else datesRow.remove();
+  }
+
+  const notesBlock = document.querySelector('[data-field="notes_block"]');
+  if (notesBlock) {
+    if (String(payload.notes || "").trim()) setField("notes", payload.notes);
+    else notesBlock.remove();
+  }
+
+  document.title = "Payment request " + textOrDash(doc.document_number) + " - Kridiya Travel";
+}
+
+// A missing logo file must never leave an empty box on a printed document.
+(function () {
+  const logo = document.getElementById("brandLogo");
+  if (!logo) return;
+  logo.addEventListener("error", function () {
+    logo.hidden = true;
+    const name = document.getElementById("brandName");
+    if (name) name.hidden = false;
+  });
+})();
+
+window.renderPaymentRequest = renderPaymentRequest;
+</script>
+
+</body>
+</html>

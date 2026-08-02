@@ -1,2 +1,0 @@
-period,campaign_id,campaign_name,channel,service,spend_aed,impressions,clicks,website_enquiries,whatsapp_conversations,qualified_leads,quotes_sent,bookings_confirmed,booking_revenue_aed,supplier_cost_aed,gross_profit_aed,refunds_aed,net_gross_profit_aed,cpl_aed,cac_aed,gross_profit_return,first_response_minutes,quote_to_booking_rate,lost_top_reason,decision,owner,notes
-YYYY-MM,kt-example,Example Campaign,google,flights,0,0,0,0,0,0,0,0,0,0,0,0,0,,,,,,,hold,Marketing,"Replace example row with live monthly data"

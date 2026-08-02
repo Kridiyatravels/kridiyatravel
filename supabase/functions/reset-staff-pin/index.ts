@@ -1,4 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { generateSixDigitPin, supabaseRuntimeKeys } from "../_shared/runtime.ts";
 
 const ALLOWED_ORIGINS = ["https://admin.kridiyatravel.com", "http://localhost:8138", "http://localhost:8137"];
 function corsHeaders(origin: string | null) {
@@ -17,9 +18,11 @@ Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin");
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(origin) });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, origin);
-  const url = Deno.env.get("SUPABASE_URL")!;
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const { url, publishableKey: anonKey, secretKey: serviceKey } = supabaseRuntimeKeys();
+  if (!url || !anonKey || !serviceKey) {
+    console.error("reset-staff-pin: required Supabase runtime keys are unavailable");
+    return json({ error: "PIN reset is temporarily unavailable." }, 503, origin);
+  }
   const authHeader = req.headers.get("Authorization") || "";
   const caller = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } } });
   const { data: isAdmin, error: adminErr } = await caller.rpc("is_admin");
@@ -32,17 +35,21 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(url, serviceKey);
   let pin = "";
   for (let attempt = 0; attempt < 10; attempt++) {
-    const buf = new Uint32Array(1); crypto.getRandomValues(buf);
-    const candidate = String(100000 + (buf[0] % 900000));
+    const candidate = generateSixDigitPin();
     const { data: used, error } = await admin.rpc("staff_pin_in_use", { p_pin: candidate, p_exclude_user_id: targetUserId });
     if (error) return json({ error: "Could not check PIN availability." }, 503, origin);
     if (!used) { pin = candidate; break; }
   }
   if (!pin) return json({ error: "Could not generate a unique PIN - try again." }, 500, origin);
-  const { error: updateError } = await admin.auth.admin.updateUserById(targetUserId, { password: strongInternalPassword() });
-  if (updateError) return json({ error: updateError.message }, 400, origin);
   const { error: pinError } = await admin.rpc("staff_set_pin", { p_user_id: targetUserId, p_pin: pin });
-  if (pinError) return json({ error: "The PIN could not be saved. Please reset again." }, 500, origin);
+  if (pinError) return json({ error: "The PIN could not be saved." }, 500, origin);
+  const { error: updateError } = await admin.auth.admin.updateUserById(targetUserId, { password: strongInternalPassword() });
+  if (updateError) {
+    console.error("reset-staff-pin: PIN stored but auth password rotation failed", updateError.message);
+    return json({ error: "The PIN was stored but account security could not be finalized. Please reset again." }, 500, origin);
+  }
   await admin.from("audit_events").insert({ actor_user_id: callerData?.user?.id ?? null, event_type: "staff.pin_reset", entity_type: "user", entity_id: targetUserId, metadata: {} });
+  // Sensitive: the plaintext PIN is returned once for the administrator to deliver securely.
+  // Do not add request/response body logging on this path.
   return json({ pin }, 200, origin);
 });
