@@ -1,4 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "jsr:@supabase/supabase-js@2";
+import { clientAddress, supabaseRuntimeKeys } from "../_shared/runtime.ts";
 
 const META_DATASET_ID = "1584188866628210";
 const META_GRAPH_API_VERSION = "v25.0";
@@ -23,21 +25,6 @@ function json(origin: string | null, status: number, body: Record<string, unknow
   return new Response(JSON.stringify(body), { status, headers: corsHeaders(origin) });
 }
 
-function configuredPublishableKeys(): string[] {
-  const keys: string[] = [];
-  try {
-    const named = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") || "{}");
-    Object.values(named).forEach((value) => {
-      if (typeof value === "string") keys.push(value);
-    });
-  } catch {
-    // Invalid platform configuration is handled as an authorization failure.
-  }
-  const legacy = Deno.env.get("SUPABASE_ANON_KEY");
-  if (legacy) keys.push(legacy);
-  return keys;
-}
-
 function cleanString(value: unknown, maxLength: number): string | undefined {
   if (typeof value !== "string") return undefined;
   const clean = value.trim();
@@ -55,11 +42,18 @@ Deno.serve(async (request) => {
     return new Response("ok", { headers: corsHeaders(origin) });
   }
   if (request.method !== "POST") return json(origin, 405, { error: "Method not allowed" });
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) return json(origin, 403, { error: "Origin not allowed" });
+  if (origin && !ALLOWED_ORIGINS.has(origin)) return json(origin, 403, { error: "Origin not allowed" });
 
+  // This is intentionally a public browser endpoint. A publishable key and
+  // Origin are routing/CORS signals, not authentication. Abuse is constrained
+  // below with server-side IP rate limiting and event-id deduplication.
+  const { url: supabaseUrl, publishableKey, secretKey } = supabaseRuntimeKeys();
+  if (!supabaseUrl || !publishableKey || !secretKey) {
+    console.error("meta-conversions: required Supabase runtime keys are unavailable");
+    return json(origin, 503, { error: "Conversion tracking is temporarily unavailable" });
+  }
   const suppliedKey = request.headers.get("apikey");
-  const allowedKeys = configuredPublishableKeys();
-  if (!suppliedKey || !allowedKeys.includes(suppliedKey)) {
+  if (!suppliedKey || suppliedKey !== publishableKey) {
     return json(origin, 401, { error: "Invalid project key" });
   }
 
@@ -79,6 +73,24 @@ Deno.serve(async (request) => {
     return json(origin, 400, { error: "Invalid event ID" });
   }
 
+  const address = clientAddress(request);
+  const addressDigest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(secretKey + "|meta|" + address),
+  );
+  const ipHash = Array.from(new Uint8Array(addressDigest), (value) => value.toString(16).padStart(2, "0")).join("");
+  const admin = createClient(supabaseUrl, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data: admission, error: admissionError } = await admin.rpc("admit_meta_conversion", {
+    p_ip_hash: ipHash,
+    p_event_id: eventId,
+  });
+  if (admissionError) {
+    console.error("meta-conversions: abuse-control check failed", admissionError.message);
+    return json(origin, 503, { error: "Conversion tracking is temporarily unavailable" });
+  }
+  if (admission === "rate_limited") return json(origin, 429, { error: "Too many requests" });
+  if (admission === "duplicate") return json(origin, 200, { ok: true, duplicate: true });
+
   const eventSourceUrl = cleanString(payload.event_source_url, 1000);
   let source: URL;
   try {
@@ -91,8 +103,7 @@ Deno.serve(async (request) => {
     return json(origin, 400, { error: "Event source is not Kridiya Travel" });
   }
 
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const clientIp = cleanString(forwardedFor ? forwardedFor.split(",")[0] : undefined, 64);
+  const clientIp = cleanString(address === "unknown" ? undefined : address, 64);
   const clientUserAgent = cleanString(payload.client_user_agent, 500);
   const userData: Record<string, string> = {};
   if (clientIp) userData.client_ip_address = clientIp;

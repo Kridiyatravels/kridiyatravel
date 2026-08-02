@@ -2,14 +2,13 @@
 // The browser submits only a six-digit PIN. Sensitive lookup and rate-limit
 // operations use the server-only Supabase secret key inside this Edge Function.
 import { createClient } from "jsr:@supabase/supabase-js@2";
+import { clientAddress, supabaseRuntimeKeys } from "../_shared/runtime.ts";
 
 const ALLOWED_ORIGINS = [
   "https://admin.kridiyatravel.com",
   "http://localhost:8138",
   "http://localhost:8137"
 ];
-const MAX_FAILED_ATTEMPTS = 5;
-const RATE_LIMIT_MINUTES = 15;
 
 function corsHeaders(origin: string | null) {
   const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
@@ -26,15 +25,6 @@ function json(body: unknown, status: number, origin: string | null) {
     status,
     headers: { ...corsHeaders(origin), "Content-Type": "application/json" }
   });
-}
-
-function defaultKey(environmentName: string) {
-  try {
-    const keys = JSON.parse(Deno.env.get(environmentName) || "{}");
-    return typeof keys.default === "string" ? keys.default : "";
-  } catch {
-    return "";
-  }
 }
 
 async function hashAddress(address: string, secretKey: string) {
@@ -59,9 +49,7 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Origin not allowed" }, 403, origin);
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
-  const publishableKey = defaultKey("SUPABASE_PUBLISHABLE_KEYS") || Deno.env.get("KRIDIYA_PUBLISHABLE_KEY") || "";
-  const secretKey = defaultKey("SUPABASE_SECRET_KEYS");
+  const { url: supabaseUrl, publishableKey, secretKey } = supabaseRuntimeKeys();
   if (!supabaseUrl || !publishableKey || !secretKey) {
     console.error("staff-pin-login: required Supabase runtime keys are unavailable");
     return json({ error: "Staff login is temporarily unavailable." }, 503, origin);
@@ -79,77 +67,64 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Enter your 6-digit PIN." }, 400, origin);
   }
 
-  const forwardedAddress = (req.headers.get("x-forwarded-for") || "unknown").split(",")[0].trim();
+  const forwardedAddress = clientAddress(req);
   const ipHash = await hashAddress(forwardedAddress, secretKey);
   const admin = createClient(supabaseUrl, secretKey, {
     auth: { persistSession: false, autoRefreshToken: false }
   });
 
-  const cutoff = new Date(Date.now() - RATE_LIMIT_MINUTES * 60 * 1000).toISOString();
-  const { count: failedCount, error: countError } = await admin
-    .from("staff_pin_login_attempts")
-    .select("id", { count: "exact", head: true })
-    .eq("ip_hash", ipHash)
-    .eq("success", false)
-    .gte("attempted_at", cutoff);
-  if (countError) {
-    console.error("staff-pin-login: rate-limit check failed", countError.message);
+  const { data: admission, error: admissionError } = await admin.rpc("staff_pin_login_begin", { p_ip_hash: ipHash });
+  if (admissionError) {
+    console.error("staff-pin-login: rate-limit admission failed", admissionError.message);
     return json({ error: "Staff login is temporarily unavailable." }, 503, origin);
   }
-  if ((failedCount || 0) >= MAX_FAILED_ATTEMPTS) {
-    return json({ error: "Too many attempts. Try again in 15 minutes." }, 429, origin);
+  if (admission?.allowed !== true) {
+    const retryAfter = Number(admission?.retry_after_seconds || 900);
+    return new Response(JSON.stringify({ error: "Too many attempts. Try again later." }), {
+      status: 429,
+      headers: { ...corsHeaders(origin), "Content-Type": "application/json", "Retry-After": String(retryAfter) }
+    });
   }
-
-  const { data: attempt, error: attemptError } = await admin
-    .from("staff_pin_login_attempts")
-    .insert({ ip_hash: ipHash, success: false })
-    .select("id")
-    .single();
-  if (attemptError || !attempt) {
-    console.error("staff-pin-login: could not record login attempt", attemptError?.message);
-    return json({ error: "Staff login is temporarily unavailable." }, 503, origin);
-  }
-
-  // Best-effort cleanup keeps only the last day of rate-limit records.
-  await admin
-    .from("staff_pin_login_attempts")
-    .delete()
-    .lt("attempted_at", new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+  const attemptId = String(admission.attempt_id || "");
 
   // This RPC is executable only by service_role after the matching migration.
   const { data: identity, error: rpcError } = await admin.rpc("staff_identity_for_pin", { p_pin: pin });
   const email = identity && typeof identity.email === "string" ? identity.email : "";
   const userId = identity && typeof identity.user_id === "string" ? identity.user_id : "";
-  const legacy = identity?.legacy === true;
   if (rpcError || !email || !userId) {
     return json({ error: "Incorrect PIN." }, 401, origin);
   }
 
-  let authPassword = pin;
-  if (!legacy) {
-    authPassword = strongInternalPassword();
-    const { error: rotateError } = await admin.auth.admin.updateUserById(userId, { password: authPassword });
-    if (rotateError) {
-      console.error("staff-pin-login: internal password rotation failed", rotateError.message);
-      return json({ error: "Staff login is temporarily unavailable." }, 503, origin);
-    }
+  const authPassword = strongInternalPassword();
+  const { error: rotateError } = await admin.auth.admin.updateUserById(userId, { password: authPassword });
+  if (rotateError) {
+    console.error("staff-pin-login: internal password rotation failed", rotateError.message);
+    return json({ error: "Staff login is temporarily unavailable." }, 503, origin);
   }
 
   // Supabase Auth performs the authoritative password check and issues session tokens.
-  const authResponse = await fetch(supabaseUrl + "/auth/v1/token?grant_type=password", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: publishableKey },
-    body: JSON.stringify({ email, password: authPassword })
-  });
-  const token = await authResponse.json().catch(() => ({}));
+  async function exchangePassword(password: string) {
+    const response = await fetch(supabaseUrl + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", apikey: publishableKey },
+      body: JSON.stringify({ email, password })
+    });
+    return { response, token: await response.json().catch(() => ({})) };
+  }
+  let { response: authResponse, token } = await exchangePassword(authPassword);
   if (!authResponse.ok || !token.access_token) {
+    // A concurrent login may rotate the password between update and exchange.
+    const retryPassword = strongInternalPassword();
+    const { error: retryRotateError } = await admin.auth.admin.updateUserById(userId, { password: retryPassword });
+    if (!retryRotateError) ({ response: authResponse, token } = await exchangePassword(retryPassword));
+  }
+  if (!authResponse.ok || !token.access_token) {
+    console.error("staff-pin-login: password exchange failed after rotation retry", { userId, status: authResponse.status });
+    await admin.rpc("staff_pin_login_finish", { p_attempt_id: attemptId, p_user_id: userId, p_success: false });
     return json({ error: "Incorrect PIN." }, 401, origin);
   }
 
-  await admin
-    .from("staff_pin_login_attempts")
-    .update({ success: true })
-    .eq("id", attempt.id);
+  await admin.rpc("staff_pin_login_finish", { p_attempt_id: attemptId, p_user_id: userId, p_success: true });
 
   // Best-effort audit as the newly signed-in user.
   try {

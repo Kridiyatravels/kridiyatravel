@@ -1,0 +1,233 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .ink{fill:#2f2415}.deep{fill:#b6530f}.orange{fill:#f2820c}.gold{fill:#f6c445}
+      .soft{fill:#fff4e6}.pale{fill:#ffe0a6}.white{fill:#fff}.skin{fill:#d9945d}
+      .line{fill:none;stroke:#2f2415;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+      .thin{fill:none;stroke:#b6530f;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+    </style>
+  </defs>
+
+  <symbol id="scene-flight" viewBox="0 0 260 190">
+    <circle class="soft" cx="130" cy="96" r="82"/>
+    <path class="pale" d="M27 147c34-15 69-20 105-8 35 11 66 12 101-2v31H27z"/>
+    <path class="white" d="M154 43l65 12-4 12-29 1-24 28-12-2 14-27-31-2z"/>
+    <path class="orange" d="M160 49l59 6-4 12-29 1z"/>
+    <circle class="skin" cx="91" cy="66" r="19"/>
+    <path class="ink" d="M72 66c0-19 12-27 25-23 9 3 13 12 12 24-8-7-21-10-37-1z"/>
+    <path class="orange" d="M68 91c13-12 34-12 46 0l11 53H57z"/>
+    <path class="line" d="M75 96l-18 24m49-24 18 29"/>
+    <path class="ink" d="M70 143h18l-6 32H65zm28 0h18l10 32h-18z"/>
+    <rect class="deep" x="137" y="112" width="45" height="54" rx="8"/>
+    <path class="thin" d="M149 112v-10c0-8 20-8 20 0v10m-24 22h29"/>
+    <circle class="ink" cx="148" cy="170" r="5"/><circle class="ink" cx="172" cy="170" r="5"/>
+  </symbol>
+
+  <symbol id="scene-hotel" viewBox="0 0 260 190">
+    <rect class="soft" x="22" y="21" width="216" height="148" rx="18"/>
+    <rect class="white" x="144" y="40" width="72" height="112" rx="8"/>
+    <rect class="pale" x="158" y="56" width="18" height="20" rx="3"/><rect class="pale" x="184" y="56" width="18" height="20" rx="3"/>
+    <rect class="pale" x="158" y="85" width="18" height="20" rx="3"/><rect class="pale" x="184" y="85" width="18" height="20" rx="3"/>
+    <rect class="deep" x="172" y="120" width="18" height="32" rx="3"/>
+    <circle class="skin" cx="87" cy="63" r="18"/>
+    <path class="ink" d="M69 62c2-19 31-26 38 0-10-5-25-5-38 0z"/>
+    <path class="deep" d="M63 88c15-10 34-10 48 0l7 56H55z"/>
+    <path class="gold" d="M72 88h30l-5 13H77z"/>
+    <path class="line" d="M65 96l-21 28m64-28 22 24"/>
+    <path class="ink" d="M62 143h20l-4 31H59zm29 0h20l5 31H96z"/>
+    <path class="orange" d="M122 117h51l-6 9h-39z"/><circle class="gold" cx="148" cy="109" r="5"/>
+  </symbol>
+
+  <symbol id="scene-holiday" viewBox="0 0 260 190">
+    <circle class="pale" cx="195" cy="45" r="24"/>
+    <path class="soft" d="M22 160c19-38 43-56 73-57 31-1 44 24 68 21 24-4 38-33 75-42v86H22z"/>
+    <path class="gold" d="M177 92c13-16 31-20 53-12-13 9-22 24-25 45z"/>
+    <circle class="skin" cx="82" cy="61" r="17"/><path class="ink" d="M65 61c0-20 27-27 36-8l-36 8z"/>
+    <path class="orange" d="M60 83c13-9 30-9 43 0l8 54H53z"/>
+    <circle class="skin" cx="132" cy="68" r="16"/><path class="deep" d="M116 67c2-22 31-24 34-2-12-7-23-7-34 2z"/>
+    <path class="gold" d="M112 89c12-8 28-8 40 0l12 48h-60z"/>
+    <path class="line" d="M66 91l-17 31m51-28 16 22m4-19-13 27m40-28 17 26"/>
+    <path class="ink" d="M59 136h18l-5 36H54zm28 0h18l9 36H95zm50 0h18l10 36h-19zm-27 0h18l-5 36h-19z"/>
+    <rect class="white" x="67" y="102" width="69" height="45" rx="5" transform="rotate(-4 67 102)"/>
+    <path class="thin" d="M78 119l16-7 15 9 16-8m-32-1 3 25"/>
+  </symbol>
+
+  <symbol id="scene-umrah" viewBox="0 0 260 190">
+    <circle class="soft" cx="130" cy="96" r="82"/>
+    <path class="gold" d="M207 30a27 27 0 1 1-29 40 23 23 0 1 0 29-40z"/>
+    <rect class="ink" x="139" y="88" width="72" height="68" rx="3"/>
+    <path class="gold" d="M139 104h72v13h-72z"/><rect class="deep" x="171" y="117" width="13" height="25" rx="2"/>
+    <circle class="skin" cx="78" cy="70" r="17"/>
+    <path class="ink" d="M61 72c-1-24 35-27 38-3-13-7-26-6-38 3z"/>
+    <path class="white" d="M53 93c16-10 34-10 49 0l10 55H45z"/>
+    <path class="line" d="M58 101l-15 28m55-28 18 27"/>
+    <circle class="skin" cx="112" cy="78" r="14"/>
+    <path class="pale" d="M98 77c3-18 26-22 30-2-9-5-19-4-30 2z"/>
+    <path class="orange" d="M94 96c11-8 25-8 35 0l8 50H88z"/>
+    <path class="ink" d="M53 147h20l-5 28H49zm29 0h20l8 28H91zm42-1h16l8 29h-17zm-30 0h16l-5 29H89z"/>
+  </symbol>
+
+  <symbol id="scene-cruise" viewBox="0 0 260 190">
+    <circle class="soft" cx="130" cy="93" r="83"/>
+    <circle class="gold" cx="203" cy="42" r="21"/>
+    <path class="pale" d="M21 150c24-12 47 12 72 0s48 12 73 0 48 12 73 0v25H21z"/>
+    <path class="white" d="M90 87h121l-17 55H73z"/><path class="orange" d="M82 128h119l-7 14H73z"/>
+    <path class="deep" d="M121 58h54v29h-54z"/><rect class="gold" x="131" y="67" width="13" height="10"/><rect class="gold" x="152" y="67" width="13" height="10"/>
+    <path class="thin" d="M146 58V41m0 0h26l-26 13"/>
+    <circle class="skin" cx="63" cy="73" r="15"/><path class="ink" d="M49 71c3-20 29-20 29 1-9-5-19-5-29-1z"/>
+    <path class="orange" d="M45 91c11-7 25-7 35 0l8 42H38z"/>
+    <path class="line" d="M48 98l-16 19m44-18 17 13"/>
+    <path class="ink" d="M43 132h16l-4 28H39zm24 0h16l8 28H75z"/>
+  </symbol>
+
+  <symbol id="scene-visa" viewBox="0 0 260 190">
+    <rect class="soft" x="20" y="22" width="220" height="146" rx="18"/>
+    <rect class="white" x="126" y="39" width="91" height="112" rx="8" transform="rotate(5 126 39)"/>
+    <rect class="deep" x="143" y="55" width="57" height="75" rx="5"/>
+    <circle class="gold" cx="172" cy="85" r="16"/><path class="thin" d="M158 85h28m-14-16c-9 10-9 22 0 32m0-32c9 10 9 22 0 32"/>
+    <circle class="skin" cx="75" cy="61" r="17"/><path class="ink" d="M58 62c0-23 33-25 36-3-12-7-24-6-36 3z"/>
+    <path class="orange" d="M52 84c13-9 30-9 43 0l9 56H44z"/>
+    <path class="line" d="M56 94l-18 25m54-25 17 21"/>
+    <rect class="gold" x="94" y="109" width="34" height="24" rx="4" transform="rotate(8 94 109)"/>
+    <path class="ink" d="M50 139h18l-4 31H46zm27 0h19l8 31H86z"/>
+    <circle class="orange" cx="206" cy="139" r="19"/><path class="white" d="M197 139l6 6 12-15 4 4-16 19-10-10z"/>
+  </symbol>
+
+  <symbol id="scene-team" viewBox="0 0 260 190">
+    <path class="soft" d="M24 43c45-26 91-28 137-7 30 14 55 44 75 91l-28 42H40z"/>
+    <circle class="skin" cx="84" cy="62" r="18"/><path class="ink" d="M66 62c3-24 35-25 37-2-13-6-25-5-37 2z"/>
+    <path class="orange" d="M59 87c15-11 34-11 49 0l8 58H50z"/>
+    <circle class="skin" cx="148" cy="57" r="18"/><path class="deep" d="M130 58c0-25 36-27 38-3-13-7-25-6-38 3z"/>
+    <path class="gold" d="M123 83c15-10 34-10 49 0l11 62h-70z"/>
+    <circle class="skin" cx="203" cy="77" r="15"/><path class="ink" d="M188 76c3-19 27-21 30-2-10-5-20-5-30 2z"/>
+    <path class="white" d="M184 98c11-8 26-8 38 0l11 47h-57z"/>
+    <path class="line" d="M65 96l-20 28m63-28 17 20m4-23-14 25m51-25 17 24m4-10-11 24m42-25 17 23"/>
+    <path class="ink" d="M55 144h22l-5 31H50zm31 0h22l9 31H96zm34 0h22l-5 31h-22zm31 0h22l9 31h-22zm31 0h18l-4 31h-18zm25 0h18l8 31h-18z"/>
+  </symbol>
+
+  <symbol id="scene-support" viewBox="0 0 260 190">
+    <circle class="soft" cx="126" cy="95" r="82"/>
+    <path class="pale" d="M158 39h71v55h-34l-16 15 3-15h-24z"/>
+    <circle class="orange" cx="178" cy="66" r="5"/><circle class="gold" cx="194" cy="66" r="5"/><circle class="deep" cx="210" cy="66" r="5"/>
+    <circle class="skin" cx="93" cy="66" r="20"/><path class="ink" d="M72 65c2-28 40-29 42-3-15-8-28-7-42 3z"/>
+    <path class="orange" d="M63 94c18-13 41-13 58 0l9 66H53z"/>
+    <path class="line" d="M68 104l-25 31m72-31 24 29"/>
+    <path class="deep" d="M66 64c0-22 12-37 29-37 18 0 30 14 30 36h-7c0-18-8-29-23-29-14 0-22 11-22 30z"/>
+    <rect class="deep" x="112" y="62" width="13" height="27" rx="6"/><path class="thin" d="M123 84c13 0 16 5 15 14h-15"/>
+    <path class="ink" d="M61 159h24l-5 22H57zm36 0h24l9 22h-24z"/>
+  </symbol>
+
+  <symbol id="scene-corporate" viewBox="0 0 260 190">
+    <rect class="soft" x="19" y="24" width="222" height="142" rx="18"/>
+    <path class="pale" d="M141 40h77v101h-77z"/><rect class="white" x="154" y="54" width="18" height="18"/><rect class="white" x="184" y="54" width="18" height="18"/><rect class="white" x="154" y="84" width="18" height="18"/><rect class="white" x="184" y="84" width="18" height="18"/>
+    <circle class="skin" cx="80" cy="59" r="18"/><path class="ink" d="M62 58c2-23 34-25 37-3-12-6-25-5-37 3z"/>
+    <path class="deep" d="M57 83c14-10 33-10 47 0l9 58H48z"/>
+    <path class="white" d="M72 83h18l-4 35H75z"/><path class="gold" d="M78 83h7l4 21-7 10-7-10z"/>
+    <path class="line" d="M61 92l-19 26m60-26 22 23"/>
+    <rect class="orange" x="111" y="108" width="43" height="34" rx="5"/><path class="thin" d="M122 108v-8c0-7 21-7 21 0v8"/>
+    <path class="ink" d="M54 140h20l-4 34H50zm29 0h20l10 34H93z"/>
+    <path class="gold" d="M181 119h26v22h-26z"/>
+  </symbol>
+
+  <symbol id="scene-account" viewBox="0 0 260 190">
+    <circle class="soft" cx="130" cy="94" r="82"/>
+    <rect class="white" x="116" y="34" width="105" height="116" rx="8"/>
+    <path class="pale" d="M134 54h68v13h-68zm0 25h48v9h-48zm0 19h60v9h-60zm0 20h40v9h-40z"/>
+    <circle class="gold" cx="199" cy="126" r="16"/><path class="deep" d="M192 126l5 5 10-13 4 4-14 17-9-9z"/>
+    <circle class="skin" cx="73" cy="65" r="18"/><path class="ink" d="M55 65c2-23 34-25 37-3-12-7-25-6-37 3z"/>
+    <path class="orange" d="M49 89c14-10 33-10 47 0l10 57H40z"/>
+    <path class="line" d="M55 98l-20 27m57-27 21 20"/>
+    <path class="ink" d="M46 145h20l-5 31H42zm29 0h20l9 31H84z"/>
+  </symbol>
+
+  <symbol id="scene-welcome" viewBox="0 0 260 190">
+    <circle class="soft" cx="130" cy="95" r="82"/>
+    <path class="gold" d="M181 35l8 17 19 3-14 13 4 19-17-9-17 9 4-19-14-13 19-3z"/>
+    <circle class="skin" cx="103" cy="65" r="20"/><path class="ink" d="M83 65c2-26 38-28 41-3-14-7-28-6-41 3z"/>
+    <path class="orange" d="M72 94c18-13 42-13 59 0l12 64H60z"/>
+    <path class="line" d="M77 105l-25 29m74-29 31 12"/>
+    <rect class="deep" x="149" y="97" width="55" height="43" rx="5" transform="rotate(5 149 97)"/>
+    <circle class="gold" cx="177" cy="117" r="10"/><path class="thin" d="M169 117h16m-8-8c-6 7-6 13 0 18m0-18c6 7 6 13 0 18"/>
+    <path class="ink" d="M68 157h24l-5 25H63zm37 0h24l10 25h-24z"/>
+  </symbol>
+
+  <symbol id="scene-celebrate" viewBox="0 0 260 190">
+    <circle class="soft" cx="130" cy="101" r="78"/>
+    <path class="orange" d="M45 42l8 8-8 8-8-8zm161 17l9 9-9 9-9-9z"/><circle class="gold" cx="73" cy="29" r="7"/><circle class="deep" cx="193" cy="34" r="6"/>
+    <path class="gold" d="M91 43l8 19 20 2-15 13 5 20-18-10-18 10 5-20-15-13 20-2z"/>
+    <circle class="skin" cx="132" cy="72" r="20"/><path class="ink" d="M112 71c2-27 39-28 42-3-14-8-28-7-42 3z"/>
+    <path class="orange" d="M101 101c19-13 43-13 62 0l13 60H89z"/>
+    <path class="line" d="M106 108L74 83m84 25 32-26"/>
+    <path class="ink" d="M98 160h25l-5 24H93zm39 0h25l10 24h-25z"/>
+    <circle class="white" cx="132" cy="125" r="14"/><path class="deep" d="M124 125l6 6 12-16 5 4-17 21-11-11z"/>
+  </symbol>
+
+  <symbol id="object-shield" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <path class="orange" d="M80 20l43 18v31c0 27-18 47-43 56-25-9-43-29-43-56V38z"/>
+    <path class="white" d="M58 70l14 14 31-38 8 7-39 48-22-22z"/>
+  </symbol>
+
+  <symbol id="object-terms" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <rect class="white" x="44" y="23" width="72" height="96" rx="8"/>
+    <path class="pale" d="M57 42h46v8H57zm0 17h36v7H57zm0 15h46v7H57zm0 15h31v7H57z"/>
+    <circle class="orange" cx="105" cy="102" r="22"/>
+    <path class="white" d="M94 102h22v5H94zm11-14v28h-5V88z"/>
+  </symbol>
+
+  <symbol id="object-hotel-stay" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <rect class="white" x="36" y="36" width="88" height="66" rx="10"/>
+    <path class="pale" d="M48 50h18v15H48zm29 0h18v15H77zm29 0h10v15h-10z"/>
+    <path class="orange" d="M44 80h72v22H44z"/>
+    <path class="deep" d="M52 70h29c8 0 14 6 14 14v18H52z"/>
+    <path class="white" d="M59 79h24c4 0 7 3 7 7v5H59z"/>
+    <path class="gold" d="M98 74h22v28H98z"/>
+    <path class="thin" d="M44 102h78M80 36V24m-14 0h28"/>
+    <circle class="gold" cx="109" cy="88" r="4"/>
+  </symbol>
+
+  <symbol id="object-visa-doc" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <rect class="white" x="47" y="24" width="66" height="92" rx="8"/>
+    <path class="pale" d="M59 42h42v8H59zm0 56h32v7H59z"/>
+    <circle class="gold" cx="80" cy="69" r="19"/>
+    <path class="thin" d="M61 69h38M80 50c9 11 9 27 0 38M80 50c-9 11-9 27 0 38"/>
+    <path class="orange" d="M100 88l19 10-16 10-19-10z"/>
+    <path class="deep" d="M106 95l7 4-9 5-7-4z"/>
+  </symbol>
+
+  <symbol id="object-secure-login" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <rect class="white" x="42" y="48" width="76" height="56" rx="10"/>
+    <path class="thin" d="M58 48V37c0-26 44-26 44 0v11"/>
+    <circle class="gold" cx="80" cy="74" r="12"/>
+    <path class="deep" d="M77 82h6l4 12H73z"/>
+    <path class="orange" d="M55 24h17v9H55z"/>
+    <path class="thin" d="M63 33v14"/>
+  </symbol>
+
+  <symbol id="object-mail-lock" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <rect class="orange" x="28" y="43" width="80" height="56" rx="8"/>
+    <path class="white" d="M35 51l33 25 33-25v10L68 86 35 61z"/>
+    <rect class="deep" x="85" y="72" width="43" height="43" rx="8"/>
+    <path class="thin" d="M95 72V61c0-15 23-15 23 0v11"/>
+    <circle class="gold" cx="107" cy="91" r="5"/>
+  </symbol>
+
+  <symbol id="object-compass" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <circle class="white" cx="80" cy="70" r="40"/><circle class="deep" cx="80" cy="70" r="6"/>
+    <path class="orange" d="M95 43L86 74 65 97l9-31z"/><path class="gold" d="M65 97l9-31 12 8z"/>
+    <path class="thin" d="M80 28v9m0 66v9M38 70h9m66 0h9"/>
+  </symbol>
+
+  <symbol id="object-camera" viewBox="0 0 160 140">
+    <circle class="soft" cx="80" cy="70" r="58"/>
+    <rect class="orange" x="27" y="47" width="106" height="66" rx="10"/>
+    <path class="deep" d="M49 47l9-17h34l10 17z"/><circle class="white" cx="82" cy="80" r="25"/><circle class="gold" cx="82" cy="80" r="15"/>
+    <circle class="white" cx="116" cy="60" r="6"/>
+  </symbol>
+</svg>
