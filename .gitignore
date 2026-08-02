@@ -1,2 +1,7 @@
 .claude/
-kridiya-corporate/
+.agents/
+.codex-worktrees/
+.tools/
+output/
+kridiya-corporate-live/
+docs/
