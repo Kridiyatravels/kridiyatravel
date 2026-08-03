@@ -1,7 +1,7 @@
 -- Register every Kridiya template in public.templates.
 --
 -- public.templates is the registry the admin UI lists, and it was empty:
--- nothing pointed at any of the 41 templates that exist on disk, so staff
+-- nothing pointed at any of the 45 templates that exist on disk, so staff
 -- had no way to find them.
 --
 -- NOT YET APPLIED. Review, then apply with the backend session's tooling.
@@ -52,7 +52,11 @@ values
   ('Email — Payment receipt', 'customer_email', 'email', 'templates/emails/10-receipt-sent.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens.'),
   ('Email — Cancellation and refund update', 'customer_email', 'email', 'templates/emails/11-cancellation-refund-update.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens.'),
   ('Email — Staff handover note', 'internal_email', 'email', 'templates/emails/12-staff-handover-note.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens. Internal only.'),
-  ('Email — Kridiya Travel update', 'marketing_email', 'email', 'templates/emails/13-marketing-shell.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens. Requires a signed {{ unsubscribe_url }} from the marketing-unsubscribe function.'),
+  ('Email — Your e-ticket', 'customer_email', 'email', 'templates/emails/13-eticket-issued.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens.'),
+  ('Email — Visa application outcome', 'customer_email', 'email', 'templates/emails/14-visa-outcome.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens.'),
+  ('Email — Your hotel voucher', 'customer_email', 'email', 'templates/emails/15-hotel-voucher-issued.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens.'),
+  ('Email — Your monthly statement', 'customer_email', 'email', 'templates/emails/16-monthly-statement.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens.'),
+  ('Email — Kridiya Travel update', 'marketing_email', 'email', 'templates/emails/17-marketing-shell.html', 'active', 'Has a matching .txt plain-text alternative with the same tokens. Requires a signed {{ unsubscribe_url }} from the marketing-unsubscribe function.'),
   ('Auth email — Change email', 'auth_email', 'email', 'docs/email-template-preview-change-email.html', 'active', 'Supabase auth template. Needs a plain-text alternative.'),
   ('Auth email — Confirm signup', 'auth_email', 'email', 'docs/email-template-preview-confirm-signup.html', 'active', 'Supabase auth template. Needs a plain-text alternative.'),
   ('Auth email — Invite user', 'auth_email', 'email', 'docs/email-template-preview-invite-user.html', 'active', 'Supabase auth template. Needs a plain-text alternative.'),
