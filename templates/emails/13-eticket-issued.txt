@@ -1,0 +1,18 @@
+Your e-ticket is ready
+
+Hi {{ customer_name }}, your ticket has been issued and the e-ticket receipt is attached to this email.
+
+Carry it with the passport used to book. You can check in online or at the airport counter.
+
+- Booking reference: {{ booking_reference }}
+- Airline reference: {{ pnr }}
+- Route: {{ route_or_destination }}
+- Departure: {{ departure_datetime }}
+- Passengers: {{ passengers }}
+- Baggage: {{ baggage }}
+
+Check every traveller name against the passport now. After ticketing, name corrections may not be possible and can incur airline charges. Arrive at least three hours before an international departure.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

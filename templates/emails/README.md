@@ -20,9 +20,13 @@ plain-text part is itself a spam signal.
 | `10-receipt-sent` | Payment receipt - Booking {{ booking_reference }} |
 | `11-cancellation-refund-update` | Cancellation/refund update - Booking {{ booking_reference }} |
 | `12-staff-handover-note` | Handover - Booking {{ booking_reference }} |
-| `13-marketing-shell` | {{ subject }} |
+| `13-eticket-issued` | E-ticket issued - Booking {{ booking_reference }} |
+| `14-visa-outcome` | Visa application outcome - {{ booking_reference }} |
+| `15-hotel-voucher-issued` | Hotel voucher - Booking {{ booking_reference }} |
+| `16-monthly-statement` | Monthly statement {{ period }} - {{ company_name }} |
+| `17-marketing-shell` | {{ subject }} |
 
-`13-marketing-shell` is the only one carrying the unsubscribe footer. Any
+`17-marketing-shell` is the only one carrying the unsubscribe footer. Any
 marketing send must use it and must fill `{{ unsubscribe_url }}` with a
 signed link from the marketing-unsubscribe function.
 

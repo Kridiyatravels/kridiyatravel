@@ -424,7 +424,95 @@ const TEMPLATES = [
     footer: "Internal document. It contains operational detail that is not shared with customers."
   },
   {
-    file: "13-marketing-shell",
+    file: "13-eticket-issued",
+    title: "Your e-ticket",
+    subject: "E-ticket issued - Booking {{ booking_reference }}",
+    preheader: "Your e-ticket is attached. Check every name against the passport.",
+    eyebrow: "Ticket issued",
+    heading: "Your e-ticket is ready",
+    body: [
+      "Hi {{ customer_name }}, your ticket has been issued and the e-ticket receipt is attached to this email.",
+      "Carry it with the passport used to book. You can check in online or at the airport counter."
+    ],
+    fields: [
+      { label: "Booking reference", value: "{{ booking_reference }}" },
+      { label: "Airline reference", value: "{{ pnr }}" },
+      { label: "Route", value: "{{ route_or_destination }}" },
+      { label: "Departure", value: "{{ departure_datetime }}" },
+      { label: "Passengers", value: "{{ passengers }}" },
+      { label: "Baggage", value: "{{ baggage }}" }
+    ],
+    note: "Check every traveller name against the passport now. After ticketing, name corrections may not be possible and can incur airline charges. Arrive at least three hours before an international departure."
+  },
+  {
+    file: "14-visa-outcome",
+    title: "Visa application outcome",
+    subject: "Visa application outcome - {{ booking_reference }}",
+    preheader: "The issuing authority has returned a decision on your application.",
+    eyebrow: "Visa update",
+    heading: "There is a decision on your visa application",
+    body: [
+      "Hi {{ customer_name }}, the issuing authority has returned its decision on your application. The full outcome document is attached.",
+      "{{ outcome_sentence }}"
+    ],
+    fields: [
+      { label: "Kridiya reference", value: "{{ booking_reference }}" },
+      { label: "Application number", value: "{{ application_number }}" },
+      { label: "Country", value: "{{ country }}" },
+      { label: "Visa type", value: "{{ visa_type }}" },
+      { label: "Outcome", value: "{{ outcome }}" },
+      { label: "Decision date", value: "{{ decided_on }}" }
+    ],
+    // One email covers approval and refusal, so the sentence and the note
+    // are both filled by the caller. Writing a fixed congratulatory line
+    // here would send it on a refusal too.
+    note: "{{ next_step_note }}"
+  },
+  {
+    file: "15-hotel-voucher-issued",
+    title: "Your hotel voucher",
+    subject: "Hotel voucher - Booking {{ booking_reference }}",
+    preheader: "Your hotel voucher is attached. Present it at check-in.",
+    eyebrow: "Voucher issued",
+    heading: "Your hotel voucher is ready",
+    body: [
+      "Hi {{ customer_name }}, your hotel reservation is arranged and the voucher is attached.",
+      "Present the voucher with the lead guest's passport at check-in."
+    ],
+    fields: [
+      { label: "Hotel", value: "{{ hotel_name }}" },
+      { label: "Address", value: "{{ hotel_address }}" },
+      { label: "Check-in", value: "{{ check_in }}" },
+      { label: "Check-out", value: "{{ check_out }}" },
+      { label: "Room", value: "{{ room_type }}" },
+      { label: "Hotel confirmation", value: "{{ hotel_confirmation }}" },
+      { label: "Kridiya reference", value: "{{ booking_reference }}" }
+    ],
+    note: "The hotel may ask for a card at check-in to cover extras such as minibar or laundry — those are settled directly by the guest. Tourism and city fees charged at the property are payable locally unless the voucher states they are included."
+  },
+  {
+    file: "16-monthly-statement",
+    title: "Your monthly statement",
+    subject: "Monthly statement {{ period }} - {{ company_name }}",
+    preheader: "Your company statement for the period is attached.",
+    eyebrow: "Company statement",
+    heading: "Your monthly statement is ready",
+    body: [
+      "Hi {{ contact_name }}, the statement for {{ company_name }} covering {{ period }} is attached."
+    ],
+    fields: [
+      { label: "Statement number", value: "{{ statement_number }}" },
+      { label: "Period", value: "{{ period }}" },
+      { label: "Bookings in period", value: "{{ booking_count }}" },
+      { label: "Invoiced", value: "{{ currency }} {{ invoiced }}" },
+      { label: "Received", value: "{{ currency }} {{ received }}" },
+      { label: "Balance outstanding", value: "{{ currency }} {{ outstanding }}" },
+      { label: "Payment narrative", value: "{{ statement_number }}" }
+    ],
+    note: "Please quote the payment narrative on any transfer so it can be matched to your account. If any line is disputed, tell us within seven days and we will hold that line while it is checked."
+  },
+  {
+    file: "17-marketing-shell",
     title: "Kridiya Travel update",
     subject: "{{ subject }}",
     preheader: "{{ preheader }}",
@@ -471,7 +559,7 @@ function build() {
     return "| `" + row.file + "` | " + row.subject + " |";
   })).concat([
     "",
-    "`13-marketing-shell` is the only one carrying the unsubscribe footer. Any",
+    "`17-marketing-shell` is the only one carrying the unsubscribe footer. Any",
     "marketing send must use it and must fill `{{ unsubscribe_url }}` with a",
     "signed link from the marketing-unsubscribe function.",
     "",

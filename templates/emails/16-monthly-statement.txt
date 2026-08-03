@@ -1,0 +1,17 @@
+Your monthly statement is ready
+
+Hi {{ contact_name }}, the statement for {{ company_name }} covering {{ period }} is attached.
+
+- Statement number: {{ statement_number }}
+- Period: {{ period }}
+- Bookings in period: {{ booking_count }}
+- Invoiced: {{ currency }} {{ invoiced }}
+- Received: {{ currency }} {{ received }}
+- Balance outstanding: {{ currency }} {{ outstanding }}
+- Payment narrative: {{ statement_number }}
+
+Please quote the payment narrative on any transfer so it can be matched to your account. If any line is disputed, tell us within seven days and we will hold that line while it is checked.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

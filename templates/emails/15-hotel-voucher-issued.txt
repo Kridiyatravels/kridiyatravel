@@ -1,0 +1,19 @@
+Your hotel voucher is ready
+
+Hi {{ customer_name }}, your hotel reservation is arranged and the voucher is attached.
+
+Present the voucher with the lead guest's passport at check-in.
+
+- Hotel: {{ hotel_name }}
+- Address: {{ hotel_address }}
+- Check-in: {{ check_in }}
+- Check-out: {{ check_out }}
+- Room: {{ room_type }}
+- Hotel confirmation: {{ hotel_confirmation }}
+- Kridiya reference: {{ booking_reference }}
+
+The hotel may ask for a card at check-in to cover extras such as minibar or laundry — those are settled directly by the guest. Tourism and city fees charged at the property are payable locally unless the voucher states they are included.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

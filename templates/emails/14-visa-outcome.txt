@@ -1,0 +1,18 @@
+There is a decision on your visa application
+
+Hi {{ customer_name }}, the issuing authority has returned its decision on your application. The full outcome document is attached.
+
+{{ outcome_sentence }}
+
+- Kridiya reference: {{ booking_reference }}
+- Application number: {{ application_number }}
+- Country: {{ country }}
+- Visa type: {{ visa_type }}
+- Outcome: {{ outcome }}
+- Decision date: {{ decided_on }}
+
+{{ next_step_note }}
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com
