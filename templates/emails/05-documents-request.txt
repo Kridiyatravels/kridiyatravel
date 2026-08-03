@@ -1,0 +1,11 @@
+Documents required to continue
+
+Hi {{ customer_name }}, to continue with your {{ service }} we need the documents listed below.
+
+{{ document_list }}
+
+Please make sure every document is clear and valid. Passport copies must show the full details page, with all four corners visible and no glare.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

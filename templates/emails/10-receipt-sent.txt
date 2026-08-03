@@ -1,0 +1,14 @@
+Thank you — your payment is recorded
+
+Hi {{ customer_name }}, we have recorded your payment. The receipt is attached to this email.
+
+- Booking reference: {{ booking_reference }}
+- Amount received: {{ currency }} {{ amount }}
+- Payment method: {{ payment_method }}
+- Receipt number: {{ receipt_number }}
+
+Please keep the receipt for your records.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

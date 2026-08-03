@@ -1,0 +1,13 @@
+A gentle reminder about your payment
+
+Hi {{ customer_name }}, this is a follow-up on the pending payment for booking {{ booking_reference }}.
+
+- Booking reference: {{ booking_reference }}
+- Amount pending: {{ currency }} {{ amount_pending }}
+- Payment reference: {{ booking_reference }}
+
+Please complete the payment and share the proof so we can continue with the booking. Fares and availability are not held against an unpaid balance.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com
