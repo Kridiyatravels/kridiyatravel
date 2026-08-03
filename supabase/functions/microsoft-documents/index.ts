@@ -196,7 +196,14 @@ async function uploadBookingDocument(form: FormData, caller: SupabaseClient, adm
   if (!(file instanceof File) || !bookingId) throw new Error("Booking and file are required");
   const { data: booking, error: bookingError } = await admin.from("bookings")
     .select("id, user_id, booking_reference, created_at").eq("id", bookingId).maybeSingle();
-  if (bookingError || !booking) throw new Error("Booking not found");
+  if (bookingError) {
+    console.error("Microsoft document booking lookup failed", { bookingId, code: bookingError.code, message: bookingError.message });
+    throw new Error(`Booking lookup failed (${bookingError.code || "database"})`);
+  }
+  if (!booking) {
+    console.error("Microsoft document booking was not found", { bookingId });
+    throw new Error("Booking not found");
+  }
   const token = await graphToken();
   const folder = await bookingFolder(token, booking, categoryFor(documentType));
   const uploaded = await uploadFile(token, folder, file);
