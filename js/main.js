@@ -477,6 +477,7 @@ function renderChrome() {
         "</ul></div>" +
         "<div><h4>Company</h4><ul class=\"footer-links\">" +
           '<li><a href="about.html">About Us</a></li>' +
+          '<li><a href="guides/">Travel Guides</a></li>' +
           '<li><a href="contact.html">Contact Us</a></li>' +
           '<li><a href="login.html">Customer Login</a></li>' +
           '<li><a href="https://corporate.kridiyatravel.com/login.html?next=corporate-account.html">Corporate Portal</a></li>' +
