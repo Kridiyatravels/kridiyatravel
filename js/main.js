@@ -401,7 +401,7 @@ function renderChrome() {
         '<div class="topbar-group">' +
           '<span class="topbar-item">' + icon("phone") + '<a href="tel:' + KRIDIYA.phoneTel + '">' + KRIDIYA.phoneDisplay + "</a></span>" +
           '<span class="topbar-item optional">' + icon("mail") + '<a href="mailto:' + KRIDIYA.emails.info + '">' + KRIDIYA.emails.info + "</a></span>" +
-          '<span class="topbar-item optional">' + icon("pin") + "<span>" + KRIDIYA.address + "</span></span>" +
+          '<span class="topbar-item optional">' + icon("pin") + "<span>Registered in " + KRIDIYA.address + "</span></span>" +
         "</div>" +
         '<div class="topbar-social">' +
           '<a class="icon-instagram" href="' + KRIDIYA.social.instagram + '" target="_blank" rel="noopener" aria-label="Kridiya Travel on Instagram">' + icon("instagram") + "</a>" +
@@ -457,7 +457,7 @@ function renderChrome() {
       '<div class="container">' +
       '<div class="footer-grid">' +
         '<div class="footer-brand">' + logoHTML(true) +
-          "<p>" + KRIDIYA.legal + " is a licensed travel house in " + KRIDIYA.address +
+          "<p>" + KRIDIYA.legal + " is a licensed travel company registered in " + KRIDIYA.address +
           ". Flights, hotels, holidays, visas and Umrah — handled end to end by real travel experts.</p>" +
           '<div class="footer-social">' +
             '<a class="icon-instagram" href="' + KRIDIYA.social.instagram + '" target="_blank" rel="noopener" aria-label="Instagram">' + icon("instagram") + "</a>" +
@@ -488,7 +488,7 @@ function renderChrome() {
           '<li><a href="about.html#faq">FAQs</a></li>' +
         "</ul></div>" +
         "<div><h4>Get in Touch</h4><ul class=\"footer-contact\">" +
-          "<li>" + icon("pin") + "<span>" + KRIDIYA.legal + "<br>" + KRIDIYA.address + "</span></li>" +
+          "<li>" + icon("pin") + "<span>Registered office: " + KRIDIYA.address + "<br>No customer visits or walk-ins</span></li>" +
           "<li>" + icon("phone") + '<a href="tel:' + KRIDIYA.phoneTel + '">' + KRIDIYA.phoneDisplay + "</a></li>" +
           "<li>" + icon("mail") + '<a href="mailto:' + KRIDIYA.emails.info + '">' + KRIDIYA.emails.info + "</a></li>" +
         "</ul>" +
