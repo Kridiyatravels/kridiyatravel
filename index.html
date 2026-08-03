@@ -10,7 +10,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32">
 <link rel="apple-touch-icon" href="assets/favicon-180.png">
-<link rel="preload" as="image" href="assets/home/hero.jpg">
 <link rel="stylesheet" href="css/styles.css?v=20260731a">
 <link rel="canonical" href="https://www.kridiyatravel.com/">
 <!-- Social share preview. Replace og:image/twitter:image with a branded 1200x630 image when available. -->
@@ -95,7 +94,7 @@
 <main>
 
  <!-- Portal banner + booking widget -->
- <section class="hero hero-photo" aria-labelledby="hero-title" style="--hero-img: url('assets/home/hero.jpg')">
+ <section class="hero hero-photo" aria-labelledby="hero-title">
  <svg class="hero-plane" viewBox="0 0 200 120" aria-hidden="true">
  <path d="M0 100 C60 90 120 60 195 15" fill="none" stroke="oklch(0.83 0.15 84 / 0.7)" stroke-width="1.5" stroke-dasharray="5 7"/>
  <path d="M186 22 199 9l4-1-1 4-13 13-4 1z" fill="oklch(0.83 0.15 84)"/>
@@ -303,7 +302,7 @@
  </ul>
  </div>
  <div class="why-visual reveal">
- <img src="assets/home/hero.jpg" width="1600" height="1063" alt="Aircraft wing above the clouds at sunset" loading="lazy">
+ <picture><source type="image/webp" srcset="assets/home/hero-640.webp 640w, assets/home/hero-960.webp 960w, assets/home/hero-1600.webp 1600w" sizes="(max-width: 860px) 100vw, 50vw"><img src="assets/home/hero.jpg" width="1600" height="1063" alt="Aircraft wing above the clouds at sunset" loading="lazy" decoding="async"></picture>
  </div>
  </div>
  </section>

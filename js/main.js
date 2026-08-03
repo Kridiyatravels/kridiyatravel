@@ -863,6 +863,19 @@ function initDateMins() {
   });
 }
 
+function initAccessibilityLandmarks() {
+  const main = document.querySelector("main");
+  if (!main) return;
+  if (!main.id) main.id = "main-content";
+  if (!document.querySelector(".skip-link")) {
+    const link = document.createElement("a");
+    link.className = "skip-link";
+    link.href = "#" + main.id;
+    link.textContent = "Skip to main content";
+    document.body.insertBefore(link, document.body.firstChild);
+  }
+}
+
 function fmtDate(iso) {
   if (!iso) return "";
   const d = new Date(iso + "T00:00:00");
@@ -871,6 +884,7 @@ function fmtDate(iso) {
 
 /* ---------- Boot ---------- */
 document.addEventListener("DOMContentLoaded", function () {
+  initAccessibilityLandmarks();
   renderChrome();
   initAnalyticsConsentBanner();
   initDateMins();

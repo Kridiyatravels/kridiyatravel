@@ -2368,3 +2368,113 @@ body {
 .preference-status.error { color: #a52424; }
 .preference-status.pending { color: #6b4a20; }
 .preference-note { color: #665c50; font-size: 0.92rem; }
+
+/* Mobile accessibility baseline. Keep controls comfortably tappable without
+   inflating ordinary inline links or changing the established visual system. */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: calc(var(--z-drawer) + 2);
+  transform: translateY(-160%);
+  padding: 0.75rem 1rem;
+  border-radius: var(--r-sm);
+  background: var(--ink);
+  color: #fff;
+  font-weight: 800;
+}
+.skip-link:focus { transform: translateY(0); }
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.why-visual picture,
+.why-visual picture img { display: block; width: 100%; height: 100%; }
+.why-visual picture img { object-fit: cover; }
+@media (max-width: 720px) {
+  .btn,
+  .nav-toggle,
+  .main-nav a,
+  .widget-tab,
+  .fake-input,
+  .trip-type label,
+  .svc-link,
+  .topbar-social a,
+  .footer-social a,
+  .footer-links a,
+  .footer-contact a,
+  .footer-routes a,
+  .newsletter-consent a,
+  .topbar-item a,
+  .section-link,
+  .swap-btn,
+  .stepper button,
+  .cal-nav,
+  .sort-pill,
+  .wa-float,
+  .link-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .field input,
+  .field select,
+  .field textarea,
+  .newsletter-form input,
+  .cust-request-form input[type="text"] {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  .topbar,
+  .hero-badges,
+  .field label,
+  .seg-row .field label,
+  .form-note,
+  .analytics-consent p,
+  .preference-note {
+    font-size: max(0.8125rem, 13px);
+  }
+
+  .offer-left small,
+  .offer-body p,
+  .offer-code,
+  .dest-card .dest-fare,
+  .fare-note,
+  .hero-badges span,
+  .pkg-tag,
+  .pkg-price i,
+  .newsletter-consent,
+  .footer-legal,
+  .footer-routes p,
+  small { font-size: 13px !important; }
+
+  .newsletter-consent,
+  .newsletter-consent a,
+  .footer-routes,
+  .footer-routes a,
+  .footer-routes p { font-size: 13px !important; }
+
+  .trip-type input { width: 20px; height: 20px; }
+  .footer-links a,
+  .footer-contact a,
+  .footer-routes a,
+  .newsletter-consent a,
+  .topbar-item a,
+  .section-link { display: inline-flex; align-items: center; }
+
+  .hero-cta .btn { width: 100%; justify-content: center; }
+  .svc-row { gap: 0.5rem; }
+  .svc-link { padding-block: 0.65rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
