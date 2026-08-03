@@ -23,6 +23,18 @@ requireText("supabase/migrations/20260803093548_fix_booking_linked_quote_respons
   ["corporate quote response RPC", /respond_my_corporate_quote/],
   ["corporate membership authorization", /corporate_portal_members/],
 ]);
+requireText("supabase/functions/microsoft-documents/index.ts", [
+  ["Microsoft application token flow", /client_credentials/],
+  ["staff permission checks", /has_staff_permission/],
+  ["booking document upload", /upload_booking_document/],
+  ["payment proof upload", /upload_payment_proof/],
+  ["supplier invoice upload", /upload_supplier_invoice/],
+  ["authorized document download", /download_booking_document/],
+]);
+requireText("js/auth.js", [
+  ["Microsoft-backed customer download", /microsoft-documents/],
+  ["legacy Supabase download fallback", /createSignedUrl\(storagePath/],
+]);
 if (fs.existsSync("supabase/functions/marketing-unsubscribe/index.ts")) {
   requireText("js/unsubscribe.js", [
     ["unsubscribe function invocation", /marketing-unsubscribe/],
@@ -43,4 +55,4 @@ if (failures.length) {
   console.error(failures.join("\n"));
   process.exit(1);
 }
-console.log("Registration, staff PIN, quote response, and unsubscribe contracts are present.");
+console.log("Registration, staff PIN, quote response, unsubscribe, and Microsoft document contracts are present.");
