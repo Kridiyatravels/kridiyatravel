@@ -1,0 +1,18 @@
+{{ heading }}
+
+Hi {{ customer_name }},
+
+{{ body_paragraph_1 }}
+
+{{ body_paragraph_2 }}
+
+{{ cta_label }}: {{ cta_url }}
+
+{{ closing_note }}
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com
+
+You are receiving this because you asked Kridiya Travel to keep you updated.
+Unsubscribe: {{ unsubscribe_url }}

@@ -1,0 +1,16 @@
+We have your corporate travel request
+
+Hi {{ contact_name }}, thank you. We have received the corporate booking request for {{ company_name }}.
+
+- Company: {{ company_name }}
+- Requester: {{ requester_name }}
+- Service: {{ service }}
+- Route / destination: {{ route_or_destination }}
+- Travel date: {{ travel_date }}
+- Travellers: {{ travellers }}
+
+We will review availability, payment and LPO requirements, and supplier conditions, then come back to you.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

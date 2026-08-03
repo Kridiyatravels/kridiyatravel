@@ -1,0 +1,19 @@
+Booking handover
+
+Internal handover for booking {{ booking_reference }}. Do not forward this to the customer.
+
+- Booking: {{ booking_reference }}
+- Customer / company: {{ customer_name }}
+- Service: {{ service }}
+- Current status: {{ booking_status }}
+- Payment status: {{ payment_status }}
+- Supplier status / reference: {{ supplier_status }}
+- Pending action: {{ pending_action }}
+- Deadline: {{ deadline }}
+- Important notes: {{ notes }}
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com
+
+Internal document. It contains operational detail that is not shared with customers.

@@ -1,0 +1,16 @@
+Your booking is confirmed
+
+Hi {{ customer_name }}, your booking has been confirmed. The full confirmation document is attached.
+
+- Booking reference: {{ booking_reference }}
+- Service: {{ service }}
+- Route / destination: {{ route_or_destination }}
+- Travel date: {{ travel_date }}
+- Passengers: {{ passengers }}
+- Airline / hotel reference: {{ supplier_reference }}
+
+Check every traveller name against the passport now. Name corrections after ticketing may not be possible and can incur airline charges.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

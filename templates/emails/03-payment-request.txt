@@ -1,0 +1,19 @@
+Payment needed to proceed
+
+Hi {{ customer_name }}, to proceed with your booking please arrange payment of the amount below.
+
+- Booking reference: {{ booking_reference }}
+- Service: {{ service }}
+- Total booking value: {{ currency }} {{ total_amount }}
+- Amount due now: {{ currency }} {{ amount_due }}
+- Payment method: {{ payment_method }}
+- Account holder: KRIDIYA Travel and Tourism FZ-LLC
+- IBAN: AE540860000009813682904
+- BIC: WIOBAEADXXX
+- Payment reference: {{ booking_reference }}
+
+Please send the payment proof once completed. Ticketing, visa submission and supplier confirmation proceed only after payment is confirmed.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

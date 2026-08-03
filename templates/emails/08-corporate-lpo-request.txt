@@ -1,0 +1,15 @@
+LPO or written approval needed
+
+Hi {{ contact_name }}, for corporate booking {{ booking_reference }} we need the LPO or written approval before we confirm with the supplier.
+
+- Booking reference: {{ booking_reference }}
+- LPO number or approval email: {{ lpo_number }}
+- Approved amount: {{ currency }} {{ amount }}
+- Approving person: {{ approval_person }}
+- Billing / accounts contact: {{ billing_email }}
+
+Supplier confirmation cannot proceed until the approval is on file. Fares and availability may change in the meantime.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

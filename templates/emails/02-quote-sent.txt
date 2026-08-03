@@ -1,0 +1,19 @@
+Your travel quote is ready
+
+Hi {{ customer_name }}, here is the quote you asked for.
+
+- Service: {{ service }}
+- Route / destination: {{ route_or_destination }}
+- Travel date: {{ travel_date }}
+- Passengers: {{ passengers }}
+- Total amount: {{ currency }} {{ amount }}
+- Airline / hotel / supplier: {{ supplier_details }}
+- Valid until: {{ valid_until }}
+
+Confirm this quote: {{ confirm_url }}
+
+Fares, availability, visa rules and supplier conditions can change until booking and payment are completed. To proceed, confirm and arrange payment.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com

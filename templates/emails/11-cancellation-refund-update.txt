@@ -1,0 +1,15 @@
+Update on your cancellation and refund
+
+Hi {{ customer_name }}, here is the current position on the cancellation and refund for booking {{ booking_reference }}.
+
+- Booking reference: {{ booking_reference }}
+- Cancellation status: {{ cancellation_status }}
+- Refund amount, if applicable: {{ currency }} {{ refund_amount }}
+- Expected timeline: {{ timeline }}
+- Supplier / authority rule applied: {{ rule }}
+
+Refunds and cancellations follow the rules of the airline, hotel, visa authority or payment provider. Bank clearing times are outside our control.
+
+Regards,
+Kridiya Travel and Tourism FZ-LLC
++971 50 941 3873 - contact@kridiyatravel.com - www.kridiyatravel.com
