@@ -19,7 +19,7 @@ requireText("supabase/functions/staff-pin-login/index.ts", [
   ["atomic login admission", /staff_pin_login_begin/],
   ["login completion", /staff_pin_login_finish/],
 ]);
-requireText("supabase/migrations/20260801_fix_booking_linked_quote_responses.sql", [
+requireText("supabase/migrations/20260803093548_fix_booking_linked_quote_responses.sql", [
   ["corporate quote response RPC", /respond_my_corporate_quote/],
   ["corporate membership authorization", /corporate_portal_members/],
 ]);

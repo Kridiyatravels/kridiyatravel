@@ -10,9 +10,15 @@
 
 create sequence if not exists public.doc_statement_seq;
 
+-- The trigger can name a type that the documents column's enum still rejects.
+-- Add both values before any generator attempts to insert them.
+alter type public.document_type add value if not exists 'supplier_payment_note';
+alter type public.document_type add value if not exists 'monthly_statement';
+
 create or replace function public.set_document_number()
 returns trigger
 language plpgsql
+set search_path to 'public'
 as $function$
 declare
   yr text := to_char(now(), 'YYYY');
