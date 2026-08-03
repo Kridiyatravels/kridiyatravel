@@ -913,7 +913,7 @@ function enquiryFormHTML(opts) {
       '<div class="field"><label>PHONE / WHATSAPP</label><input name="Phone" type="tel" placeholder="+971 …" required value="' + (u && u.phone ? u.phone : "") + '"></div>' +
       '<div class="field"><label>ANYTHING ELSE? (OPTIONAL)</label><textarea name="Notes" placeholder="Preferred airline, budget, flexible dates…"></textarea></div>' +
       '<label class="form-consent"><input type="checkbox" name="Marketing_consent" value="Yes"> Send me occasional travel offers by email. I can opt out at any time.</label>' +
-      '<button class="btn btn-primary btn-block" type="submit">' + icon("mail") + " Send email</button>" +
+      '<button class="btn btn-primary btn-block" type="submit">' + icon("mail") + " Send request</button>" +
       '<p class="form-note">Goes straight to our travel experts. We reply within business hours, usually much faster.</p>' +
     "</form>" +
     '<p class="or">— or —</p>' +
