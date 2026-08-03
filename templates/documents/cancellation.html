@@ -1,0 +1,508 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cancellation Notice - Kridiya Travel and Tourism FZ-LLC</title>
+<style>
+  /* ============================================================
+     Kridiya Travel - cancellation notice
+     Renders from a booking row plus the cancellation charges.
+     Never renders supplier_cost, margin, or staff_notes.
+     Print target: single-page A4.
+     ============================================================ */
+  :root {
+    --brand-deep: #b6530f; --brand-soft: #fff4e6; --gold: #f6c445;
+    --ink: #2f2415; --heading-ink: #1e1509; --text: #574b3b;
+    --text-muted: #79694f; --bg: #fdf8f0; --surface: #ffffff;
+    --line: #f1e8d8; --line-strong: #e3d5be;
+    --ok-bg: #e8f5ec; --ok-ink: #1e6b3a;
+    --wait-bg: #fff4e6; --wait-ink: #b6530f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; padding: 28px 16px; background: var(--bg);
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: var(--text); font-size: 14px; line-height: 1.55;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  .sheet {
+    max-width: 780px; margin: 0 auto; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 14px; padding: 34px 36px 28px;
+  }
+
+  .head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--line-strong);
+  }
+  .brand-logo { height: 46px; width: auto; display: block; }
+  .brand-name { font-size: 17px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .brand-legal { font-size: 11px; color: var(--text-muted); margin: 3px 0 0; }
+  .doc-meta { text-align: right; flex-shrink: 0; }
+  .doc-kind {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--brand-deep); margin: 0 0 5px;
+  }
+  .doc-number { font-size: 20px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .doc-date { font-size: 12px; color: var(--text-muted); margin: 4px 0 0; }
+
+  .outcome {
+    margin: 22px 0; padding: 20px 22px; background: var(--bg);
+    border: 1px solid var(--line-strong); border-radius: 10px;
+  }
+  .outcome-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted); margin: 0 0 5px;
+  }
+  .outcome-title {
+    font-size: 23px; font-weight: 800; color: var(--heading-ink);
+    margin: 0; letter-spacing: -0.02em; line-height: 1.25; word-break: break-word;
+  }
+  .outcome-sub { font-size: 13px; color: var(--text); margin: 7px 0 0; }
+
+  .section-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin: 0 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+  }
+  .block { margin-bottom: 22px; }
+  .cols { display: flex; gap: 30px; margin-bottom: 22px; }
+  .col { flex: 1; min-width: 0; }
+
+  .rows { width: 100%; border-collapse: collapse; }
+  .rows th, .rows td { text-align: left; vertical-align: top; padding: 6px 0; font-size: 13px; line-height: 1.45; }
+  .rows th { font-weight: 500; color: var(--text-muted); width: 42%; padding-right: 12px; }
+  .rows td { color: var(--ink); font-weight: 600; word-break: break-word; }
+
+  .charges table { width: 100%; border-collapse: collapse; }
+  .charges th {
+    text-align: left; font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 0 10px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  .charges td {
+    padding: 9px 10px 9px 0; font-size: 13px; color: var(--ink);
+    border-bottom: 1px solid var(--line); vertical-align: top;
+  }
+  .charges td:first-child { font-weight: 700; }
+  .charges .num { text-align: right; padding-right: 0; white-space: nowrap; }
+  .charges tr:last-child td { border-bottom: 0; }
+
+  .money { display: flex; justify-content: flex-end; margin: 8px 0 22px; }
+  .money table { border-collapse: collapse; min-width: 300px; }
+  .money th { text-align: left; font-weight: 500; color: var(--text-muted); font-size: 13px; padding: 6px 24px 6px 0; }
+  .money td { text-align: right; font-weight: 700; color: var(--ink); font-size: 13px; padding: 6px 0; white-space: nowrap; }
+  .money tr.grand th, .money tr.grand td {
+    border-top: 2px solid var(--line-strong); padding-top: 10px;
+    font-size: 15px; font-weight: 800; color: var(--heading-ink);
+  }
+
+  .callout {
+    margin: 0 0 20px; padding: 13px 16px; border: 1px solid var(--line-strong);
+    border-radius: 9px; font-size: 13px; color: var(--heading-ink); font-weight: 600;
+  }
+  .callout.ok { background: var(--ok-bg); border-color: #cbe6d5; }
+  .callout.warn { background: var(--wait-bg); border-color: #f0d9b8; }
+
+  .notes {
+    margin: 0 0 20px; padding: 14px 16px; background: var(--bg); border-radius: 9px;
+    border-left: 3px solid var(--line-strong); font-size: 13px; color: var(--text);
+  }
+  .notes strong { color: var(--heading-ink); }
+
+  .terms {
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+    margin: 0 0 22px; padding-top: 16px; border-top: 1px solid var(--line);
+  }
+  .terms p { margin: 0 0 5px; }
+
+  .foot {
+    padding-top: 16px; border-top: 2px solid var(--line-strong);
+    display: flex; justify-content: space-between; gap: 24px;
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  }
+  .foot-block { flex: 1; min-width: 0; }
+  .foot-title { font-size: 11px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
+  .foot a { color: var(--brand-deep); text-decoration: none; }
+
+  .issued {
+    margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--text-muted);
+    display: flex; justify-content: space-between; gap: 16px;
+  }
+
+  .actions { max-width: 780px; margin: 0 auto 16px; display: flex; gap: 10px; justify-content: flex-end; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 8px;
+    cursor: pointer; border: 1px solid var(--line-strong); background: var(--surface); color: var(--brand-deep);
+  }
+  .btn.primary { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+
+  @page { size: A4; margin: 13mm; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 12.5px; }
+    .sheet { max-width: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+    .actions { display: none !important; }
+    .outcome { margin: 16px 0; padding: 16px 18px; }
+    .outcome-title { font-size: 20px; }
+    .cols, .block, .money { margin-bottom: 16px; }
+    .notes, .callout { margin-bottom: 14px; }
+    .terms { margin-bottom: 16px; }
+    .sheet, .cols, .foot, .outcome, .money { break-inside: avoid; }
+    .charges tr { break-inside: avoid; }
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 16px 10px; }
+    .sheet { padding: 22px 18px 20px; }
+    .head { flex-direction: column; gap: 16px; }
+    .doc-meta { text-align: left; }
+    .cols { flex-direction: column; gap: 18px; }
+    .money { justify-content: stretch; }
+    .money table { width: 100%; min-width: 0; }
+    .foot { flex-direction: column; gap: 16px; }
+    .issued { flex-direction: column; gap: 4px; }
+    .charges { overflow-x: auto; }
+    .charges table { min-width: 420px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="actions">
+  <button class="btn" type="button" onclick="window.close()">Close</button>
+  <button class="btn primary" type="button" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="sheet" id="cancellation">
+
+  <div class="head">
+    <div>
+      <img class="brand-logo" id="brandLogo" src="../../assets/brand/kridiya-logo-hd.png" alt="Kridiya Travel and Tourism">
+      <p class="brand-name" id="brandName" hidden>Kridiya Travel and Tourism</p>
+      <p class="brand-legal">Kridiya Travel and Tourism FZ-LLC &middot; Ras Al Khaimah, UAE</p>
+    </div>
+    <div class="doc-meta">
+      <p class="doc-kind">Cancellation Notice</p>
+      <p class="doc-number" data-field="document_number">CXL-2026-0001</p>
+      <p class="doc-date" data-field="issued_on">Issued 2 August 2026</p>
+    </div>
+  </div>
+
+  <div class="outcome">
+    <p class="outcome-label" data-field="service_label">Flight booking &middot; DXB &rarr; CMB &rarr; DXB</p>
+    <p class="outcome-title">This booking has been cancelled.</p>
+    <p class="outcome-sub" data-field="cancelled_line">Cancelled on 2 August 2026 at your request.</p>
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <p class="section-title">Booked for</p>
+      <table class="rows">
+        <tr data-field="company_row" hidden><th>Company</th><td data-field="company_name">—</td></tr>
+        <tr><th>Name</th><td data-field="customer_name">Mahendran Kumar</td></tr>
+        <tr><th>Email</th><td data-field="customer_email">mahendran@example.com</td></tr>
+        <tr><th>Phone</th><td data-field="customer_phone">+971 50 000 0000</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Cancelled booking</p>
+      <table class="rows">
+        <tr><th>Reference</th><td data-field="booking_reference">KRD-2026-0184</td></tr>
+        <tr><th>Service</th><td data-field="service_type">Flight</td></tr>
+        <tr data-field="supplier_row"><th>Supplier reference</th><td data-field="supplier_reference">ABC123</td></tr>
+        <tr data-field="travel_row"><th>Original travel dates</th><td data-field="travel_dates">12 &ndash; 24 September 2026</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="block charges" data-block="charges">
+    <p class="section-title">Cancellation charges</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:72%">Charge</th>
+          <th class="num" style="width:28%">Amount</th>
+        </tr>
+      </thead>
+      <tbody data-field="charge_rows">
+        <tr><td>Airline cancellation penalty</td><td class="num">AED 450.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="money" data-block="money">
+    <table>
+      <tr><th>Paid to Kridiya</th><td data-field="amount_paid">AED 4,850.00</td></tr>
+      <tr data-field="charges_row"><th>Cancellation charges</th><td data-field="charges_total">− AED 450.00</td></tr>
+      <tr class="grand"><th>Refund due to you</th><td data-field="refund_due">AED 4,400.00</td></tr>
+    </table>
+  </div>
+
+  <div class="callout ok" data-field="refund_callout">
+    A refund of <b data-field="refund_amount">AED 4,400.00</b> will be returned to the original payment method. A separate refund note is issued once it has been sent.
+  </div>
+
+  <div class="callout warn" data-field="no_refund_callout" hidden>
+    No refund is due on this cancellation. The charges above account for the full amount paid.
+  </div>
+
+  <div class="notes" data-field="reason_block">
+    <strong>Reason:</strong> <span data-field="reason">Cancelled at the customer's request.</span>
+  </div>
+
+  <div class="terms">
+    <p>This notice confirms that the booking above has been cancelled with the supplier. Once cancelled, the fare, room or visa slot is released and cannot be reinstated — a new booking would be made at the price available at that time.</p>
+    <p>Kridiya Travel and Tourism FZ-LLC is not registered for VAT. No VAT has been charged and no tax registration number applies to this document.</p>
+    <p>Cancellation penalties are set by the airline, hotel, consulate or supplier under the fare rules that applied when the booking was made. Kridiya cannot waive them.</p>
+    <p>Where a refund is due, the amount is returned to the original payment method. Bank clearing times are outside Kridiya's control.</p>
+  </div>
+
+  <div class="foot">
+    <div class="foot-block">
+      <p class="foot-title">Kridiya Travel and Tourism FZ-LLC</p>
+      FDRK7105, Compass Building, Al Shohada Road,<br>
+      Al Hamra Industrial Zone-FZ, Ras Al Khaimah, UAE
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Contact</p>
+      +971 50 941 3873<br>
+      <a href="mailto:contact@kridiyatravel.com">contact@kridiyatravel.com</a><br>
+      <a href="https://www.kridiyatravel.com">www.kridiyatravel.com</a>
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Licence</p>
+      Trade licence 5033347<br>
+      RAK Freezone, United Arab Emirates
+    </div>
+  </div>
+
+  <div class="issued">
+    <span>Issued by <span data-field="issued_by">Kridiya Travel</span></span>
+    <span data-field="generated_stamp">Generated 2 August 2026</span>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   renderCancellation(booking, charges, extras)
+
+   booking - a row from public.bookings
+   charges - [{ description, amount }] penalties actually applied
+   extras  - { customer: {...}, company_name, document_number,
+               issued_by, amount_paid, currency, cancelled_on,
+               reason, cancelled_by } (optional)
+
+   Never reads supplier_cost, margin, or staff_notes.
+   ------------------------------------------------------------------ */
+
+const SERVICE_LABELS = {
+  flight: "Flight booking", hotel: "Hotel booking", holiday: "Holiday package",
+  visa: "Visa application", umrah: "Umrah package", cruise: "Cruise booking",
+  insurance: "Travel insurance", transfer: "Airport transfer",
+  corporate: "Corporate booking", other: "Travel booking"
+};
+
+function textOrDash(value) {
+  const clean = value === null || value === undefined ? "" : String(value).trim();
+  return clean || "—";
+}
+
+function toNumber(value) {
+  if (value === null || value === undefined || String(value).trim() === "") return null;
+  const n = Number(value);
+  return isFinite(n) ? n : null;
+}
+
+function formatMoney(amount, currency) {
+  const value = toNumber(amount);
+  if (value === null) return "—";
+  return (currency || "AED") + " " + value.toLocaleString("en-AE", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function humanise(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return "—";
+  return clean.charAt(0).toUpperCase() + clean.slice(1).replace(/_/g, " ");
+}
+
+function escapeHtml(value) {
+  return String(value === null || value === undefined ? "" : value).replace(/[&<>"']/g, function (ch) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  });
+}
+
+function setField(name, value) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (node) {
+    node.textContent = value;
+  });
+}
+
+function showField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.hidden = false; });
+}
+
+function hideField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.hidden = true; });
+}
+
+function removeField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.remove(); });
+}
+
+function removeBlock(name) {
+  const block = document.querySelector('[data-block="' + name + '"]');
+  if (block) block.remove();
+}
+
+function travelDates(booking) {
+  const start = formatDate(booking.travel_start);
+  const end = formatDate(booking.travel_end);
+  if (start && end && start !== end) return start + " – " + end;
+  return start || end || "";
+}
+
+function renderCharges(charges, currency) {
+  const body = document.querySelector('[data-field="charge_rows"]');
+  if (!body) return 0;
+
+  const list = (Array.isArray(charges) ? charges : []).filter(function (c) {
+    return c && (String(c.description || "").trim() || toNumber(c.amount) !== null);
+  });
+
+  if (list.length === 0) { removeBlock("charges"); return 0; }
+
+  let total = 0;
+  body.innerHTML = list.map(function (charge) {
+    const amount = toNumber(charge.amount);
+    if (amount !== null) total += amount;
+    return "<tr><td>" + escapeHtml(textOrDash(charge.description)) + "</td>" +
+      '<td class="num">' + escapeHtml(formatMoney(charge.amount, currency)) + "</td></tr>";
+  }).join("");
+
+  return total;
+}
+
+function renderCancellation(booking, charges, extras) {
+  booking = booking || {};
+  extras = extras || {};
+  const customer = extras.customer || {};
+  const currency = extras.currency || booking.currency || "AED";
+
+  setField("document_number", textOrDash(extras.document_number));
+  const cancelledOn = formatDate(extras.cancelled_on || new Date());
+  setField("issued_on", "Issued " + (cancelledOn || "—"));
+  setField("generated_stamp", "Generated " + (formatDate(new Date()) || "—"));
+  setField("issued_by", textOrDash(extras.issued_by || "Kridiya Travel"));
+
+  const label = [SERVICE_LABELS[booking.service_type] || humanise(booking.service_type),
+                 String(booking.route_or_destination || "").trim()]
+                .filter(function (v) { return v && v !== "—"; }).join(" · ");
+  const labelNode = document.querySelector('[data-field="service_label"]');
+  if (labelNode) { if (label) labelNode.textContent = label; else labelNode.remove(); }
+
+  // "at your request" is only true when the customer asked. Anything else
+  // is left unattributed rather than blamed on them.
+  const by = String(extras.cancelled_by || "").trim().toLowerCase();
+  const attribution = by === "customer" ? " at your request."
+    : by === "supplier" ? " by the supplier."
+    : ".";
+  setField("cancelled_line", cancelledOn
+    ? "Cancelled on " + cancelledOn + attribution
+    : "This booking has been cancelled" + attribution);
+
+  if (String(extras.company_name || "").trim()) {
+    setField("company_name", extras.company_name);
+    showField("company_row");
+  } else {
+    hideField("company_row");
+  }
+
+  setField("customer_name", textOrDash(customer.full_name || booking.title));
+  setField("customer_email", textOrDash(customer.email));
+  setField("customer_phone", textOrDash(customer.phone || customer.whatsapp));
+
+  setField("booking_reference", textOrDash(booking.booking_reference));
+  setField("service_type", humanise(booking.service_type));
+
+  if (String(booking.supplier_reference || "").trim()) {
+    setField("supplier_reference", booking.supplier_reference);
+  } else {
+    removeField("supplier_row");
+  }
+
+  const dates = travelDates(booking);
+  if (dates) setField("travel_dates", dates); else removeField("travel_row");
+
+  // ---- money ----
+  const chargeTotal = renderCharges(charges, currency);
+  const paid = toNumber(extras.amount_paid);
+
+  if (paid === null) {
+    // Without a known amount paid, a refund line would be a guess.
+    removeBlock("money");
+    removeField("refund_callout");
+    removeField("no_refund_callout");
+  } else {
+    setField("amount_paid", formatMoney(paid, currency));
+    if (chargeTotal > 0) {
+      setField("charges_total", "− " + formatMoney(chargeTotal, currency));
+    } else {
+      removeField("charges_row");
+    }
+    const refund = Math.max(0, paid - chargeTotal);
+    setField("refund_due", formatMoney(refund, currency));
+
+    if (refund > 0.009) {
+      setField("refund_amount", formatMoney(refund, currency));
+      hideField("no_refund_callout");
+    } else {
+      removeField("refund_callout");
+      showField("no_refund_callout");
+    }
+  }
+
+  const reasonBlock = document.querySelector('[data-field="reason_block"]');
+  if (reasonBlock) {
+    if (String(extras.reason || "").trim()) {
+      setField("reason", extras.reason);
+    } else {
+      reasonBlock.remove();
+    }
+  }
+
+  document.title = "Cancellation " + textOrDash(extras.document_number) + " - Kridiya Travel";
+}
+
+// A missing logo file must never leave an empty box on a printed document.
+(function () {
+  const logo = document.getElementById("brandLogo");
+  if (!logo) return;
+  logo.addEventListener("error", function () {
+    logo.hidden = true;
+    const name = document.getElementById("brandName");
+    if (name) name.hidden = false;
+  });
+})();
+
+window.renderCancellation = renderCancellation;
+</script>
+
+</body>
+</html>

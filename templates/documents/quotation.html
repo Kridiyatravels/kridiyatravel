@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quotation - Kridiya Travel and Tourism FZ-LLC</title>
+<style>
+  /* ============================================================
+     Kridiya Travel - quotation
+     Renders from a public.quotes row plus the enquiry customer.
+     Never renders supplier_cost, margin, or staff_notes.
+     Print target: single-page A4.
+     ============================================================ */
+  :root {
+    --brand-deep: #b6530f; --brand-soft: #fff4e6; --gold: #f6c445;
+    --ink: #2f2415; --heading-ink: #1e1509; --text: #574b3b;
+    --text-muted: #79694f; --bg: #fdf8f0; --surface: #ffffff;
+    --line: #f1e8d8; --line-strong: #e3d5be;
+    --ok-bg: #e8f5ec; --ok-ink: #1e6b3a;
+    --wait-bg: #fff4e6; --wait-ink: #b6530f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; padding: 28px 16px; background: var(--bg);
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: var(--text); font-size: 14px; line-height: 1.55;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  .sheet {
+    max-width: 780px; margin: 0 auto; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 14px; padding: 34px 36px 28px;
+  }
+
+  .head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--line-strong);
+  }
+  .brand-logo { height: 46px; width: auto; display: block; }
+  .brand-name { font-size: 17px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .brand-legal { font-size: 11px; color: var(--text-muted); margin: 3px 0 0; }
+  .doc-meta { text-align: right; flex-shrink: 0; }
+  .doc-kind {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--brand-deep); margin: 0 0 5px;
+  }
+  .doc-number { font-size: 20px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .doc-date { font-size: 12px; color: var(--text-muted); margin: 4px 0 0; }
+
+  .price {
+    margin: 22px 0; padding: 20px 22px; background: var(--brand-soft); border-radius: 10px;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  }
+  .price-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--brand-deep); margin: 0 0 4px;
+  }
+  .price-value {
+    font-size: 30px; font-weight: 800; color: var(--heading-ink);
+    margin: 0; letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .price-sub { font-size: 12.5px; color: #9a7040; margin: 5px 0 0; font-weight: 600; }
+  .price-side { text-align: right; flex-shrink: 0; }
+  .pill {
+    display: inline-block; padding: 7px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; white-space: nowrap;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--text);
+  }
+  .pill.ok { background: var(--ok-bg); border-color: #cbe6d5; color: var(--ok-ink); }
+  .pill.wait { background: var(--surface); border-color: #f0d9b8; color: var(--wait-ink); }
+
+  .section-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin: 0 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+  }
+  .block { margin-bottom: 22px; }
+  .cols { display: flex; gap: 30px; margin-bottom: 22px; }
+  .col { flex: 1; min-width: 0; }
+
+  .rows { width: 100%; border-collapse: collapse; }
+  .rows th, .rows td { text-align: left; vertical-align: top; padding: 6px 0; font-size: 13px; line-height: 1.45; }
+  .rows th { font-weight: 500; color: var(--text-muted); width: 42%; padding-right: 12px; }
+  .rows td { color: var(--ink); font-weight: 600; word-break: break-word; }
+
+  .items table { width: 100%; border-collapse: collapse; }
+  .items th {
+    text-align: left; font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 0 10px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  .items td {
+    padding: 9px 10px 9px 0; font-size: 13px; color: var(--ink);
+    border-bottom: 1px solid var(--line); vertical-align: top;
+  }
+  .items td:first-child { font-weight: 700; }
+  .items .num { text-align: right; padding-right: 0; white-space: nowrap; }
+  .items .muted { color: var(--text-muted); font-weight: 500; }
+  .items tr:last-child td { border-bottom: 0; }
+
+  .totals { display: flex; justify-content: flex-end; margin: 8px 0 22px; }
+  .totals table { border-collapse: collapse; min-width: 290px; }
+  .totals th { text-align: left; font-weight: 500; color: var(--text-muted); font-size: 13px; padding: 6px 24px 6px 0; }
+  .totals td { text-align: right; font-weight: 700; color: var(--ink); font-size: 13px; padding: 6px 0; white-space: nowrap; }
+  .totals tr.grand th, .totals tr.grand td {
+    border-top: 2px solid var(--line-strong); padding-top: 10px;
+    font-size: 15px; font-weight: 800; color: var(--heading-ink);
+  }
+
+  .notes {
+    margin: 0 0 20px; padding: 14px 16px; background: var(--bg); border-radius: 9px;
+    border-left: 3px solid var(--line-strong); font-size: 13px; color: var(--text);
+  }
+  .notes strong { color: var(--heading-ink); }
+
+  .callout {
+    margin: 0 0 20px; padding: 13px 16px; border: 1px solid var(--line-strong);
+    border-radius: 9px; font-size: 13px; color: var(--heading-ink); font-weight: 600;
+  }
+  .callout.warn { background: var(--wait-bg); border-color: #f0d9b8; }
+
+  .quote-terms { margin: 0 0 20px; }
+  .quote-terms ul { margin: 0; padding-left: 18px; }
+  .quote-terms li { font-size: 12.5px; color: var(--text); margin-bottom: 4px; }
+
+  .terms {
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+    margin: 0 0 22px; padding-top: 16px; border-top: 1px solid var(--line);
+  }
+  .terms p { margin: 0 0 5px; }
+
+  .foot {
+    padding-top: 16px; border-top: 2px solid var(--line-strong);
+    display: flex; justify-content: space-between; gap: 24px;
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  }
+  .foot-block { flex: 1; min-width: 0; }
+  .foot-title { font-size: 11px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
+  .foot a { color: var(--brand-deep); text-decoration: none; }
+
+  .issued {
+    margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--text-muted);
+    display: flex; justify-content: space-between; gap: 16px;
+  }
+
+  .actions { max-width: 780px; margin: 0 auto 16px; display: flex; gap: 10px; justify-content: flex-end; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 8px;
+    cursor: pointer; border: 1px solid var(--line-strong); background: var(--surface); color: var(--brand-deep);
+  }
+  .btn.primary { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+
+  @page { size: A4; margin: 13mm; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 12.5px; }
+    .sheet { max-width: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+    .actions { display: none !important; }
+    .price { margin: 16px 0; padding: 16px 18px; }
+    .price-value { font-size: 26px; }
+    .cols, .block, .totals { margin-bottom: 16px; }
+    .notes, .callout, .quote-terms { margin-bottom: 14px; }
+    .terms { margin-bottom: 16px; }
+    .sheet, .cols, .foot, .price, .totals { break-inside: avoid; }
+    .items tr { break-inside: avoid; }
+    .items thead { display: table-header-group; }
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 16px 10px; }
+    .sheet { padding: 22px 18px 20px; }
+    .head { flex-direction: column; gap: 16px; }
+    .doc-meta { text-align: left; }
+    .price { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .price-side { text-align: left; }
+    .cols { flex-direction: column; gap: 18px; }
+    .totals { justify-content: stretch; }
+    .totals table { width: 100%; min-width: 0; }
+    .foot { flex-direction: column; gap: 16px; }
+    .issued { flex-direction: column; gap: 4px; }
+    .items { overflow-x: auto; }
+    .items table { min-width: 460px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="actions">
+  <button class="btn" type="button" onclick="window.close()">Close</button>
+  <button class="btn primary" type="button" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="sheet" id="quotation">
+
+  <div class="head">
+    <div>
+      <img class="brand-logo" id="brandLogo" src="../../assets/brand/kridiya-logo-hd.png" alt="Kridiya Travel and Tourism">
+      <p class="brand-name" id="brandName" hidden>Kridiya Travel and Tourism</p>
+      <p class="brand-legal">Kridiya Travel and Tourism FZ-LLC &middot; Ras Al Khaimah, UAE</p>
+    </div>
+    <div class="doc-meta">
+      <p class="doc-kind">Quotation</p>
+      <p class="doc-number" data-field="document_number">QTN-2026-0001</p>
+      <p class="doc-date" data-field="issued_on">Issued 2 August 2026</p>
+    </div>
+  </div>
+
+  <div class="price">
+    <div>
+      <p class="price-label">Quoted price</p>
+      <p class="price-value" data-field="price">AED 1,200.00</p>
+      <p class="price-sub" data-field="validity_line">Valid until 21 July 2026</p>
+    </div>
+    <div class="price-side">
+      <span class="pill wait" data-field="status_pill">Awaiting your confirmation</span>
+    </div>
+  </div>
+
+  <div class="callout warn" data-field="expired_callout" hidden>
+    This quotation has passed its validity date. Fares and availability must be re-checked before booking — please contact us for a refreshed quote.
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <p class="section-title">Prepared for</p>
+      <table class="rows">
+        <tr data-field="company_row" hidden><th>Company</th><td data-field="company_name">—</td></tr>
+        <tr><th>Name</th><td data-field="customer_name">Mahendran Kumar</td></tr>
+        <tr><th>Email</th><td data-field="customer_email">mahendran@example.com</td></tr>
+        <tr><th>Phone</th><td data-field="customer_phone">+971 50 000 0000</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Quotation</p>
+      <table class="rows">
+        <tr><th>Reference</th><td data-field="quote_reference">QTN-2026-0001</td></tr>
+        <tr><th>Service</th><td data-field="service_type">Flight</td></tr>
+        <tr data-field="airline_row"><th>Airline</th><td data-field="airline">Emirates (Direct)</td></tr>
+        <tr data-field="valid_row"><th>Valid until</th><td data-field="valid_until">21 July 2026</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="block" data-block="option">
+    <p class="section-title" data-field="option_title">Travel option</p>
+    <table class="rows" data-field="option_rows">
+      <tr><th>Onward</th><td>Dubai (DXB) &rarr; Colombo (CMB) &middot; 22 July 2026</td></tr>
+      <tr><th>Return</th><td>Colombo (CMB) &rarr; Dubai (DXB) &middot; 29 July 2026</td></tr>
+      <tr><th>Baggage</th><td>30 kg</td></tr>
+    </table>
+  </div>
+
+  <div class="block items" data-block="addons">
+    <p class="section-title">Optional add-ons</p>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:72%">Add-on</th>
+          <th class="num" style="width:28%">Price</th>
+        </tr>
+      </thead>
+      <tbody data-field="addon_rows">
+        <tr><td>Extra baggage</td><td class="num">AED 34.00</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="totals" data-block="totals">
+    <table>
+      <tr><th data-field="base_label">Quoted price</th><td data-field="base_price">AED 1,200.00</td></tr>
+      <tr data-field="addons_total_row"><th>Add-ons</th><td data-field="addons_total">AED 34.00</td></tr>
+      <tr class="grand"><th>Total if all add-ons taken</th><td data-field="grand_total">AED 1,234.00</td></tr>
+    </table>
+  </div>
+
+  <div class="notes" data-field="description_block">
+    <strong>Details:</strong> <span data-field="description">Return economy fare, hand baggage plus 30 kg checked.</span>
+  </div>
+
+  <div class="quote-terms" data-block="quote_terms">
+    <p class="section-title">Quotation terms</p>
+    <ul data-field="terms_list">
+      <li>Fares are subject to availability and may change until the ticket is issued.</li>
+    </ul>
+  </div>
+
+  <div class="terms">
+    <p>This is a quotation, not a booking. Nothing is held with the airline, hotel, consulate or supplier until it is confirmed and payment is received. Prices and availability can change at any time before then.</p>
+    <p>Kridiya Travel and Tourism FZ-LLC is not registered for VAT. No VAT has been charged and no tax registration number applies to this document.</p>
+    <p>To accept this quotation, reply to the email it was sent with, or WhatsApp the quotation reference to +971 50 941 3873.</p>
+  </div>
+
+  <div class="foot">
+    <div class="foot-block">
+      <p class="foot-title">Kridiya Travel and Tourism FZ-LLC</p>
+      FDRK7105, Compass Building, Al Shohada Road,<br>
+      Al Hamra Industrial Zone-FZ, Ras Al Khaimah, UAE
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Contact</p>
+      +971 50 941 3873<br>
+      <a href="mailto:contact@kridiyatravel.com">contact@kridiyatravel.com</a><br>
+      <a href="https://www.kridiyatravel.com">www.kridiyatravel.com</a>
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Licence</p>
+      Trade licence 5033347<br>
+      RAK Freezone, United Arab Emirates
+    </div>
+  </div>
+
+  <div class="issued">
+    <span>Issued by <span data-field="issued_by">Kridiya Travel</span></span>
+    <span data-field="generated_stamp">Generated 2 August 2026</span>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   renderQuotation(quote, extras)
+
+   quote  - a row from public.quotes. option_data is a free-form
+            label -> value map; addons is [{ name, price }]; terms is
+            multi-line text where lines may start with "- ".
+   extras - { customer: {full_name,email,phone}, company_name,
+              document_number, issued_by } (optional)
+
+   Never reads supplier_cost, margin, or staff notes.
+   ------------------------------------------------------------------ */
+
+const SERVICE_LABELS = {
+  flight: "Flight", hotel: "Hotel", holiday: "Holiday package",
+  visa: "Visa application", umrah: "Umrah package", cruise: "Cruise",
+  insurance: "Travel insurance", transfer: "Airport transfer",
+  corporate: "Corporate booking", other: "Travel service"
+};
+
+const STATUS_LABELS = {
+  draft: "Draft", sent: "Awaiting your confirmation",
+  accepted: "Accepted", declined: "Declined", expired: "Expired"
+};
+
+function textOrDash(value) {
+  const clean = value === null || value === undefined ? "" : String(value).trim();
+  return clean || "—";
+}
+
+function toNumber(value) {
+  if (value === null || value === undefined || String(value).trim() === "") return null;
+  const n = Number(value);
+  return isFinite(n) ? n : null;
+}
+
+function formatMoney(amount, currency) {
+  const value = toNumber(amount);
+  if (value === null) return "—";
+  return (currency || "AED") + " " + value.toLocaleString("en-AE", {
+    minimumFractionDigits: 2, maximumFractionDigits: 2
+  });
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function humanise(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return "—";
+  return clean.charAt(0).toUpperCase() + clean.slice(1).replace(/_/g, " ");
+}
+
+function escapeHtml(value) {
+  return String(value === null || value === undefined ? "" : value).replace(/[&<>"']/g, function (ch) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  });
+}
+
+function setField(name, value) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (node) {
+    node.textContent = value;
+  });
+}
+
+function showField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.hidden = false; });
+}
+
+function hideField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.hidden = true; });
+}
+
+function removeField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.remove(); });
+}
+
+function removeBlock(name) {
+  const block = document.querySelector('[data-block="' + name + '"]');
+  if (block) block.remove();
+}
+
+// option_data holds whatever labels staff entered — render it as given
+// rather than guessing at a fixed flight shape that may not be there.
+function renderOption(optionData) {
+  const table = document.querySelector('[data-field="option_rows"]');
+  if (!table) return;
+
+  const entries = Object.keys(optionData || {})
+    .filter(function (key) {
+      // service/travel_start/travel_end are internal routing fields, not
+      // something a customer needs to read back on a quotation.
+      if (["service", "travel_start", "travel_end", "route_or_destination"].indexOf(key) !== -1) return false;
+      return String(optionData[key] === null || optionData[key] === undefined ? "" : optionData[key]).trim() !== "";
+    });
+
+  if (entries.length === 0) { removeBlock("option"); return; }
+
+  table.innerHTML = entries.map(function (key) {
+    return "<tr><th>" + escapeHtml(humanise(key)) + "</th><td>" +
+      escapeHtml(String(optionData[key])) + "</td></tr>";
+  }).join("");
+}
+
+function renderAddons(addons, currency) {
+  const body = document.querySelector('[data-field="addon_rows"]');
+  if (!body) return 0;
+
+  const list = Array.isArray(addons) ? addons.filter(function (a) {
+    return a && String(a.name || "").trim();
+  }) : [];
+
+  if (list.length === 0) { removeBlock("addons"); return 0; }
+
+  let total = 0;
+  body.innerHTML = list.map(function (addon) {
+    const price = toNumber(addon.price);
+    if (price !== null) total += price;
+    return "<tr><td>" + escapeHtml(addon.name) + "</td>" +
+      '<td class="num">' + escapeHtml(formatMoney(addon.price, currency)) + "</td></tr>";
+  }).join("");
+
+  return total;
+}
+
+// Staff type terms as free text, one rule per line, often with a leading
+// dash. Split it so the document shows a real list, not a wall of text.
+function renderTerms(terms) {
+  const list = document.querySelector('[data-field="terms_list"]');
+  if (!list) return;
+
+  const lines = String(terms || "")
+    .split(/\r?\n/)
+    .map(function (line) { return line.replace(/^\s*[-•*]\s*/, "").trim(); })
+    .filter(Boolean);
+
+  if (lines.length === 0) { removeBlock("quote_terms"); return; }
+
+  list.innerHTML = lines.map(function (line) {
+    return "<li>" + escapeHtml(line) + "</li>";
+  }).join("");
+}
+
+function renderQuotation(quote, extras) {
+  quote = quote || {};
+  extras = extras || {};
+  const customer = extras.customer || {};
+  const currency = quote.currency || "AED";
+  const optionData = quote.option_data || {};
+
+  setField("document_number", textOrDash(extras.document_number));
+  setField("quote_reference", textOrDash(extras.document_number));
+  setField("issued_on", "Issued " + (formatDate(quote.created_at) || "—"));
+  setField("generated_stamp", "Generated " + (formatDate(new Date()) || "—"));
+  setField("issued_by", textOrDash(extras.issued_by || "Kridiya Travel"));
+
+  setField("customer_name", textOrDash(customer.full_name));
+  setField("customer_email", textOrDash(customer.email));
+  setField("customer_phone", textOrDash(customer.phone || customer.whatsapp));
+
+  if (String(extras.company_name || "").trim()) {
+    setField("company_name", extras.company_name);
+    showField("company_row");
+  } else {
+    hideField("company_row");
+  }
+
+  const service = quote.service_type || optionData.service;
+  setField("service_type", SERVICE_LABELS[service] || humanise(service));
+
+  if (String(quote.airline || "").trim()) {
+    setField("airline", quote.airline);
+  } else {
+    removeField("airline_row");
+  }
+
+  // ---- validity ----
+  const validText = formatDate(quote.valid_until);
+  if (validText) {
+    setField("valid_until", validText);
+    setField("validity_line", "Valid until " + validText);
+  } else {
+    removeField("valid_row");
+    setField("validity_line", "Confirm with us before booking — no validity date set");
+  }
+
+  // Compare whole days so a quote valid until today is still valid today.
+  const validUntil = quote.valid_until ? new Date(quote.valid_until) : null;
+  const today = new Date();
+  const expired = validUntil && !isNaN(validUntil.getTime()) &&
+    new Date(validUntil.getFullYear(), validUntil.getMonth(), validUntil.getDate()) <
+    new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  const status = String(quote.status || "sent").trim().toLowerCase();
+  const pill = document.querySelector('[data-field="status_pill"]');
+  if (pill) {
+    const label = expired && status === "sent" ? "Expired" : (STATUS_LABELS[status] || humanise(status));
+    pill.textContent = label;
+    pill.className = "pill " + (status === "accepted" ? "ok" : "wait");
+  }
+  if (expired && status !== "accepted") showField("expired_callout"); else hideField("expired_callout");
+
+  // ---- money ----
+  const base = toNumber(quote.price_amount);
+  setField("price", formatMoney(base, currency));
+  setField("base_price", formatMoney(base, currency));
+
+  renderOption(optionData);
+  const addonTotal = renderAddons(quote.addons, currency);
+
+  if (addonTotal > 0 && base !== null) {
+    setField("addons_total", formatMoney(addonTotal, currency));
+    setField("grand_total", formatMoney(base + addonTotal, currency));
+  } else {
+    // With no add-ons the totals table would just repeat the price band.
+    removeBlock("totals");
+  }
+
+  const descriptionBlock = document.querySelector('[data-field="description_block"]');
+  if (descriptionBlock) {
+    if (String(quote.description || "").trim()) {
+      setField("description", quote.description);
+    } else {
+      descriptionBlock.remove();
+    }
+  }
+
+  renderTerms(quote.terms);
+
+  document.title = "Quotation " + textOrDash(extras.document_number) + " - Kridiya Travel";
+}
+
+// A missing logo file must never leave an empty box on a printed document.
+(function () {
+  const logo = document.getElementById("brandLogo");
+  if (!logo) return;
+  logo.addEventListener("error", function () {
+    logo.hidden = true;
+    const name = document.getElementById("brandName");
+    if (name) name.hidden = false;
+  });
+})();
+
+window.renderQuotation = renderQuotation;
+</script>
+
+</body>
+</html>

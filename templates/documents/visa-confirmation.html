@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visa Confirmation - Kridiya Travel and Tourism FZ-LLC</title>
+<style>
+  /* ============================================================
+     Kridiya Travel - visa confirmation
+     Renders from a booking row plus the visa details and applicants.
+     Never renders supplier_cost, margin, or staff_notes.
+     Print target: single-page A4.
+     ============================================================ */
+  :root {
+    --brand-deep: #b6530f; --brand-soft: #fff4e6; --gold: #f6c445;
+    --ink: #2f2415; --heading-ink: #1e1509; --text: #574b3b;
+    --text-muted: #79694f; --bg: #fdf8f0; --surface: #ffffff;
+    --line: #f1e8d8; --line-strong: #e3d5be;
+    --ok-bg: #e8f5ec; --ok-ink: #1e6b3a;
+    --wait-bg: #fff4e6; --wait-ink: #b6530f;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; padding: 28px 16px; background: var(--bg);
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, Helvetica, sans-serif;
+    color: var(--text); font-size: 14px; line-height: 1.55;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  .sheet {
+    max-width: 780px; margin: 0 auto; background: var(--surface);
+    border: 1px solid var(--line); border-radius: 14px; padding: 34px 36px 28px;
+  }
+
+  .head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--line-strong);
+  }
+  .brand-logo { height: 46px; width: auto; display: block; }
+  .brand-name { font-size: 17px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .brand-legal { font-size: 11px; color: var(--text-muted); margin: 3px 0 0; }
+  .doc-meta { text-align: right; flex-shrink: 0; }
+  .doc-kind {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--brand-deep); margin: 0 0 5px;
+  }
+  .doc-number { font-size: 20px; font-weight: 800; color: var(--heading-ink); margin: 0; letter-spacing: -0.01em; }
+  .doc-date { font-size: 12px; color: var(--text-muted); margin: 4px 0 0; }
+
+  .visa {
+    margin: 22px 0; padding: 20px 22px; background: var(--brand-soft); border-radius: 10px;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  }
+  .visa-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--brand-deep); margin: 0 0 4px;
+  }
+  .visa-type {
+    font-size: 25px; font-weight: 800; color: var(--heading-ink);
+    margin: 0; letter-spacing: -0.02em; line-height: 1.2; word-break: break-word;
+  }
+  .visa-sub { font-size: 12.5px; color: #9a7040; margin: 5px 0 0; font-weight: 600; }
+  .visa-side { text-align: right; flex-shrink: 0; }
+  .pill {
+    display: inline-block; padding: 7px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; white-space: nowrap;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--text);
+  }
+  .pill.ok { background: var(--ok-bg); border-color: #cbe6d5; color: var(--ok-ink); }
+  .pill.wait { background: var(--surface); border-color: #f0d9b8; color: var(--wait-ink); }
+
+  .section-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.09em;
+    text-transform: uppercase; color: var(--text-muted);
+    margin: 0 0 10px; padding-bottom: 7px; border-bottom: 1px solid var(--line);
+  }
+  .block { margin-bottom: 22px; }
+  .cols { display: flex; gap: 30px; margin-bottom: 22px; }
+  .col { flex: 1; min-width: 0; }
+
+  .rows { width: 100%; border-collapse: collapse; }
+  .rows th, .rows td { text-align: left; vertical-align: top; padding: 6px 0; font-size: 13px; line-height: 1.45; }
+  .rows th { font-weight: 500; color: var(--text-muted); width: 42%; padding-right: 12px; }
+  .rows td { color: var(--ink); font-weight: 600; word-break: break-word; }
+
+  .grid { width: 100%; border-collapse: collapse; }
+  .grid th {
+    text-align: left; font-size: 11px; font-weight: 800; letter-spacing: 0.05em;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 0 10px 8px 0; border-bottom: 1px solid var(--line); white-space: nowrap;
+  }
+  .grid td {
+    padding: 9px 10px 9px 0; font-size: 13px; color: var(--ink);
+    border-bottom: 1px solid var(--line); vertical-align: top;
+  }
+  .grid td:first-child { font-weight: 700; }
+  .grid tr:last-child td { border-bottom: 0; }
+  .grid .muted { color: var(--text-muted); font-weight: 500; }
+
+  .callout {
+    margin: 0 0 20px; padding: 13px 16px; border: 1px solid var(--line-strong);
+    border-radius: 9px; font-size: 13px; color: var(--heading-ink); font-weight: 600;
+  }
+  .callout.warn { background: var(--wait-bg); border-color: #f0d9b8; }
+
+  .notes {
+    margin: 0 0 20px; padding: 14px 16px; background: var(--bg); border-radius: 9px;
+    border-left: 3px solid var(--line-strong); font-size: 13px; color: var(--text);
+  }
+  .notes strong { color: var(--heading-ink); }
+
+  .terms {
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+    margin: 0 0 22px; padding-top: 16px; border-top: 1px solid var(--line);
+  }
+  .terms p { margin: 0 0 5px; }
+
+  .foot {
+    padding-top: 16px; border-top: 2px solid var(--line-strong);
+    display: flex; justify-content: space-between; gap: 24px;
+    font-size: 11.5px; color: var(--text-muted); line-height: 1.6;
+  }
+  .foot-block { flex: 1; min-width: 0; }
+  .foot-title { font-size: 11px; font-weight: 800; color: var(--ink); margin: 0 0 4px; }
+  .foot a { color: var(--brand-deep); text-decoration: none; }
+
+  .issued {
+    margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--line);
+    font-size: 11px; color: var(--text-muted);
+    display: flex; justify-content: space-between; gap: 16px;
+  }
+
+  .actions { max-width: 780px; margin: 0 auto 16px; display: flex; gap: 10px; justify-content: flex-end; }
+  .btn {
+    font: inherit; font-weight: 700; font-size: 13px; padding: 9px 18px; border-radius: 8px;
+    cursor: pointer; border: 1px solid var(--line-strong); background: var(--surface); color: var(--brand-deep);
+  }
+  .btn.primary { background: var(--brand-deep); border-color: var(--brand-deep); color: #fff; }
+
+  @page { size: A4; margin: 13mm; }
+
+  @media print {
+    body { background: #fff; padding: 0; font-size: 12.5px; }
+    .sheet { max-width: none; border: 0; border-radius: 0; padding: 0; margin: 0; }
+    .actions { display: none !important; }
+    .visa { margin: 16px 0; padding: 16px 18px; }
+    .visa-type { font-size: 22px; }
+    .cols, .block { margin-bottom: 16px; }
+    .notes, .callout { margin-bottom: 14px; }
+    .terms { margin-bottom: 16px; }
+    .sheet, .cols, .foot, .visa { break-inside: avoid; }
+    .grid tr { break-inside: avoid; }
+    .grid thead { display: table-header-group; }
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 16px 10px; }
+    .sheet { padding: 22px 18px 20px; }
+    .head { flex-direction: column; gap: 16px; }
+    .doc-meta { text-align: left; }
+    .visa { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .visa-side { text-align: left; }
+    .cols { flex-direction: column; gap: 18px; }
+    .foot { flex-direction: column; gap: 16px; }
+    .issued { flex-direction: column; gap: 4px; }
+    .block { overflow-x: auto; }
+    .grid { min-width: 460px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="actions">
+  <button class="btn" type="button" onclick="window.close()">Close</button>
+  <button class="btn primary" type="button" onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<div class="sheet" id="visa">
+
+  <div class="head">
+    <div>
+      <img class="brand-logo" id="brandLogo" src="../../assets/brand/kridiya-logo-hd.png" alt="Kridiya Travel and Tourism">
+      <p class="brand-name" id="brandName" hidden>Kridiya Travel and Tourism</p>
+      <p class="brand-legal">Kridiya Travel and Tourism FZ-LLC &middot; Ras Al Khaimah, UAE</p>
+    </div>
+    <div class="doc-meta">
+      <p class="doc-kind">Visa Confirmation</p>
+      <p class="doc-number" data-field="document_number">VSA-2026-0001</p>
+      <p class="doc-date" data-field="issued_on">Issued 2 August 2026</p>
+    </div>
+  </div>
+
+  <div class="visa">
+    <div>
+      <p class="visa-label" data-field="country_label">United Arab Emirates</p>
+      <p class="visa-type" data-field="visa_type">60-day tourist visa</p>
+      <p class="visa-sub" data-field="validity_line">Enter before 30 October 2026 &middot; Single entry</p>
+    </div>
+    <div class="visa-side">
+      <span class="pill ok" data-field="status_pill">Approved</span>
+    </div>
+  </div>
+
+  <div class="callout warn" data-field="pending_callout" hidden>
+    This application has not been approved yet. It is not a visa and must not be used to book non-refundable travel.
+  </div>
+
+  <div class="cols">
+    <div class="col">
+      <p class="section-title">Applicant</p>
+      <table class="rows">
+        <tr data-field="company_row" hidden><th>Company</th><td data-field="company_name">—</td></tr>
+        <tr><th>Name</th><td data-field="customer_name">Mahendran Kumar</td></tr>
+        <tr><th>Email</th><td data-field="customer_email">mahendran@example.com</td></tr>
+        <tr><th>Phone</th><td data-field="customer_phone">+971 50 000 0000</td></tr>
+      </table>
+    </div>
+    <div class="col">
+      <p class="section-title">Application</p>
+      <table class="rows">
+        <tr><th>Kridiya reference</th><td data-field="booking_reference">KRD-2026-0184</td></tr>
+        <tr data-field="ref_row"><th>Application number</th><td data-field="application_number">UAE-88213</td></tr>
+        <tr data-field="entry_row"><th>Entry type</th><td data-field="entry_type">Single entry</td></tr>
+        <tr data-field="stay_row"><th>Permitted stay</th><td data-field="stay_length">60 days</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="block" data-block="applicants">
+    <p class="section-title">Approved applicants</p>
+    <table class="grid">
+      <thead>
+        <tr>
+          <th style="width:34%">Name</th>
+          <th style="width:22%">Nationality</th>
+          <th style="width:22%">Passport</th>
+          <th style="width:22%">Visa number</th>
+        </tr>
+      </thead>
+      <tbody data-field="applicant_rows">
+        <tr>
+          <td>Mahendran Kumar</td>
+          <td class="muted">Indian</td>
+          <td class="muted">M1234567</td>
+          <td class="muted">784-2026-1234567</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="notes" data-field="notes_block">
+    <strong>Note:</strong> <span data-field="customer_notes">Original passport not required for entry.</span>
+  </div>
+
+  <div class="terms">
+    <p>This document is issued by Kridiya Travel and Tourism FZ-LLC to confirm the outcome of a visa application it submitted on the applicant's behalf. It is not the visa itself — carry the visa copy issued by the authority together with your passport.</p>
+    <p>Kridiya Travel and Tourism FZ-LLC is not registered for VAT. No VAT has been charged and no tax registration number applies to this document.</p>
+    <p>Entry is decided by the immigration officer at the border, not by the visa and not by Kridiya. Overstaying carries fines set by the issuing authority and is the traveller's responsibility.</p>
+    <p>Check every name, passport number and date above against the passport immediately. Corrections after issue may require a new application and a new fee.</p>
+  </div>
+
+  <div class="foot">
+    <div class="foot-block">
+      <p class="foot-title">Kridiya Travel and Tourism FZ-LLC</p>
+      FDRK7105, Compass Building, Al Shohada Road,<br>
+      Al Hamra Industrial Zone-FZ, Ras Al Khaimah, UAE
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Visa desk</p>
+      +971 50 941 3873<br>
+      <a href="mailto:contact@kridiyatravel.com">contact@kridiyatravel.com</a><br>
+      <a href="https://www.kridiyatravel.com">www.kridiyatravel.com</a>
+    </div>
+    <div class="foot-block">
+      <p class="foot-title">Licence</p>
+      Trade licence 5033347<br>
+      RAK Freezone, United Arab Emirates
+    </div>
+  </div>
+
+  <div class="issued">
+    <span>Issued by <span data-field="issued_by">Kridiya Travel</span></span>
+    <span data-field="generated_stamp">Generated 2 August 2026</span>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------
+   renderVisaConfirmation(booking, visa, applicants, extras)
+
+   booking    - a row from public.bookings
+   visa       - { country, visa_type, entry_type, stay_length,
+                  application_number, enter_before, issued_on, status }
+                (usually booking.service_payload)
+   applicants - public.booking_passengers rows, optionally carrying
+                visa_number
+   extras     - { customer: {...}, company_name, document_number,
+                  issued_by } (optional)
+
+   Never reads supplier_cost, margin, or staff_notes.
+   ------------------------------------------------------------------ */
+
+const APPROVED_STATES = ["approved", "issued", "confirmed", "granted"];
+
+function textOrDash(value) {
+  const clean = value === null || value === undefined ? "" : String(value).trim();
+  return clean || "—";
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+}
+
+function humanise(value) {
+  const clean = String(value || "").trim();
+  if (!clean) return "—";
+  return clean.charAt(0).toUpperCase() + clean.slice(1).replace(/_/g, " ");
+}
+
+function escapeHtml(value) {
+  return String(value === null || value === undefined ? "" : value).replace(/[&<>"']/g, function (ch) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch];
+  });
+}
+
+function setField(name, value) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (node) {
+    node.textContent = value;
+  });
+}
+
+function showField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.hidden = false; });
+}
+
+function hideField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.hidden = true; });
+}
+
+function removeField(name) {
+  document.querySelectorAll('[data-field="' + name + '"]').forEach(function (n) { n.remove(); });
+}
+
+function removeBlock(name) {
+  const block = document.querySelector('[data-block="' + name + '"]');
+  if (block) block.remove();
+}
+
+function optionalRow(rowField, valueField, value) {
+  if (String(value === null || value === undefined ? "" : value).trim()) {
+    setField(valueField, value);
+  } else {
+    removeField(rowField);
+  }
+}
+
+function renderApplicants(applicants) {
+  const body = document.querySelector('[data-field="applicant_rows"]');
+  if (!body) return;
+
+  const list = Array.isArray(applicants) ? applicants : [];
+  if (list.length === 0) { removeBlock("applicants"); return; }
+
+  body.innerHTML = list.map(function (p) {
+    return "<tr>" +
+      "<td>" + escapeHtml(textOrDash(p.passenger_name || p.traveller_name)) + "</td>" +
+      '<td class="muted">' + escapeHtml(textOrDash(p.nationality)) + "</td>" +
+      '<td class="muted">' + escapeHtml(textOrDash(p.passport_number)) + "</td>" +
+      '<td class="muted">' + escapeHtml(textOrDash(p.visa_number)) + "</td>" +
+      "</tr>";
+  }).join("");
+}
+
+function renderVisaConfirmation(booking, visa, applicants, extras) {
+  booking = booking || {};
+  visa = visa || {};
+  extras = extras || {};
+  const customer = extras.customer || {};
+
+  setField("document_number", textOrDash(extras.document_number));
+  setField("issued_on", "Issued " + (formatDate(visa.issued_on || booking.created_at) || "—"));
+  setField("generated_stamp", "Generated " + (formatDate(new Date()) || "—"));
+  setField("issued_by", textOrDash(extras.issued_by || "Kridiya Travel"));
+
+  const countryNode = document.querySelector('[data-field="country_label"]');
+  if (countryNode) {
+    const country = String(visa.country || booking.route_or_destination || "").trim();
+    if (country) countryNode.textContent = country; else countryNode.remove();
+  }
+
+  setField("visa_type", textOrDash(visa.visa_type || booking.title));
+
+  // The date a visa must be used by is the single most consequential field
+  // on this document, so it leads the band rather than sitting in a table.
+  const enterBefore = formatDate(visa.enter_before);
+  const entry = String(visa.entry_type || "").trim();
+  const subParts = [];
+  if (enterBefore) subParts.push("Enter before " + enterBefore);
+  if (entry) subParts.push(humanise(entry));
+  const subNode = document.querySelector('[data-field="validity_line"]');
+  if (subNode) { if (subParts.length) subNode.textContent = subParts.join(" · "); else subNode.remove(); }
+
+  if (String(extras.company_name || "").trim()) {
+    setField("company_name", extras.company_name);
+    showField("company_row");
+  } else {
+    hideField("company_row");
+  }
+
+  setField("customer_name", textOrDash(customer.full_name || booking.title));
+  setField("customer_email", textOrDash(customer.email));
+  setField("customer_phone", textOrDash(customer.phone || customer.whatsapp));
+
+  setField("booking_reference", textOrDash(booking.booking_reference));
+  optionalRow("ref_row", "application_number", visa.application_number || booking.supplier_reference);
+  optionalRow("entry_row", "entry_type", entry ? humanise(entry) : "");
+  optionalRow("stay_row", "stay_length", visa.stay_length);
+
+  renderApplicants(applicants);
+
+  // Only a genuinely approved application gets the green pill. Anything
+  // else is called out, because a pending application is not a visa.
+  const status = String(visa.status || booking.status || "").trim().toLowerCase();
+  const approved = APPROVED_STATES.indexOf(status) !== -1;
+  const pill = document.querySelector('[data-field="status_pill"]');
+  if (pill) {
+    pill.textContent = approved ? humanise(status) : (status ? humanise(status) : "Pending");
+    pill.className = "pill " + (approved ? "ok" : "wait");
+  }
+  if (approved) hideField("pending_callout"); else showField("pending_callout");
+
+  const notesBlock = document.querySelector('[data-field="notes_block"]');
+  if (notesBlock) {
+    if (String(booking.customer_notes || "").trim()) {
+      setField("customer_notes", booking.customer_notes);
+    } else {
+      notesBlock.remove();
+    }
+  }
+
+  document.title = "Visa confirmation " + textOrDash(extras.document_number) + " - Kridiya Travel";
+}
+
+// A missing logo file must never leave an empty box on a printed document.
+(function () {
+  const logo = document.getElementById("brandLogo");
+  if (!logo) return;
+  logo.addEventListener("error", function () {
+    logo.hidden = true;
+    const name = document.getElementById("brandName");
+    if (name) name.hidden = false;
+  });
+})();
+
+window.renderVisaConfirmation = renderVisaConfirmation;
+</script>
+
+</body>
+</html>
