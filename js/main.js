@@ -905,7 +905,7 @@ document.addEventListener("click", function (e) {
   const link = e.target.closest("a[href]");
   if (!link) return;
   const href = link.getAttribute("href") || "";
-  if (/whatsapp/i.test(href)) trackEvent("click_whatsapp", { link_location: link.className || "content" });
+  if (/(?:wa\.me|whatsapp\.com)/i.test(href)) trackEvent("click_whatsapp", { link_location: link.className || "content" });
   else if (/^tel:/i.test(href)) trackEvent("click_call", { link_location: link.className || "content" });
   else if (/^mailto:/i.test(href)) trackEvent("click_email", { link_location: link.className || "content" });
 });
