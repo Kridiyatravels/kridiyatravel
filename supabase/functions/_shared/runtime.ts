@@ -1,9 +1,20 @@
 export function defaultKey(environmentName: string): string {
   try {
     const keys = JSON.parse(Deno.env.get(environmentName) || "{}");
-    return typeof keys.default === "string" ? keys.default : "";
+    if (typeof keys.default === "string" && keys.default) return keys.default;
+    const fallback = Object.values(keys).find((value) => typeof value === "string" && value);
+    return typeof fallback === "string" ? fallback : "";
   } catch {
     return "";
+  }
+}
+
+export function allKeys(environmentName: string): string[] {
+  try {
+    const keys = JSON.parse(Deno.env.get(environmentName) || "{}");
+    return Object.values(keys).filter((value): value is string => typeof value === "string" && Boolean(value));
+  } catch {
+    return [];
   }
 }
 
@@ -13,6 +24,10 @@ export function supabaseRuntimeKeys() {
     publishableKey: defaultKey("SUPABASE_PUBLISHABLE_KEYS"),
     secretKey: defaultKey("SUPABASE_SECRET_KEYS"),
   };
+}
+
+export function supabaseSecretKeys(): string[] {
+  return allKeys("SUPABASE_SECRET_KEYS");
 }
 
 export function generateSixDigitPin(): string {

@@ -1,5 +1,5 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
-import { supabaseRuntimeKeys } from "../_shared/runtime.ts";
+import { supabaseRuntimeKeys, supabaseSecretKeys } from "../_shared/runtime.ts";
 
 type DigestMode = "daily" | "overdue";
 type Task = {
@@ -66,7 +66,7 @@ Deno.serve(async (request: Request) => {
   if (!token) return reply(origin, 401, { error: "Authentication required" });
 
   const admin = createClient(url, secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
-  const isServiceCall = token === secretKey;
+  const isServiceCall = supabaseSecretKeys().includes(token);
   if (!isServiceCall) {
     const caller = createClient(url, publishableKey, {
       global: { headers: { Authorization: authHeader } },
