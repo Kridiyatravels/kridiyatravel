@@ -620,12 +620,22 @@ async function submitEnquiryToSupabase(fields, serviceType, reference) {
     marketing_consent_at: fields.marketingConsent ? new Date().toISOString() : null,
     marketing_consent_source: fields.marketingConsent ? "website_enquiry" : null,
     marketing_consent_version: fields.marketingConsent ? "privacy-2026-07" : null
-  }));
+  })).select("id").single();
   if (result.error && (result.error.code === "PGRST204" || result.error.code === "42703")) {
     console.warn("Kridiya: attribution migration is not applied yet; saving the legacy enquiry record.");
-    result = await sb.from("enquiries").insert(baseRecord);
+    result = await sb.from("enquiries").insert(baseRecord).select("id").single();
   }
   if (result.error) throw result.error;
+  // Operational email is best-effort: the enquiry remains saved even if Resend is temporarily unavailable.
+  try {
+    const notification = await sb.functions.invoke("staff-notification-email", {
+      body: { enquiry_id: result.data.id }
+    });
+    if (notification.error) console.warn("Kridiya: staff notification email was not delivered", notification.error);
+  } catch (error) {
+    console.warn("Kridiya: staff notification email was not delivered", error);
+  }
+  return result.data;
 }
 
 async function submitNewsletterConsent(email) {
