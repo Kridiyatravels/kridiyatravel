@@ -255,13 +255,17 @@ a:hover { text-decoration: underline; }
 .footer-social a.icon-instagram { background: var(--ig); }
 .topbar-social a.icon-facebook,
 .footer-social a.icon-facebook { background: var(--fb); }
+.topbar-social a.icon-linkedin,
+.footer-social a.icon-linkedin { background: #0a66c2; }
 .topbar-social a.icon-whatsapp,
 .footer-social a.icon-whatsapp { background: var(--wa); }
 .topbar-social a.icon-instagram svg,
 .topbar-social a.icon-facebook svg,
+.topbar-social a.icon-linkedin svg,
 .topbar-social a.icon-whatsapp svg,
 .footer-social a.icon-instagram svg,
 .footer-social a.icon-facebook svg,
+.footer-social a.icon-linkedin svg,
 .footer-social a.icon-whatsapp svg { fill: #fff; }
 @media (max-width: 720px) {
   .topbar-item.optional { display: none; }
@@ -2086,9 +2090,11 @@ body {
    The floating WhatsApp button and .btn-wa keep their own green. */
 .topbar-social a.icon-instagram,
 .topbar-social a.icon-facebook,
+.topbar-social a.icon-linkedin,
 .topbar-social a.icon-whatsapp,
 .footer-social a.icon-instagram,
 .footer-social a.icon-facebook,
+.footer-social a.icon-linkedin,
 .footer-social a.icon-whatsapp {
   background: var(--surface);
   background-image: none;
@@ -2096,15 +2102,19 @@ body {
 }
 .topbar-social a.icon-instagram svg,
 .topbar-social a.icon-facebook svg,
+.topbar-social a.icon-linkedin svg,
 .topbar-social a.icon-whatsapp svg,
 .footer-social a.icon-instagram svg,
 .footer-social a.icon-facebook svg,
+.footer-social a.icon-linkedin svg,
 .footer-social a.icon-whatsapp svg { fill: var(--brand-deep); }
 .topbar-social a.icon-instagram:hover,
 .topbar-social a.icon-facebook:hover,
+.topbar-social a.icon-linkedin:hover,
 .topbar-social a.icon-whatsapp:hover,
 .footer-social a.icon-instagram:hover,
 .footer-social a.icon-facebook:hover,
+.footer-social a.icon-linkedin:hover,
 .footer-social a.icon-whatsapp:hover {
   background: var(--brand);
   background-image: none;
@@ -2112,9 +2122,11 @@ body {
 }
 .topbar-social a.icon-instagram:hover svg,
 .topbar-social a.icon-facebook:hover svg,
+.topbar-social a.icon-linkedin:hover svg,
 .topbar-social a.icon-whatsapp:hover svg,
 .footer-social a.icon-instagram:hover svg,
 .footer-social a.icon-facebook:hover svg,
+.footer-social a.icon-linkedin:hover svg,
 .footer-social a.icon-whatsapp:hover svg { fill: #fff; }
 
 /* Legal pages */
