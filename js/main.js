@@ -552,12 +552,11 @@ function toast(msg) {
   toastTimer = setTimeout(function () { el.classList.remove("show"); }, 4200);
 }
 
-/* ---------- FormSubmit plumbing ----------
-   Every enquiry/contact form POSTs to https://formsubmit.co/<inbox>.
-   Forms tagged data-enquiry-type also get a KD-XXX-##### reference,
-   get written to Supabase (so the enquiry can be tracked on the account
-   and admin pages), and hand the reference to thanks.html. The footer
-   newsletter form has no data-enquiry-type and keeps submitting natively. */
+/* ---------- Enquiry submission plumbing ----------
+   Every form tagged data-enquiry-type is saved to Supabase first. Only
+   after that succeeds do we send the same enquiry to FormSubmit as a
+   best-effort email confirmation and hand the reference to thanks.html.
+   The footer newsletter form has no data-enquiry-type. */
 const SERVICE_TYPE_RULES = [
   [/flight/i, "flight"],
   [/hotel/i, "hotel"],
@@ -620,22 +619,15 @@ async function submitEnquiryToSupabase(fields, serviceType, reference) {
     marketing_consent_at: fields.marketingConsent ? new Date().toISOString() : null,
     marketing_consent_source: fields.marketingConsent ? "website_enquiry" : null,
     marketing_consent_version: fields.marketingConsent ? "privacy-2026-07" : null
-  })).select("id").single();
+  }));
   if (result.error && (result.error.code === "PGRST204" || result.error.code === "42703")) {
     console.warn("Kridiya: attribution migration is not applied yet; saving the legacy enquiry record.");
-    result = await sb.from("enquiries").insert(baseRecord).select("id").single();
+    result = await sb.from("enquiries").insert(baseRecord);
   }
   if (result.error) throw result.error;
-  // Operational email is best-effort: the enquiry remains saved even if Resend is temporarily unavailable.
-  try {
-    const notification = await sb.functions.invoke("staff-notification-email", {
-      body: { enquiry_id: result.data.id }
-    });
-    if (notification.error) console.warn("Kridiya: staff notification email was not delivered", notification.error);
-  } catch (error) {
-    console.warn("Kridiya: staff notification email was not delivered", error);
-  }
-  return result.data;
+  // The database's enquiries_notify_new trigger creates staff_notifications atomically.
+  // Do not request the inserted row here: anonymous visitors may INSERT but cannot SELECT enquiries.
+  return { reference: reference };
 }
 
 async function submitNewsletterConsent(email) {
@@ -666,11 +658,12 @@ async function sendFormSubmitAjax(form, reference) {
   const data = new FormData(form);
   const payload = { Reference: reference };
   data.forEach(function (v, k) { payload[k] = v; });
-  await fetch(formSubmitAjaxURL(form), {
+  const response = await fetch(formSubmitAjaxURL(form), {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify(payload)
   });
+  if (!response.ok) throw new Error("FormSubmit returned HTTP " + response.status);
 }
 
 function restoreSubmitButton(btn, label) {
@@ -766,20 +759,12 @@ function prepareFormSubmit(form) {
     const fields = gatherEnquiryFields(form);
     const dest = next.value;
 
-    Promise.allSettled([
-      submitEnquiryToSupabase(fields, serviceType, reference),
-      sendFormSubmitAjax(form, reference)
-    ]).then(async function (results) {
-      const savedToSupabase = results[0].status === "fulfilled";
-      const emailedToTeam = results[1].status === "fulfilled";
-
-      if (!savedToSupabase) console.error("Kridiya: could not save enquiry to Supabase", results[0].reason);
-      if (!emailedToTeam) console.error("Kridiya: could not email enquiry", results[1].reason);
-
-      if (!savedToSupabase && !emailedToTeam) {
-        restoreSubmitButton(btn, originalButtonLabel);
-        toast("We could not send this enquiry. Please try again or WhatsApp us on +971 50 941 3873.");
-        return;
+    submitEnquiryToSupabase(fields, serviceType, reference).then(async function () {
+      try {
+        await sendFormSubmitAjax(form, reference);
+      } catch (error) {
+        // Supabase is the source of truth; email delivery must never determine CRM success.
+        console.error("Kridiya: enquiry was saved, but the confirmation email could not be sent", error);
       }
 
       const metaEventId = generateMetaEventId("lead");
@@ -787,7 +772,7 @@ function prepareFormSubmit(form) {
         enquiry_type: type,
         service_type: serviceType,
         reference: reference,
-        saved_to_crm: savedToSupabase
+        saved_to_crm: true
       }, { eventId: metaEventId });
       try {
         await sendMetaLeadServerEvent(metaEventId, serviceType, type);
@@ -796,6 +781,10 @@ function prepareFormSubmit(form) {
       }
       stashEnquiryForThanksPage(reference, serviceType, fields.summary, type, fields.fullName);
       location.href = dest;
+    }).catch(function (error) {
+      console.error("Kridiya: could not save enquiry to Supabase", error);
+      restoreSubmitButton(btn, originalButtonLabel);
+      toast("We could not save this enquiry. Please try again or WhatsApp us on +971 50 941 3873.");
     });
   });
 }
