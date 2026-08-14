@@ -28,5 +28,6 @@ jobs:
           MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
           MICROSOFT_CLIENT_SECRET: ${{ secrets.MICROSOFT_CLIENT_SECRET }}
           MICROSOFT_DRIVE_ID: ${{ secrets.MICROSOFT_DRIVE_ID }}
-          MICROSOFT_ROOT_FOLDER: ${{ secrets.MICROSOFT_ROOT_FOLDER }}
+          # Folder names and drive IDs are configuration, not credentials.
+          MICROSOFT_ROOT_FOLDER: Kridiya Business
         run: node scripts/backup-supabase.mjs

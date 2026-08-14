@@ -128,7 +128,9 @@ if (!localFile) throw new Error("Usage: upload-backup-sharepoint.mjs <dump.sql>"
 
 const token = await getToken();
 const driveId = required("MICROSOFT_DRIVE_ID");
-const root = required("MICROSOFT_ROOT_FOLDER").replace(/^\/+|\/+$/g, "");
+const root = String(process.env.MICROSOFT_ROOT_FOLDER || "Kridiya Business")
+  .trim()
+  .replace(/^\/+|\/+$/g, "");
 const folderPath = `${root}/database-backups`;
 await ensureFolder(token, driveId, folderPath);
 const result = await upload(token, driveId, folderPath, path.resolve(localFile));
@@ -139,4 +141,3 @@ console.log(JSON.stringify({
   path: result.remotePath,
   webUrl: result.webUrl,
 }));
-
