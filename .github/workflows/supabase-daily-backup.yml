@@ -1,0 +1,32 @@
+name: Daily Supabase logical backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 21 * * *" # 06:17 Asia/Seoul (UTC+9)
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    container: postgres:17
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Dump and upload database
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+          BACKUP_UPLOADER: scripts/upload-backup-sharepoint.mjs
+          MICROSOFT_TENANT_ID: ${{ secrets.MICROSOFT_TENANT_ID }}
+          MICROSOFT_CLIENT_ID: ${{ secrets.MICROSOFT_CLIENT_ID }}
+          MICROSOFT_CLIENT_SECRET: ${{ secrets.MICROSOFT_CLIENT_SECRET }}
+          MICROSOFT_DRIVE_ID: ${{ secrets.MICROSOFT_DRIVE_ID }}
+          MICROSOFT_ROOT_FOLDER: ${{ secrets.MICROSOFT_ROOT_FOLDER }}
+        run: node scripts/backup-supabase.mjs
