@@ -660,6 +660,17 @@ async function uploadEnquiryAttachments(enquiryId, files) {
   }
 }
 
+function enquiryAttachmentError(files) {
+  const selected = Array.from(files || []);
+  if (selected.length > 3) return "Choose no more than 3 supporting documents.";
+  const allowed = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+  const invalidType = selected.find(function (file) { return allowed.indexOf(file.type) === -1; });
+  if (invalidType) return "Attachments must be PDF, JPG, PNG, or WebP files.";
+  const invalidSize = selected.find(function (file) { return file.size < 1 || file.size > 10485760; });
+  if (invalidSize) return "Each attachment must be between 1 byte and 10 MB.";
+  return "";
+}
+
 async function submitNewsletterConsent(email) {
   const sb = await KridiyaAuth.client();
   const a = attributionPayload();
@@ -800,7 +811,12 @@ function prepareFormSubmit(form) {
   }
   if (form.dataset.enquiryType && KridiyaAuth.session() && !form.querySelector('[name="Enquiry_attachments"]')) {
     const submitButton = form.querySelector('button[type="submit"]');
-    if (submitButton) submitButton.insertAdjacentHTML("beforebegin", '<div class="field enquiry-upload-field"><label>SUPPORTING DOCUMENTS (OPTIONAL)</label><input type="file" name="Enquiry_attachments" multiple accept="application/pdf,image/jpeg,image/png,image/webp"><span class="sub">Up to 3 PDF or image files, 10 MB each. Uploaded privately after the enquiry is saved.</span></div>');
+    if (submitButton) {
+      const uploadId = (form.id || "enquiry") + "-attachments";
+      submitButton.insertAdjacentHTML("beforebegin", '<div class="field enquiry-upload-field"><label for="' + uploadId + '">SUPPORTING DOCUMENTS (OPTIONAL)</label><input id="' + uploadId + '" type="file" name="Enquiry_attachments" multiple accept="application/pdf,image/jpeg,image/png,image/webp" aria-describedby="' + uploadId + '-help"><span class="sub" id="' + uploadId + '-help">Up to 3 PDF or image files, 10 MB each. Uploaded privately after the enquiry is saved.</span></div>');
+      const uploadInput = form.querySelector('[name="Enquiry_attachments"]');
+      uploadInput.addEventListener("change", function () { setFieldError(uploadInput, enquiryAttachmentError(uploadInput.files)); });
+    }
   }
   let next = form.querySelector('input[name="_next"]');
   if (!next) {
@@ -821,6 +837,15 @@ function prepareFormSubmit(form) {
 
   form.addEventListener("submit", function (e) {
     if (!validateForm(form)) { e.preventDefault(); return; }
+
+    const attachmentInput = form.querySelector('[name="Enquiry_attachments"]');
+    const attachmentProblem = attachmentInput ? enquiryAttachmentError(attachmentInput.files) : "";
+    if (attachmentProblem) {
+      e.preventDefault();
+      setFieldError(attachmentInput, attachmentProblem);
+      attachmentInput.focus();
+      return;
+    }
 
     const type = form.dataset.enquiryType;
     if (!type) {
@@ -863,8 +888,7 @@ function prepareFormSubmit(form) {
     const serviceType = serviceTypeFromLabel(type);
     const reference = generateReference(serviceType);
     const fields = gatherEnquiryFields(form);
-    const attachmentInput = form.querySelector('[name="Enquiry_attachments"]');
-    const attachmentFiles = attachmentInput ? Array.from(attachmentInput.files || []).slice(0, 3) : [];
+    const attachmentFiles = attachmentInput ? Array.from(attachmentInput.files || []) : [];
     const dest = next.value;
 
     submitEnquiryToSupabase(fields, serviceType, reference).then(async function (saved) {
