@@ -363,6 +363,13 @@ window.KridiyaAuth = (function () {
     return attach.data === true;
   }
 
+  async function listMyBookingTimeline(bookingId) {
+    const sb = await client();
+    const result = await sb.rpc("list_my_booking_timeline", { p_booking_id: bookingId });
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
   async function listMyTravellers() {
     const sb = await client();
     const result = await sb.rpc("list_my_travellers");
@@ -591,6 +598,7 @@ window.KridiyaAuth = (function () {
     openBookingDocument: openBookingDocument,
     listCustomerPayments: listCustomerPayments,
     uploadMyPaymentProof: uploadMyPaymentProof,
+    listMyBookingTimeline: listMyBookingTimeline,
     listMyTravellers: listMyTravellers,
     saveMyTraveller: saveMyTraveller,
     archiveMyTraveller: archiveMyTraveller,
@@ -951,7 +959,26 @@ window.KridiyaAuth = (function () {
     }).join("") + "</div>";
   }
 
+  function tripTimelineHTML(events) {
+    if (!events.length) return '<p class="form-note">No trip milestones are available yet.</p>';
+    return '<ol class="trip-timeline">' + events.map(function (event) {
+      const date = new Date(event.event_at);
+      return '<li class="timeline-' + KridiyaAuth.escapeHTML(event.tone || "current") + '"><span></span><div><time datetime="' + KridiyaAuth.escapeHTML(event.event_at) + '">' + KridiyaAuth.escapeHTML(date.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })) + '</time><b>' + KridiyaAuth.escapeHTML(event.title) + '</b><small>' + KridiyaAuth.escapeHTML(event.detail || "") + '</small></div></li>';
+    }).join("") + '</ol>';
+  }
+
   function wireEnquiryExtras(listEl) {
+    listEl.addEventListener("click", async function (event) {
+      const button = event.target.closest("[data-trip-timeline]");
+      if (!button) return;
+      const box = listEl.querySelector('[data-trip-timeline-box="' + button.dataset.tripTimeline + '"]');
+      if (!box) return;
+      if (!box.hidden) { box.hidden = true; button.textContent = "View trip timeline"; return; }
+      box.hidden = false; button.disabled = true; button.textContent = "Loading...";
+      try { box.innerHTML = tripTimelineHTML(await KridiyaAuth.listMyBookingTimeline(button.dataset.tripTimeline)); button.textContent = "Hide trip timeline"; }
+      catch (err) { box.innerHTML = '<div class="form-banner error" role="alert">' + KridiyaAuth.escapeHTML(errorMessage(err, "Could not load trip timeline.")) + '</div>'; button.textContent = "Try timeline again"; }
+      button.disabled = false;
+    });
     listEl.addEventListener("change", async function (event) {
       const input = event.target.closest("[data-customer-proof]");
       if (!input || !input.files || !input.files[0]) return;
@@ -1278,6 +1305,7 @@ window.KridiyaAuth = (function () {
               quotesHTML(quotes) +
               (!item.isEnquiry ? customerDocsHTML(itemDocs) : '') +
               customerPaymentsHTML(itemPayments) +
+              (!item.isEnquiry ? '<div class="enq-extra trip-timeline-wrap"><button class="btn btn-outline btn-sm" type="button" data-trip-timeline="' + KridiyaAuth.escapeHTML(item.id) + '">View trip timeline</button><div data-trip-timeline-box="' + KridiyaAuth.escapeHTML(item.id) + '" hidden></div></div>' : '') +
               "</article>";
           }).join("");
           wireEnquiryExtras(listEl);
