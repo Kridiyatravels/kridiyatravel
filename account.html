@@ -55,6 +55,32 @@
           <div class="account-main">
             <div class="account-section-head">
               <div>
+                <h2>My travellers</h2>
+                <p>Save traveller details for future requests. Passport numbers are stored securely and shown only in masked form.</p>
+              </div>
+            </div>
+            <div id="traveller-list"><p class="form-note">Loading travellers...</p></div>
+            <form id="traveller-form" class="form-grid" novalidate>
+              <input type="hidden" name="traveller_id"><input type="hidden" name="expected_updated_at">
+              <div class="form-banner error" hidden role="alert"></div>
+              <div class="field-row">
+                <div class="field col-6"><label for="tr-name">FULL NAME</label><input id="tr-name" name="full_name" required minlength="2" autocomplete="name"></div>
+                <div class="field col-6"><label for="tr-dob">DATE OF BIRTH</label><input id="tr-dob" name="date_of_birth" type="date"></div>
+              </div>
+              <div class="field-row">
+                <div class="field col-6"><label for="tr-nationality">NATIONALITY</label><input id="tr-nationality" name="nationality" autocomplete="country-name"></div>
+                <div class="field col-6"><label for="tr-passport">NEW PASSPORT NUMBER</label><input id="tr-passport" name="passport_number" autocomplete="off"><span class="sub">Leave blank while editing to keep the saved passport.</span></div>
+              </div>
+              <div class="field-row">
+                <div class="field col-6"><label for="tr-expiry">PASSPORT EXPIRY</label><input id="tr-expiry" name="passport_expiry" type="date"></div>
+              </div>
+              <div class="account-actions"><button class="btn btn-primary" type="submit" data-label="Save traveller">Save traveller</button><button class="btn btn-outline" id="traveller-cancel" type="button" hidden>Cancel edit</button></div>
+            </form>
+          </div>
+
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
                 <h2>My bookings and enquiries</h2>
                 <p>Enquiries you send while signed in are added automatically. Confirmed bookings appear here once our team sets them up.</p>
               </div>

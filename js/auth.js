@@ -345,6 +345,38 @@ window.KridiyaAuth = (function () {
     window.open(result.data.signedUrl, "_blank", "noopener");
   }
 
+  async function listMyTravellers() {
+    const sb = await client();
+    const result = await sb.rpc("list_my_travellers");
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
+  async function saveMyTraveller(payload) {
+    const sb = await client();
+    const result = await sb.rpc("save_my_traveller", {
+      p_traveller_id: payload.id || null,
+      p_full_name: payload.fullName,
+      p_date_of_birth: payload.dateOfBirth || null,
+      p_nationality: payload.nationality || null,
+      p_passport_number: payload.passportNumber || null,
+      p_passport_expiry: payload.passportExpiry || null,
+      p_expected_updated_at: payload.expectedUpdatedAt || null
+    });
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function archiveMyTraveller(id, expectedUpdatedAt) {
+    const sb = await client();
+    const result = await sb.rpc("archive_my_traveller", {
+      p_traveller_id: id,
+      p_expected_updated_at: expectedUpdatedAt
+    });
+    if (result.error) throw result.error;
+    return result.data === true;
+  }
+
   async function listEnquiries() {
     const user = await currentUser();
     if (!user) return [];
@@ -505,6 +537,9 @@ window.KridiyaAuth = (function () {
     listBookingDocuments: listBookingDocuments,
     openBookingDocument: openBookingDocument,
     listCustomerPayments: listCustomerPayments,
+    listMyTravellers: listMyTravellers,
+    saveMyTraveller: saveMyTraveller,
+    archiveMyTraveller: archiveMyTraveller,
     listRequests: listRequests,
     listQuotes: listQuotes,
     respondToTextRequest: respondToTextRequest,
@@ -925,6 +960,83 @@ window.KridiyaAuth = (function () {
         ? "Member since " + since.toLocaleDateString("en-GB", { month: "long", year: "numeric" })
         : "";
       refreshHeaderName(user);
+
+      const travellerForm = document.getElementById("traveller-form");
+      const travellerList = document.getElementById("traveller-list");
+      const travellerCancel = document.getElementById("traveller-cancel");
+      let savedTravellers = [];
+      function resetTravellerForm() {
+        travellerForm.reset();
+        travellerForm.traveller_id.value = "";
+        travellerForm.expected_updated_at.value = "";
+        travellerCancel.hidden = true;
+        banner(travellerForm, "");
+      }
+      function renderTravellers() {
+        if (!savedTravellers.length) {
+          travellerList.innerHTML = '<div class="empty-state"><p><b>No saved travellers yet.</b><br>Add yourself or a frequent traveller below.</p></div>';
+          return;
+        }
+        travellerList.innerHTML = '<div class="customer-doc-list">' + savedTravellers.map(function (t) {
+          const details = [t.date_of_birth ? "Born " + t.date_of_birth : "", t.nationality || "", t.passport_masked || "No passport saved", t.passport_expiry ? "Expires " + t.passport_expiry : ""].filter(Boolean).join(" · ");
+          return '<div class="customer-doc-row"><div><b>' + KridiyaAuth.escapeHTML(t.full_name) + '</b><small>' + KridiyaAuth.escapeHTML(details) + '</small></div><div class="account-actions"><button class="btn btn-outline" type="button" data-traveller-edit="' + KridiyaAuth.escapeHTML(t.id) + '">Edit</button><button class="btn btn-outline" type="button" data-traveller-archive="' + KridiyaAuth.escapeHTML(t.id) + '">Remove</button></div></div>';
+        }).join("") + "</div>";
+      }
+      async function refreshTravellers() {
+        savedTravellers = await KridiyaAuth.listMyTravellers();
+        renderTravellers();
+      }
+      travellerList.addEventListener("click", async function (event) {
+        const edit = event.target.closest("[data-traveller-edit]");
+        const archive = event.target.closest("[data-traveller-archive]");
+        const id = edit ? edit.dataset.travellerEdit : archive ? archive.dataset.travellerArchive : "";
+        const row = savedTravellers.find(function (item) { return item.id === id; });
+        if (!row) return;
+        if (edit) {
+          travellerForm.traveller_id.value = row.id;
+          travellerForm.expected_updated_at.value = row.updated_at;
+          travellerForm.full_name.value = row.full_name || "";
+          travellerForm.date_of_birth.value = row.date_of_birth || "";
+          travellerForm.nationality.value = row.nationality || "";
+          travellerForm.passport_number.value = "";
+          travellerForm.passport_expiry.value = row.passport_expiry || "";
+          travellerCancel.hidden = false;
+          travellerForm.scrollIntoView({ behavior: "smooth", block: "center" });
+          return;
+        }
+        if (!window.confirm("Remove " + row.full_name + " from your saved travellers?")) return;
+        try {
+          await KridiyaAuth.archiveMyTraveller(row.id, row.updated_at);
+          await refreshTravellers();
+          resetTravellerForm();
+          toast("Traveller removed.");
+        } catch (err) { toast(errorMessage(err, "Could not remove traveller.")); }
+      });
+      travellerCancel.addEventListener("click", resetTravellerForm);
+      travellerForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        if (!validateForm(travellerForm)) return;
+        banner(travellerForm, "");
+        busy(travellerForm, true, "Saving...");
+        try {
+          await KridiyaAuth.saveMyTraveller({
+            id: travellerForm.traveller_id.value,
+            expectedUpdatedAt: travellerForm.expected_updated_at.value,
+            fullName: travellerForm.full_name.value,
+            dateOfBirth: travellerForm.date_of_birth.value,
+            nationality: travellerForm.nationality.value,
+            passportNumber: travellerForm.passport_number.value,
+            passportExpiry: travellerForm.passport_expiry.value
+          });
+          await refreshTravellers();
+          resetTravellerForm();
+          toast("Traveller saved.");
+        } catch (err) { banner(travellerForm, errorMessage(err, "Could not save traveller."), "error"); }
+        busy(travellerForm, false);
+      });
+      try { await refreshTravellers(); } catch (err) {
+        travellerList.innerHTML = '<div class="form-banner error" role="alert">Could not load saved travellers.</div>';
+      }
 
       const listEl = document.getElementById("enq-list");
       try {
