@@ -61,6 +61,10 @@ Deno.serve(async (req: Request) => {
   if (adminErr || !isAdmin) {
     return json({ error: "Only admins can create staff accounts" }, 403, origin);
   }
+  const { error: recentAuthError } = await callerClient.rpc("require_recent_auth", { max_age_seconds: 1800 });
+  if (recentAuthError) {
+    return json({ error: "Recent authentication required. Sign in again to continue." }, 401, origin);
+  }
   let body: Record<string, unknown>;
   try {
     body = await req.json();

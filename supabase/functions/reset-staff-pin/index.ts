@@ -27,6 +27,8 @@ Deno.serve(async (req: Request) => {
   const caller = createClient(url, anonKey, { global: { headers: { Authorization: authHeader } } });
   const { data: isAdmin, error: adminErr } = await caller.rpc("is_admin");
   if (adminErr || !isAdmin) return json({ error: "Only admins can reset a staff PIN" }, 403, origin);
+  const { error: recentAuthError } = await caller.rpc("require_recent_auth", { max_age_seconds: 1800 });
+  if (recentAuthError) return json({ error: "Recent authentication required. Sign in again to continue." }, 401, origin);
   const { data: callerData } = await caller.auth.getUser();
   let body: Record<string, unknown>;
   try { body = await req.json(); } catch { return json({ error: "Invalid request body" }, 400, origin); }
