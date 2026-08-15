@@ -188,6 +188,37 @@ async function authenticatedClients(req: Request) {
   return { caller, admin: createClient(url, secretKey), user: data.user };
 }
 
+function operationEntity(action: string, input: FormData | Record<string, unknown>) {
+  const read = (key: string) => String(input instanceof FormData ? input.get(key) || "" : input[key] || "");
+  if (action === "upload_booking_document" || action === "download_booking_document" || action === "delete_booking_document") {
+    return { entity_type: action === "upload_booking_document" ? "booking" : "document", entity_id: read(action === "upload_booking_document" ? "booking_id" : "document_id") || null };
+  }
+  if (action === "upload_supplier_invoice") return { entity_type: "supplier_payment", entity_id: read("supplier_payment_id") || null };
+  if (action === "upload_payment_proof") return { entity_type: "payment", entity_id: read("payment_id") || null };
+  if (action === "download_staff_file") return { entity_type: read("kind") || "staff_file", entity_id: read("record_id") || null };
+  return { entity_type: null, entity_id: null };
+}
+
+async function startOperation(admin: SupabaseClient, action: string, userId: string, input: FormData | Record<string, unknown>) {
+  const entity = operationEntity(action, input);
+  const { data, error } = await admin.from("integration_operations").insert({
+    integration: "microsoft_documents", operation: action || "unknown",
+    entity_type: entity.entity_type, entity_id: entity.entity_id,
+    actor_user_id: userId, status: "processing",
+  }).select("id").single();
+  if (error) console.error("microsoft-documents: operation ledger start failed", error.code);
+  return String(data?.id || "");
+}
+
+async function finishOperation(admin: SupabaseClient, operationId: string, status: "succeeded" | "failed", httpStatus: number, error?: string) {
+  if (!operationId) return;
+  const update = await admin.from("integration_operations").update({
+    status, http_status: httpStatus, completed_at: new Date().toISOString(),
+    last_error: error ? error.replace(/[\r\n]+/g, " ").slice(0, 800) : null,
+  }).eq("id", operationId);
+  if (update.error) console.error("microsoft-documents: operation ledger finish failed", update.error.code);
+}
+
 async function uploadBookingDocument(form: FormData, caller: SupabaseClient, admin: SupabaseClient, userId: string) {
   if (!(await hasAnyPermission(caller, ["generate_documents", "edit_bookings"]))) throw new Error("Document permission required");
   const bookingId = String(form.get("booking_id") || "");
@@ -379,25 +410,38 @@ Deno.serve(async (req: Request) => {
   const origin = req.headers.get("Origin");
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(origin) });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405, origin);
+  let operationAdmin: SupabaseClient | null = null;
+  let operationId = "";
   try {
     const { caller, admin, user } = await authenticatedClients(req);
+    operationAdmin = admin;
     const contentType = req.headers.get("Content-Type") || "";
     if (contentType.includes("multipart/form-data")) {
       const form = await req.formData();
       const action = String(form.get("action") || "");
-      if (action === "upload_booking_document") return json(await uploadBookingDocument(form, caller, admin, user.id), 200, origin);
-      if (action === "upload_supplier_invoice") return json(await uploadSupplierInvoice(form, caller, admin), 200, origin);
-      if (action === "upload_payment_proof") return json(await uploadPaymentProof(form, caller, admin), 200, origin);
-      return json({ error: "Unknown upload action" }, 400, origin);
+      operationId = await startOperation(admin, action, user.id, form);
+      let response: Response;
+      if (action === "upload_booking_document") response = json(await uploadBookingDocument(form, caller, admin, user.id), 200, origin);
+      else if (action === "upload_supplier_invoice") response = json(await uploadSupplierInvoice(form, caller, admin), 200, origin);
+      else if (action === "upload_payment_proof") response = json(await uploadPaymentProof(form, caller, admin), 200, origin);
+      else response = json({ error: "Unknown upload action" }, 400, origin);
+      await finishOperation(admin, operationId, response.ok ? "succeeded" : "failed", response.status, response.ok ? undefined : "Request rejected");
+      return response;
     }
     const body = await req.json() as Record<string, unknown>;
-    if (body.action === "download_booking_document") return await downloadDocument(body, caller, admin, user.id, origin);
-    if (body.action === "download_staff_file") return await downloadStaffFile(body, caller, admin, origin);
-    if (body.action === "delete_booking_document") return json(await deleteDocument(body, caller, admin), 200, origin);
-    return json({ error: "Unknown action" }, 400, origin);
+    const action = String(body.action || "");
+    operationId = await startOperation(admin, action, user.id, body);
+    let response: Response;
+    if (action === "download_booking_document") response = await downloadDocument(body, caller, admin, user.id, origin);
+    else if (action === "download_staff_file") response = await downloadStaffFile(body, caller, admin, origin);
+    else if (action === "delete_booking_document") response = json(await deleteDocument(body, caller, admin), 200, origin);
+    else response = json({ error: "Unknown action" }, 400, origin);
+    await finishOperation(admin, operationId, response.ok ? "succeeded" : "failed", response.status, response.ok ? undefined : "Request rejected");
+    return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Microsoft document operation failed";
     const status = /Authentication required/.test(message) ? 401 : /permission|required|denied/i.test(message) ? 403 : /not found/i.test(message) ? 404 : 400;
+    if (operationAdmin) await finishOperation(operationAdmin, operationId, "failed", status, message);
     console.error("microsoft-documents:", message);
     return json({ error: message }, status, origin);
   }
