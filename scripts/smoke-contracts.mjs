@@ -30,6 +30,7 @@ requireText("supabase/functions/microsoft-documents/index.ts", [
   ["payment proof upload", /upload_payment_proof/],
   ["supplier invoice upload", /upload_supplier_invoice/],
   ["authorized document download", /download_booking_document/],
+  ["corporate member user-id authorization", /corporate_portal_members[\s\S]*\.eq\("user_id",\s*userId\)/],
 ]);
 requireText("js/auth.js", [
   ["Microsoft-backed customer download", /microsoft-documents/],

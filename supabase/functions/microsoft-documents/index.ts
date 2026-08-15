@@ -335,7 +335,7 @@ async function mayDownload(admin: SupabaseClient, caller: SupabaseClient, userId
   if (booking.user_id === userId) return true;
   if (!booking.corporate_account_id) return false;
   const { data: member } = await admin.from("corporate_portal_members")
-    .select("id").eq("corporate_account_id", booking.corporate_account_id).eq("auth_user_id", userId)
+    .select("id").eq("corporate_account_id", booking.corporate_account_id).eq("user_id", userId)
     .eq("status", "active").eq("can_view_documents", true).maybeSingle();
   return Boolean(member);
 }
