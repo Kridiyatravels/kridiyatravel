@@ -289,7 +289,7 @@ window.KridiyaAuth = (function () {
     const sb = await client();
     const result = await sb
       .from("payments")
-      .select("id, booking_id, enquiry_id, payment_reference, payment_direction, amount, currency, method, status, refund_amount, refund_reason, refund_method, refund_reference, refund_requested_at, refund_approved_at, refund_completed_at, created_at")
+      .select("id, booking_id, enquiry_id, payment_reference, payment_direction, amount, currency, method, status, proof_file_name, proof_uploaded_at, proof_source, refund_amount, refund_reason, refund_method, refund_reference, refund_requested_at, refund_approved_at, refund_completed_at, created_at")
       .or(ids.join(","))
       .order("created_at", { ascending: false });
     if (result.error) return [];
@@ -343,6 +343,24 @@ window.KridiyaAuth = (function () {
       throw new Error(result.error ? result.error.message : "Could not prepare document download.");
     }
     window.open(result.data.signedUrl, "_blank", "noopener");
+  }
+
+  async function uploadMyPaymentProof(paymentId, file) {
+    const user = await currentUser();
+    if (!user) throw new Error("Please log in again.");
+    if (!file || file.size < 1 || file.size > 10485760) throw new Error("Choose a proof file up to 10 MB.");
+    if (["application/pdf", "image/jpeg", "image/png", "image/webp"].indexOf(file.type) === -1) throw new Error("Use a PDF, JPG, PNG, or WebP file.");
+    const safeName = String(file.name || "proof").replace(/[^A-Za-z0-9._-]+/g, "-").slice(-120) || "proof";
+    const path = user.id + "/" + paymentId + "/" + Date.now() + "-" + safeName;
+    const sb = await client();
+    const upload = await sb.storage.from("booking-payment-proofs").upload(path, file, { upsert: false, contentType: file.type });
+    if (upload.error) throw upload.error;
+    const attach = await sb.rpc("attach_my_payment_proof", { p_payment_id: paymentId, p_storage_path: path, p_file_name: String(file.name || safeName).slice(0, 180), p_mime_type: file.type, p_size_bytes: file.size });
+    if (attach.error) {
+      await sb.storage.from("booking-payment-proofs").remove([path]);
+      throw attach.error;
+    }
+    return attach.data === true;
   }
 
   async function listMyTravellers() {
@@ -572,6 +590,7 @@ window.KridiyaAuth = (function () {
     listBookingDocuments: listBookingDocuments,
     openBookingDocument: openBookingDocument,
     listCustomerPayments: listCustomerPayments,
+    uploadMyPaymentProof: uploadMyPaymentProof,
     listMyTravellers: listMyTravellers,
     saveMyTraveller: saveMyTraveller,
     archiveMyTraveller: archiveMyTraveller,
@@ -925,11 +944,22 @@ window.KridiyaAuth = (function () {
       const amount = money(p.refund_amount || p.amount, p.currency);
       const isRefund = /refund/i.test(String(p.status || "")) || p.refund_amount;
       const ref = p.refund_reference || p.payment_reference || "";
-      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span></div>';
+      const canUpload = !isRefund && p.payment_direction === "customer_in" && /^(pending|proof_received)$/.test(String(p.status || ""));
+      const proof = p.proof_uploaded_at ? '<small>Proof submitted ' + KridiyaAuth.escapeHTML(new Date(p.proof_uploaded_at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + ' — awaiting verification</small>' : '';
+      const upload = canUpload ? '<label class="btn btn-outline btn-sm proof-upload-label">' + (p.proof_uploaded_at ? 'Replace proof' : 'Upload proof') + '<input type="file" data-customer-proof="' + KridiyaAuth.escapeHTML(p.id) + '" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label>' : '';
+      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + proof + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><div class="account-actions"><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span>' + upload + '</div></div>';
     }).join("") + "</div>";
   }
 
   function wireEnquiryExtras(listEl) {
+    listEl.addEventListener("change", async function (event) {
+      const input = event.target.closest("[data-customer-proof]");
+      if (!input || !input.files || !input.files[0]) return;
+      const file = input.files[0], label = input.closest("label"), old = label.firstChild.textContent;
+      input.disabled = true; label.firstChild.textContent = "Uploading...";
+      try { await KridiyaAuth.uploadMyPaymentProof(input.dataset.customerProof, file); toast("Payment proof submitted for verification."); location.reload(); }
+      catch (err) { input.disabled = false; input.value = ""; label.firstChild.textContent = old; toast(errorMessage(err, "Could not upload payment proof.")); }
+    });
     listEl.addEventListener("click", async function (e) {
       const btn = e.target.closest(".customer-doc-download");
       if (!btn) return;
