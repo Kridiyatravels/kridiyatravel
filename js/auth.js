@@ -467,9 +467,16 @@ window.KridiyaAuth = (function () {
     return result.data;
   }
 
-  async function respondToQuote(quoteId, status) {
+  async function respondToQuote(quoteId, status, expectedUpdatedAt, termsConfirmed) {
     const sb = await client();
-    const result = await sb.from("quotes").update({ status: status }).eq("id", quoteId).select("*").single();
+    const result = await sb.rpc("respond_to_my_quote", { p_quote_id: quoteId, p_decision: status, p_expected_updated_at: expectedUpdatedAt, p_terms_confirmed: termsConfirmed === true });
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function requestQuoteRevision(quoteId, message, expectedUpdatedAt) {
+    const sb = await client();
+    const result = await sb.rpc("request_my_quote_revision", { p_quote_id: quoteId, p_message: message, p_expected_updated_at: expectedUpdatedAt });
     if (result.error) throw result.error;
     return result.data;
   }
@@ -576,6 +583,7 @@ window.KridiyaAuth = (function () {
     respondToTextRequest: respondToTextRequest,
     respondToFileRequest: respondToFileRequest,
     respondToQuote: respondToQuote,
+    requestQuoteRevision: requestQuoteRevision,
     getMyCorporatePortal: getMyCorporatePortal,
     listMyCorporateBookings: listMyCorporateBookings,
     createMyCorporateRequest: createMyCorporateRequest,
@@ -881,9 +889,11 @@ window.KridiyaAuth = (function () {
           addonsHtml +
           termsHtml +
           (validity ? '<p class="quote-valid">Valid until ' + KridiyaAuth.escapeHTML(validity) + "</p>" : "") +
+          '<label class="quote-confirm"><input type="checkbox" data-quote-terms="' + q.id + '"> <span>I confirm I reviewed this quote and its terms.</span></label>' +
           '<div class="quote-actions">' +
-            '<button class="btn btn-primary" type="button" data-quote-id="' + q.id + '" data-action="accepted">Accept quote</button>' +
-            '<button class="btn btn-outline" type="button" data-quote-id="' + q.id + '" data-action="declined">Decline</button>' +
+            '<button class="btn btn-primary" type="button" data-quote-id="' + q.id + '" data-quote-updated="' + KridiyaAuth.escapeHTML(q.updated_at) + '" data-action="accepted">Accept quote</button>' +
+            '<button class="btn btn-outline" type="button" data-quote-id="' + q.id + '" data-quote-updated="' + KridiyaAuth.escapeHTML(q.updated_at) + '" data-action="revision">Request changes</button>' +
+            '<button class="btn btn-outline" type="button" data-quote-id="' + q.id + '" data-quote-updated="' + KridiyaAuth.escapeHTML(q.updated_at) + '" data-action="declined">Decline</button>' +
           "</div></div>";
       }
       return '<div class="quote-card quote-card-done">' +
@@ -963,10 +973,20 @@ window.KridiyaAuth = (function () {
     listEl.addEventListener("click", async function (e) {
       const btn = e.target.closest("[data-quote-id]");
       if (!btn) return;
+      const action = btn.dataset.action;
+      const terms = listEl.querySelector('[data-quote-terms="' + btn.dataset.quoteId + '"]');
+      if (action === "accepted" && (!terms || !terms.checked)) { toast("Please confirm you reviewed the quote and terms before accepting."); return; }
       btn.disabled = true;
       try {
-        await KridiyaAuth.respondToQuote(btn.dataset.quoteId, btn.dataset.action);
-        toast(btn.dataset.action === "accepted" ? "Quote accepted." : "Quote declined.");
+        if (action === "revision") {
+          const message = window.prompt("What would you like Kridiya to change in this quote?");
+          if (!message) { btn.disabled = false; return; }
+          await KridiyaAuth.requestQuoteRevision(btn.dataset.quoteId, message, btn.dataset.quoteUpdated);
+          toast("Revision request sent to Kridiya operations.");
+        } else {
+          await KridiyaAuth.respondToQuote(btn.dataset.quoteId, action, btn.dataset.quoteUpdated, !!(terms && terms.checked));
+          toast(action === "accepted" ? "Quote accepted." : "Quote declined.");
+        }
         location.reload();
       } catch (err) {
         btn.disabled = false;
