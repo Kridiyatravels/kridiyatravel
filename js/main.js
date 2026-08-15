@@ -484,6 +484,7 @@ function renderChrome() {
           '<li><a href="guides/">Travel Guides</a></li>' +
           '<li><a href="contact.html">Contact Us</a></li>' +
           '<li><a href="login.html">Customer Login</a></li>' +
+          '<li><a href="track-enquiry.html">Track Enquiry</a></li>' +
           '<li><a href="https://corporate.kridiyatravel.com/login.html?next=corporate-account.html">Corporate Portal</a></li>' +
           '<li><a href="register.html">Create Account</a></li>' +
           '<li><a href="privacy.html">Privacy Policy</a></li>' +

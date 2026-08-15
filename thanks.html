@@ -32,7 +32,7 @@
       <div style="display:grid;gap:0.6rem;margin-top:1.2rem">
         <a class="btn btn-wa btn-block" id="thanks-wa" href="https://wa.me/971509413873?text=Hello%20Kridiya%20Travel!%20I%20just%20sent%20an%20enquiry%20from%20your%20website." target="_blank" rel="noopener">Chat now on WhatsApp</a>
         <a class="btn btn-outline btn-block" href="index.html">Back to home</a>
-        <a class="btn btn-outline btn-block" id="thanks-track" href="register.html" hidden>Create an account to track this enquiry</a>
+        <a class="btn btn-outline btn-block" id="thanks-track" href="track-enquiry.html" hidden>Securely track this enquiry</a>
       </div>
       <p class="form-note" style="margin-top:1rem">In a hurry? Call us any time on <a href="tel:+971509413873">+971 50 941 3873</a>.</p>
     </div>
@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
   var session = window.KridiyaAuth ? KridiyaAuth.session() : null;
   if (!session) {
     var trackBtn = document.getElementById("thanks-track");
+    trackBtn.href = "track-enquiry.html?ref=" + encodeURIComponent(enq.reference);
     trackBtn.hidden = false;
   }
 });

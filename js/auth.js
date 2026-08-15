@@ -1142,6 +1142,10 @@ window.KridiyaAuth = (function () {
         ? "Member since " + since.toLocaleDateString("en-GB", { month: "long", year: "numeric" })
         : "";
       refreshHeaderName(user);
+      if (new URLSearchParams(location.search).get("claimed") === "1") {
+        toast("Enquiry connected to your verified account.");
+        history.replaceState(null, "", "account.html");
+      }
 
       const travellerForm = document.getElementById("traveller-form");
       const travellerList = document.getElementById("traveller-list");

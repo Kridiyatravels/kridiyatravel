@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track Your Enquiry - Kridiya Travel and Tourism</title>
+<meta name="description" content="Securely connect a Kridiya Travel enquiry to your verified customer account.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Great+Vibes&family=Playfair+Display:ital,wght@1,700;1,800&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/favicon-180.png">
+<link rel="stylesheet" href="css/styles.css?v=20260815d">
+</head>
+<body data-page="track-enquiry">
+<header id="site-header" class="site-header"></header>
+<main>
+  <div class="container auth-wrap">
+    <div class="auth-shell">
+      <section class="auth-card">
+        <p class="eyebrow">Secure enquiry tracking</p>
+        <h1>Connect your enquiry</h1>
+        <p>Enter the reference and the same email used in your enquiry. We will send a one-time sign-in link to verify you.</p>
+        <form id="track-enquiry-form" class="auth-form" novalidate>
+          <div class="form-banner error" hidden role="alert"></div>
+          <div class="form-banner success" hidden role="status"></div>
+          <div class="field"><label for="track-ref">ENQUIRY REFERENCE</label><input id="track-ref" name="reference" required autocomplete="off" maxlength="40" placeholder="KD-FLT-XXXXXXXX"></div>
+          <div class="field"><label for="track-email">ENQUIRY EMAIL</label><input id="track-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"></div>
+          <button class="btn btn-primary btn-block btn-lg" type="submit" data-label="Verify and track">Verify and track</button>
+        </form>
+        <p class="auth-alt">Already signed in? Submit the reference above and we will verify it against your account email.</p>
+      </section>
+      <aside class="auth-assist">
+        <h2>What happens next?</h2>
+        <ul class="auth-checklist">
+          <li><b>Email ownership check</b><span>The link works only for the email saved with that enquiry.</span></li>
+          <li><b>Private account access</b><span>Your enquiry then appears in the normal customer portal.</span></li>
+          <li><b>No public lookup</b><span>A reference by itself never displays customer or travel information.</span></li>
+        </ul>
+        <a class="btn btn-outline btn-block" href="https://wa.me/971509413873" target="_blank" rel="noopener">Need help? WhatsApp us</a>
+      </aside>
+    </div>
+  </div>
+</main>
+<footer id="site-footer" class="site-footer"></footer>
+<script src="js/main.js?v=20260815g" defer></script>
+<script src="js/auth.js?v=20260815g" defer></script>
+<script src="js/track-enquiry.js?v=20260815a" defer></script>
+</body>
+</html>
+
