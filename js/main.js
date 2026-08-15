@@ -584,6 +584,7 @@ function gatherEnquiryFields(form) {
   const details = {};
   const parts = [];
   data.forEach(function (v, k) {
+    if (typeof File !== "undefined" && v instanceof File) return;
     if (k.charAt(0) === "_" || k === "Name" || k === "Email" || k === "Phone") return;
     const val = String(v).trim();
     if (!val) return;
@@ -627,7 +628,28 @@ async function submitEnquiryToSupabase(fields, serviceType, reference) {
   if (result.error) throw result.error;
   // The database's enquiries_notify_new trigger creates staff_notifications atomically.
   // Do not request the inserted row here: anonymous visitors may INSERT but cannot SELECT enquiries.
-  return { reference: reference };
+  let enquiryId = null;
+  if (session) {
+    const lookup = await sb.from("enquiries").select("id").eq("reference", reference).eq("user_id", session.id).maybeSingle();
+    if (!lookup.error && lookup.data) enquiryId = lookup.data.id;
+  }
+  return { reference: reference, id: enquiryId };
+}
+
+async function uploadEnquiryAttachments(enquiryId, files) {
+  if (!files.length) return;
+  if (!enquiryId) throw new Error("Sign in again before uploading private documents.");
+  const user = await KridiyaAuth.currentUser(); if (!user) throw new Error("Please sign in again before uploading files.");
+  const sb = await KridiyaAuth.client();
+  for (const file of files) {
+    if (file.size < 1 || file.size > 10485760 || ["application/pdf","image/jpeg","image/png","image/webp"].indexOf(file.type) === -1) throw new Error("Attachments must be PDF, JPG, PNG, or WebP files up to 10 MB.");
+    const safe = String(file.name || "attachment").replace(/[^A-Za-z0-9._-]+/g,"-").slice(-120) || "attachment";
+    const path = user.id + "/" + enquiryId + "/" + Date.now() + "-" + safe;
+    const uploaded = await sb.storage.from("enquiry-uploads").upload(path,file,{upsert:false,contentType:file.type});
+    if (uploaded.error) throw uploaded.error;
+    const attached = await sb.rpc("attach_my_enquiry_file",{p_enquiry_id:enquiryId,p_storage_path:path,p_file_name:String(file.name||safe).slice(0,180),p_mime_type:file.type,p_size_bytes:file.size});
+    if (attached.error) { await sb.storage.from("enquiry-uploads").remove([path]); throw attached.error; }
+  }
 }
 
 async function submitNewsletterConsent(email) {
@@ -657,7 +679,7 @@ function formSubmitAjaxURL(form) {
 async function sendFormSubmitAjax(form, reference) {
   const data = new FormData(form);
   const payload = { Reference: reference };
-  data.forEach(function (v, k) { payload[k] = v; });
+  data.forEach(function (v, k) { if (!(typeof File !== "undefined" && v instanceof File)) payload[k] = v; });
   const response = await fetch(formSubmitAjaxURL(form), {
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -743,6 +765,10 @@ function prepareFormSubmit(form) {
         "Send me occasional travel offers by email. I can opt out at any time.</label>");
     }
   }
+  if (form.dataset.enquiryType && KridiyaAuth.session() && !form.querySelector('[name="Enquiry_attachments"]')) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) submitButton.insertAdjacentHTML("beforebegin", '<div class="field enquiry-upload-field"><label>SUPPORTING DOCUMENTS (OPTIONAL)</label><input type="file" name="Enquiry_attachments" multiple accept="application/pdf,image/jpeg,image/png,image/webp"><span class="sub">Up to 3 PDF or image files, 10 MB each. Uploaded privately after the enquiry is saved.</span></div>');
+  }
   let next = form.querySelector('input[name="_next"]');
   if (!next) {
     next = document.createElement("input");
@@ -804,9 +830,15 @@ function prepareFormSubmit(form) {
     const serviceType = serviceTypeFromLabel(type);
     const reference = generateReference(serviceType);
     const fields = gatherEnquiryFields(form);
+    const attachmentInput = form.querySelector('[name="Enquiry_attachments"]');
+    const attachmentFiles = attachmentInput ? Array.from(attachmentInput.files || []).slice(0, 3) : [];
     const dest = next.value;
 
-    submitEnquiryToSupabase(fields, serviceType, reference).then(async function () {
+    submitEnquiryToSupabase(fields, serviceType, reference).then(async function (saved) {
+      if (attachmentFiles.length) {
+        try { await uploadEnquiryAttachments(saved.id, attachmentFiles); }
+        catch (error) { console.error("Kridiya: enquiry saved but attachment upload failed", error); try { sessionStorage.setItem("kridiya_attachment_warning", "Your enquiry was saved, but one or more attachments could not be uploaded. Please send them through your account support request or WhatsApp."); } catch (e) {} }
+      }
       try {
         await sendFormSubmitAjax(form, reference);
       } catch (error) {
