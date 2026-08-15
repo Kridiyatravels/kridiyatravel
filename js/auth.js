@@ -386,6 +386,18 @@ window.KridiyaAuth = (function () {
     const sb = await client(); const result = await sb.rpc("list_my_communication_history", { p_limit: 50 });
     if (result.error) throw result.error; return result.data || [];
   }
+  async function getMyEnquiryDraft(formKey) {
+    const sb = await client(); const result = await sb.rpc("get_my_enquiry_draft", { p_form_key: formKey });
+    if (result.error) throw result.error; return result.data || null;
+  }
+  async function saveMyEnquiryDraft(formKey, serviceType, payload) {
+    const sb = await client(); const result = await sb.rpc("save_my_enquiry_draft", { p_form_key: formKey, p_service_type: serviceType, p_payload: payload });
+    if (result.error) throw result.error; return result.data;
+  }
+  async function deleteMyEnquiryDraft(formKey) {
+    const sb = await client(); const result = await sb.rpc("delete_my_enquiry_draft", { p_form_key: formKey });
+    if (result.error) throw result.error; return result.data === true;
+  }
 
   async function listMyTravellers() {
     const sb = await client();
@@ -619,6 +631,9 @@ window.KridiyaAuth = (function () {
     getMyNotificationPreferences: getMyNotificationPreferences,
     saveMyNotificationPreferences: saveMyNotificationPreferences,
     listMyCommunicationHistory: listMyCommunicationHistory,
+    getMyEnquiryDraft: getMyEnquiryDraft,
+    saveMyEnquiryDraft: saveMyEnquiryDraft,
+    deleteMyEnquiryDraft: deleteMyEnquiryDraft,
     listMyTravellers: listMyTravellers,
     saveMyTraveller: saveMyTraveller,
     archiveMyTraveller: archiveMyTraveller,

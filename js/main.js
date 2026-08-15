@@ -685,6 +685,52 @@ function stashEnquiryForThanksPage(reference, serviceType, summary, typeLabel, n
   } catch (e) { /* best-effort */ }
 }
 
+function enquiryDraftKey(form) {
+  const raw = [location.pathname, form.id || form.dataset.enquiryType || "enquiry"].join(":").toLowerCase();
+  return raw.replace(/[^a-z0-9:_-]+/g, "-").slice(0, 80);
+}
+
+function enquiryDraftPayload(form) {
+  const payload = {};
+  Array.from(form.elements).forEach(function (field) {
+    if (!field.name || field.disabled || field.type === "file" || field.type === "submit" || field.name.charAt(0) === "_" || /passport|card|cvv|password|otp/i.test(field.name)) return;
+    if ((field.type === "checkbox" || field.type === "radio") && !field.checked) return;
+    const value = String(field.value || "").trim();
+    if (value) payload[field.name] = value;
+  });
+  return payload;
+}
+
+function applyEnquiryDraft(form, payload) {
+  Object.keys(payload || {}).forEach(function (name) {
+    const fields = form.querySelectorAll('[name="' + CSS.escape(name) + '"]');
+    fields.forEach(function (field) {
+      if (field.type === "checkbox" || field.type === "radio") field.checked = field.value === String(payload[name]);
+      else if (field.type !== "file" && field.type !== "hidden") field.value = String(payload[name]);
+      field.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  });
+}
+
+function initEnquiryDraft(form, serviceType) {
+  const key = enquiryDraftKey(form), guestKey = "kridiya_enquiry_draft:" + key;
+  let timer = null, status = document.createElement("p");
+  status.className = "form-note enquiry-draft-status"; status.setAttribute("aria-live", "polite");
+  const submit = form.querySelector('button[type="submit"]'); if (submit) submit.insertAdjacentElement("beforebegin", status);
+  function show(text) { status.textContent = text; }
+  function save() {
+    const payload = enquiryDraftPayload(form); if (!Object.keys(payload).length) return;
+    const cached = KridiyaAuth.session();
+    if (cached) KridiyaAuth.saveMyEnquiryDraft(key, serviceType, payload).then(function () { show("Draft saved securely."); }).catch(function () { try { sessionStorage.setItem(guestKey, JSON.stringify(payload)); show("Draft saved in this browser tab."); } catch (e) {} });
+    else try { sessionStorage.setItem(guestKey, JSON.stringify(payload)); show("Draft saved in this browser tab."); } catch (e) {}
+  }
+  form.addEventListener("input", function () { clearTimeout(timer); show("Saving draft..."); timer = setTimeout(save, 900); });
+  const cached = KridiyaAuth.session();
+  const local = function () { try { const payload = JSON.parse(sessionStorage.getItem(guestKey) || "null"); if (payload) { applyEnquiryDraft(form, payload); show("Draft restored from this browser tab."); } } catch (e) {} };
+  if (cached) KridiyaAuth.getMyEnquiryDraft(key).then(function (draft) { if (draft && draft.payload) { applyEnquiryDraft(form, draft.payload); show("Your saved draft was restored."); } else local(); }).catch(local); else local();
+  return function clearDraft() { clearTimeout(timer); try { sessionStorage.removeItem(guestKey); } catch (e) {} if (KridiyaAuth.session()) KridiyaAuth.deleteMyEnquiryDraft(key).catch(function () {}); };
+}
+
 function prepareFormSubmit(form) {
   if (!form) return;
   if (form.dataset.kridiyaPrepared === "true") return;
@@ -705,6 +751,7 @@ function prepareFormSubmit(form) {
     form.appendChild(next);
   }
   next.value = new URL("thanks.html", location.href).href;
+  const draftClear = form.dataset.enquiryType ? initEnquiryDraft(form, serviceTypeFromLabel(form.dataset.enquiryType)) : function () {};
 
   let started = false;
   form.addEventListener("focusin", function () {
@@ -780,6 +827,7 @@ function prepareFormSubmit(form) {
         console.warn("Kridiya: server-side Meta lead measurement was unavailable.", error);
       }
       stashEnquiryForThanksPage(reference, serviceType, fields.summary, type, fields.fullName);
+      draftClear();
       location.href = dest;
     }).catch(function (error) {
       console.error("Kridiya: could not save enquiry to Supabase", error);
