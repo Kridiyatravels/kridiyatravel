@@ -289,7 +289,7 @@ window.KridiyaAuth = (function () {
     const sb = await client();
     const result = await sb
       .from("payments")
-      .select("id, booking_id, enquiry_id, payment_reference, payment_direction, amount, currency, method, status, proof_file_name, proof_uploaded_at, proof_source, refund_amount, refund_reason, refund_method, refund_reference, refund_requested_at, refund_approved_at, refund_completed_at, created_at")
+      .select("id, booking_id, enquiry_id, payment_reference, payment_direction, amount, currency, method, status, payment_link, receipt_document_id, proof_file_name, proof_uploaded_at, proof_source, refund_amount, refund_reason, refund_method, refund_reference, refund_requested_at, refund_approved_at, refund_completed_at, received_at, created_at")
       .or(ids.join(","))
       .order("created_at", { ascending: false });
     if (result.error) return [];
@@ -361,6 +361,14 @@ window.KridiyaAuth = (function () {
       throw attach.error;
     }
     return attach.data === true;
+  }
+
+  async function getMyPaymentReceipt(paymentId) {
+    const sb = await client();
+    const result = await sb.rpc("get_my_payment_receipt", { p_payment_id: paymentId }).maybeSingle();
+    if (result.error) throw result.error;
+    if (!result.data) throw new Error("This receipt has not been released for your account.");
+    return result.data;
   }
 
   async function listMyBookingTimeline(bookingId) {
@@ -627,6 +635,7 @@ window.KridiyaAuth = (function () {
     openBookingDocument: openBookingDocument,
     listCustomerPayments: listCustomerPayments,
     uploadMyPaymentProof: uploadMyPaymentProof,
+    getMyPaymentReceipt: getMyPaymentReceipt,
     listMyBookingTimeline: listMyBookingTimeline,
     getMyNotificationPreferences: getMyNotificationPreferences,
     saveMyNotificationPreferences: saveMyNotificationPreferences,
@@ -980,6 +989,19 @@ window.KridiyaAuth = (function () {
     }).join("") + "</div>";
   }
 
+  function safePaymentLink(value) {
+    try { const parsed = new URL(String(value || "")); return parsed.protocol === "https:" ? parsed.href : ""; }
+    catch (e) { return ""; }
+  }
+
+  function customerReceiptHTML(receipt) {
+    const received = receipt.received_at ? new Date(receipt.received_at).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
+    return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Receipt ' + KridiyaAuth.escapeHTML(receipt.receipt_number) + '</title><style>body{font-family:Arial,sans-serif;color:#1a1a1a;margin:0;padding:42px}.head{display:flex;justify-content:space-between;border-bottom:3px solid #c9601c;padding-bottom:18px}.brand{color:#a3480f;font-size:20px;font-weight:800}.meta{text-align:right}.box{border:1px solid #eed6bd;background:#fff8f0;border-radius:10px;padding:18px;margin:20px 0}.kv{display:grid;grid-template-columns:170px 1fr;gap:9px 18px}.k{color:#777}.v{font-weight:700}.amount{font-size:28px;color:#a3480f;font-weight:800}.foot{margin-top:34px;border-top:1px solid #eee;padding-top:16px;color:#666;font-size:12px;line-height:1.6}@media print{body{padding:.45in}}</style></head><body>' +
+      '<div class="head"><div><div class="brand">KRIDIYA Travel and Tourism FZ-LLC</div><p>Ras Al Khaimah, United Arab Emirates<br>Trade licence: 5033347 · info@kridiyatravel.com</p></div><div class="meta"><b>PAYMENT RECEIPT</b><h2>' + KridiyaAuth.escapeHTML(receipt.receipt_number) + '</h2></div></div>' +
+      '<div class="box kv"><span class="k">Booking reference</span><span class="v">' + KridiyaAuth.escapeHTML(receipt.booking_reference) + '</span><span class="k">Booking</span><span class="v">' + KridiyaAuth.escapeHTML(receipt.booking_title || receipt.route_or_destination || "Travel service") + '</span><span class="k">Payment reference</span><span class="v">' + KridiyaAuth.escapeHTML(receipt.payment_reference) + '</span><span class="k">Payment method</span><span class="v">' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(receipt.payment_method)) + '</span><span class="k">Received</span><span class="v">' + KridiyaAuth.escapeHTML(received) + '</span></div>' +
+      '<div class="box"><b>Amount received</b><div class="amount">' + KridiyaAuth.escapeHTML(money(receipt.amount, receipt.currency)) + '</div></div><div class="foot">This receipt confirms payment recorded by KRIDIYA Travel and Tourism. Keep it for your records.</div><script>window.onload=function(){window.print()}<\/script></body></html>';
+  }
+
   function customerPaymentsHTML(payments) {
     if (!payments.length) return '<div class="enq-extra customer-payment-list customer-empty-list"><h4>Payments and refunds</h4><p>No customer payment or refund updates yet.</p></div>';
     return '<div class="enq-extra customer-payment-list"><h4>Payments and refunds</h4>' + payments.map(function (p) {
@@ -988,9 +1010,13 @@ window.KridiyaAuth = (function () {
       const isRefund = /refund/i.test(String(p.status || "")) || p.refund_amount;
       const ref = p.refund_reference || p.payment_reference || "";
       const canUpload = !isRefund && p.payment_direction === "customer_in" && /^(pending|proof_received)$/.test(String(p.status || ""));
+      const paymentUrl = !isRefund && /^(pending|proof_received)$/.test(String(p.status || "")) ? safePaymentLink(p.payment_link) : "";
       const proof = p.proof_uploaded_at ? '<small>Proof submitted ' + KridiyaAuth.escapeHTML(new Date(p.proof_uploaded_at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) + ' — awaiting verification</small>' : '';
       const upload = canUpload ? '<label class="btn btn-outline btn-sm proof-upload-label">' + (p.proof_uploaded_at ? 'Replace proof' : 'Upload proof') + '<input type="file" data-customer-proof="' + KridiyaAuth.escapeHTML(p.id) + '" accept="image/jpeg,image/png,image/webp,application/pdf" hidden></label>' : '';
-      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + proof + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><div class="account-actions"><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span>' + upload + '</div></div>';
+      const refundStages = isRefund ? [p.refund_requested_at ? "Requested " + new Date(p.refund_requested_at).toLocaleDateString("en-GB") : "", p.refund_approved_at ? "Approved " + new Date(p.refund_approved_at).toLocaleDateString("en-GB") : "", p.refund_completed_at ? "Completed " + new Date(p.refund_completed_at).toLocaleDateString("en-GB") : ""].filter(Boolean).join(" · ") : "";
+      const pay = paymentUrl ? '<a class="btn btn-primary btn-sm" href="' + KridiyaAuth.escapeHTML(paymentUrl) + '" target="_blank" rel="noopener noreferrer">Pay securely</a>' : '';
+      const receipt = p.receipt_document_id && p.status === "received" ? '<button class="btn btn-outline btn-sm customer-receipt" type="button" data-payment-id="' + KridiyaAuth.escapeHTML(p.id) + '">Receipt</button>' : '';
+      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + proof + (refundStages ? '<small>' + KridiyaAuth.escapeHTML(refundStages) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><div class="account-actions"><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span>' + pay + receipt + upload + '</div></div>';
     }).join("") + "</div>";
   }
 
@@ -1023,6 +1049,21 @@ window.KridiyaAuth = (function () {
       catch (err) { input.disabled = false; input.value = ""; label.firstChild.textContent = old; toast(errorMessage(err, "Could not upload payment proof.")); }
     });
     listEl.addEventListener("click", async function (e) {
+      const receiptBtn = e.target.closest(".customer-receipt");
+      if (receiptBtn) {
+        receiptBtn.disabled = true;
+        const oldReceiptLabel = receiptBtn.textContent;
+        receiptBtn.textContent = "Preparing...";
+        try {
+          const receipt = await KridiyaAuth.getMyPaymentReceipt(receiptBtn.dataset.paymentId);
+          const popup = window.open("", "_blank");
+          if (!popup) throw new Error("Please allow pop-ups to open your receipt.");
+          popup.document.open(); popup.document.write(customerReceiptHTML(receipt)); popup.document.close();
+        } catch (err) { toast(errorMessage(err, "Could not open the receipt.")); }
+        receiptBtn.disabled = false;
+        receiptBtn.textContent = oldReceiptLabel;
+        return;
+      }
       const btn = e.target.closest(".customer-doc-download");
       if (!btn) return;
       btn.disabled = true;
