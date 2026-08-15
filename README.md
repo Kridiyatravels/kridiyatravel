@@ -26,7 +26,10 @@ staff PIN login, corporate quote responses, and unsubscribe.
 - `docs/` contains private operating and security material. It is deliberately
   ignored and must never be added to this public repository or published site.
 - `kridiya-corporate-live/` is a separate repository and is ignored here.
-- Supabase schema changes live under `supabase/migrations/`; do not use
-  `supabase db push` until the remote migration history has been reconciled.
+- Supabase schema changes live under `supabase/migrations/`. Production
+  migration history was reconciled against this directory on 15 August 2026.
+  Before any deployment, compare local and remote migration lists, review the
+  exact pending SQL, and apply only the intended timestamped migrations. Never
+  use an unreviewed blanket database push.
 - Never commit service-role/secret keys, staff PINs, customer data, or production
   smoke-test credentials.
