@@ -597,6 +597,7 @@ function gatherEnquiryFields(form) {
     email: String(data.get("Email") || "").trim(),
     phone: String(data.get("Phone") || "").trim(),
     marketingConsent: data.get("Marketing_consent") === "Yes",
+    primaryTravellerId: String(data.get("_primary_traveller_id") || "").trim(),
     details: details,
     summary: parts.join(" · ")
   };
@@ -634,7 +635,13 @@ async function submitEnquiryToSupabase(fields, serviceType, reference) {
     const lookup = await sb.from("enquiries").select("id").eq("reference", reference).eq("user_id", session.id).maybeSingle();
     if (!lookup.error && lookup.data) enquiryId = lookup.data.id;
   }
-  return { reference: reference, id: enquiryId };
+  let travellerLinked = !fields.primaryTravellerId;
+  if (enquiryId && fields.primaryTravellerId) {
+    const linked = await sb.rpc("link_my_enquiry_traveller", { p_enquiry_id: enquiryId, p_traveller_id: fields.primaryTravellerId });
+    travellerLinked = !linked.error && linked.data === true;
+    if (linked.error) console.error("Kridiya: enquiry saved but traveller link failed", linked.error);
+  }
+  return { reference: reference, id: enquiryId, travellerLinked: travellerLinked };
 }
 
 async function uploadEnquiryAttachments(enquiryId, files) {
@@ -758,6 +765,31 @@ function prepareFormSubmit(form) {
   if (!form) return;
   if (form.dataset.kridiyaPrepared === "true") return;
   form.dataset.kridiyaPrepared = "true";
+  if (form.dataset.enquiryType && KridiyaAuth.session()) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+      const field = document.createElement("div");
+      field.className = "field saved-traveller-field";
+      field.innerHTML = '<label>SAVED PRIMARY TRAVELLER (OPTIONAL)</label><select name="_primary_traveller_id"><option value="">Do not link a saved traveller</option></select><span class="sub">Links the canonical traveller record securely. Passport details are never copied into this form.</span>';
+      submitButton.insertAdjacentElement("beforebegin", field);
+      const select = field.querySelector("select");
+      KridiyaAuth.listMyTravellers().then(function (travellers) {
+        if (!travellers.length) { field.remove(); return; }
+        travellers.forEach(function (traveller) {
+          const option = document.createElement("option");
+          option.value = traveller.id;
+          option.textContent = [traveller.full_name, traveller.nationality, traveller.date_of_birth ? "Born " + traveller.date_of_birth : ""].filter(Boolean).join(" · ");
+          option.dataset.nationality = traveller.nationality || "";
+          select.appendChild(option);
+        });
+        select.addEventListener("change", function () {
+          const option = select.options[select.selectedIndex];
+          const nationality = form.querySelector('[name="Nationality"]');
+          if (nationality && option && option.dataset.nationality) nationality.value = option.dataset.nationality;
+        });
+      }).catch(function () { field.remove(); });
+    }
+  }
   if (form.dataset.enquiryType && !form.querySelector('input[name="Marketing_consent"]')) {
     const submitButton = form.querySelector('button[type="submit"]');
     if (submitButton) {
@@ -836,6 +868,9 @@ function prepareFormSubmit(form) {
     const dest = next.value;
 
     submitEnquiryToSupabase(fields, serviceType, reference).then(async function (saved) {
+      if (!saved.travellerLinked) {
+        try { sessionStorage.setItem("kridiya_attachment_warning", "Your enquiry was saved, but the selected traveller could not be linked. Kridiya can confirm the traveller with you before booking."); } catch (e) {}
+      }
       if (attachmentFiles.length) {
         try { await uploadEnquiryAttachments(saved.id, attachmentFiles); }
         catch (error) { console.error("Kridiya: enquiry saved but attachment upload failed", error); try { sessionStorage.setItem("kridiya_attachment_warning", "Your enquiry was saved, but one or more attachments could not be uploaded. Please send them through your account support request or WhatsApp."); } catch (e) {} }
