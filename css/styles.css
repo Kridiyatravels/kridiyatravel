@@ -1535,6 +1535,13 @@ a:hover { text-decoration: underline; }
 .trip-timeline time { color: var(--text-muted); font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
 .trip-timeline b { color: var(--ink); font-size: 0.92rem; }
 .trip-timeline small { color: var(--ink-2); }
+.notification-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0.7rem; }
+.notification-options label { display: flex; align-items: flex-start; gap: 0.65rem; padding: 0.85rem; border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+.notification-options input { width: 1rem; height: 1rem; margin-top: 0.15rem; accent-color: var(--brand-deep); }
+.notification-options span { display: grid; gap: 0.2rem; color: var(--ink); }
+.notification-options small { color: var(--text-muted); line-height: 1.4; }
+.communication-head { margin-top: 1.5rem; }
+@media (max-width: 640px) { .notification-options { grid-template-columns: 1fr; } }
 .quote-card-done { opacity: 0.94; }
 .quote-status-line { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--success); font-weight: 600; }
 .quote-status-line svg { width: 15px; height: 15px; fill: var(--success); vertical-align: -2px; margin-right: 0.25rem; }

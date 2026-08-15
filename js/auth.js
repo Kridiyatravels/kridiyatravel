@@ -370,6 +370,23 @@ window.KridiyaAuth = (function () {
     return result.data || [];
   }
 
+  async function getMyNotificationPreferences() {
+    const sb = await client(); const result = await sb.rpc("get_my_notification_preferences");
+    if (result.error) throw result.error; return result.data || {};
+  }
+  async function saveMyNotificationPreferences(values) {
+    const sb = await client(); const result = await sb.rpc("save_my_notification_preferences", {
+      p_email_enabled: values.emailEnabled, p_whatsapp_enabled: values.whatsappEnabled,
+      p_booking_updates: values.bookingUpdates, p_payment_updates: values.paymentUpdates,
+      p_document_updates: values.documentUpdates, p_support_updates: values.supportUpdates,
+      p_marketing_email: values.marketingEmail
+    }); if (result.error) throw result.error; return result.data;
+  }
+  async function listMyCommunicationHistory() {
+    const sb = await client(); const result = await sb.rpc("list_my_communication_history", { p_limit: 50 });
+    if (result.error) throw result.error; return result.data || [];
+  }
+
   async function listMyTravellers() {
     const sb = await client();
     const result = await sb.rpc("list_my_travellers");
@@ -599,6 +616,9 @@ window.KridiyaAuth = (function () {
     listCustomerPayments: listCustomerPayments,
     uploadMyPaymentProof: uploadMyPaymentProof,
     listMyBookingTimeline: listMyBookingTimeline,
+    getMyNotificationPreferences: getMyNotificationPreferences,
+    saveMyNotificationPreferences: saveMyNotificationPreferences,
+    listMyCommunicationHistory: listMyCommunicationHistory,
     listMyTravellers: listMyTravellers,
     saveMyTraveller: saveMyTraveller,
     archiveMyTraveller: archiveMyTraveller,
@@ -1334,6 +1354,30 @@ window.KridiyaAuth = (function () {
           toast(errorMessage(err, "Could not update your profile."));
         }
         btn.disabled = false;
+      });
+
+      const nf = document.getElementById("notification-form");
+      const communicationHistory = document.getElementById("communication-history");
+      function renderCommunicationHistory(rows) {
+        if (!rows.length) { communicationHistory.innerHTML = '<p class="form-note">No portal communications have been recorded yet.</p>'; return; }
+        communicationHistory.innerHTML = '<div class="customer-doc-list">' + rows.map(function (row) {
+          const at = row.delivered_at || row.sent_at || row.available_at;
+          return '<div class="customer-doc-row"><div><b>' + KridiyaAuth.escapeHTML(row.subject) + '</b><small>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(row.category) + ' · ' + KridiyaAuth.statusLabel(row.channel) + ' · ' + new Date(at).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })) + '</small></div><span class="customer-row-state">' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(row.delivery_status)) + '</span></div>';
+        }).join("") + '</div>';
+      }
+      try {
+        const notificationData = await Promise.all([KridiyaAuth.getMyNotificationPreferences(), KridiyaAuth.listMyCommunicationHistory()]);
+        const prefs = notificationData[0];
+        nf.email_enabled.checked = prefs.email_enabled !== false; nf.whatsapp_enabled.checked = prefs.whatsapp_enabled !== false;
+        nf.booking_updates.checked = prefs.booking_updates !== false; nf.payment_updates.checked = prefs.payment_updates !== false;
+        nf.document_updates.checked = prefs.document_updates !== false; nf.support_updates.checked = prefs.support_updates !== false;
+        nf.marketing_email.checked = prefs.marketing_email === true; renderCommunicationHistory(notificationData[1]);
+      } catch (err) { communicationHistory.innerHTML = '<div class="form-banner error" role="alert">Could not load communication settings.</div>'; }
+      nf.addEventListener("submit", async function (event) {
+        event.preventDefault(); busy(nf, true, "Saving..."); banner(nf, "");
+        try { await KridiyaAuth.saveMyNotificationPreferences({ emailEnabled:nf.email_enabled.checked, whatsappEnabled:nf.whatsapp_enabled.checked, bookingUpdates:nf.booking_updates.checked, paymentUpdates:nf.payment_updates.checked, documentUpdates:nf.document_updates.checked, supportUpdates:nf.support_updates.checked, marketingEmail:nf.marketing_email.checked }); banner(nf, "Notification settings saved.", "success"); }
+        catch (err) { banner(nf, errorMessage(err, "Could not save notification settings."), "error"); }
+        busy(nf, false);
       });
 
       const pwf = document.getElementById("password-form");
