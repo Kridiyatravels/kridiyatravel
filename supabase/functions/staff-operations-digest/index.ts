@@ -87,6 +87,7 @@ Deno.serve(async (request: Request) => {
     timeZone: "Asia/Dubai", year: "numeric", month: "2-digit", day: "2-digit",
   }).format(now);
 
+  let stage = "load_digest_inputs";
   try {
     const [{ data: profiles, error: profileError }, { data: preferences }, usersResult, { data: roles }, { data: allTasks, error: taskError }] = await Promise.all([
       admin.from("staff_profiles").select("user_id,full_name").eq("active", true).is("deleted_at", null),
@@ -100,7 +101,14 @@ Deno.serve(async (request: Request) => {
         .order("due_at", { ascending: true, nullsFirst: false })
         .limit(1000),
     ]);
-    if (profileError || taskError) throw profileError || taskError;
+    if (profileError) {
+      stage = "load_staff_profiles";
+      throw profileError;
+    }
+    if (taskError) {
+      stage = "load_tasks";
+      throw taskError;
+    }
 
     const preferenceMap = new Map((preferences || []).map((row) => [row.user_id, row]));
     const roleMap = new Map((roles || []).map((row) => [row.user_id, String(row.role)]));
@@ -165,14 +173,27 @@ Deno.serve(async (request: Request) => {
       }
     }
 
-    await admin.from("audit_events").insert({
+    stage = "write_digest_audit";
+    const audit = await admin.from("audit_events").insert({
       actor_user_id: null, event_type: `operations.digest_${mode}`, entity_type: "operations_digest",
       metadata: { digest_date: digestDate, results },
     });
+    if (audit.error) throw audit.error;
     return reply(origin, 200, { ok: true, mode, digest_date: digestDate, results });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown digest error";
-    console.error("staff-operations-digest:", message);
-    return reply(origin, 503, { error: "Operations digest could not be delivered" });
+    const diagnosticCode = typeof error === "object" && error && "code" in error
+      ? String((error as { code?: unknown }).code || "unknown")
+      : "unknown";
+    const message = error instanceof Error
+      ? error.message
+      : typeof error === "object" && error && "message" in error
+        ? String((error as { message?: unknown }).message || "Unknown digest error")
+        : "Unknown digest error";
+    console.error("staff-operations-digest:", stage, diagnosticCode, message);
+    return reply(origin, 503, {
+      error: "Operations digest could not be delivered",
+      stage,
+      diagnostic_code: diagnosticCode,
+    });
   }
 });
