@@ -936,6 +936,7 @@ window.KridiyaAuth = (function () {
     }
     return '<div class="enq-extra quote-list">' + sortedQuotes.map(function (q, index) {
       const amount = money(q.price_amount, q.currency);
+      const expired = q.status === "expired" || (q.valid_until && new Date(q.valid_until).getTime() <= Date.now());
       const validity = q.valid_until
         ? new Date(q.valid_until).toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric" })
         : "";
@@ -953,7 +954,7 @@ window.KridiyaAuth = (function () {
           }).join("") + "</ul></details>"
         : "";
 
-      if (q.status === "sent") {
+      if (q.status === "sent" && !expired) {
         return '<div class="quote-card">' +
           '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(displayTitle(q, index)) + '</h4><div class="quote-price">' + amount + "</div></div>" +
           (details ? '<div class="quote-details">' + details + "</div>" : "") +
@@ -970,7 +971,8 @@ window.KridiyaAuth = (function () {
       return '<div class="quote-card quote-card-done">' +
         '<div class="quote-card-head"><h4>' + KridiyaAuth.escapeHTML(displayTitle(q, index)) + '</h4><div class="quote-price">' + amount + "</div></div>" +
         (details ? '<div class="quote-details">' + details + "</div>" : "") +
-        '<p class="quote-status-line">' + icon("check") + " " + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(q.status)) + "</p></div>";
+        '<p class="quote-status-line">' + icon(expired ? "clock" : "check") + " " + KridiyaAuth.escapeHTML(expired ? "Quote expired" : KridiyaAuth.statusLabel(q.status)) + "</p>" +
+        (expired ? '<p class="form-note">Prices or availability may have changed. Ask Kridiya for refreshed options.</p><button class="btn btn-outline btn-sm customer-recovery" type="button" data-recovery-link="enquiry:' + KridiyaAuth.escapeHTML(q.enquiry_id) + '" data-recovery-subject="Refresh expired quote" data-recovery-description="Please refresh the expired quote and confirm current price, availability and terms.">Request refreshed quote</button>' : '') + "</div>";
     }).join("") + "</div>";
   }
   function customerDocsHTML(docs) {
@@ -1016,7 +1018,9 @@ window.KridiyaAuth = (function () {
       const refundStages = isRefund ? [p.refund_requested_at ? "Requested " + new Date(p.refund_requested_at).toLocaleDateString("en-GB") : "", p.refund_approved_at ? "Approved " + new Date(p.refund_approved_at).toLocaleDateString("en-GB") : "", p.refund_completed_at ? "Completed " + new Date(p.refund_completed_at).toLocaleDateString("en-GB") : ""].filter(Boolean).join(" · ") : "";
       const pay = paymentUrl ? '<a class="btn btn-primary btn-sm" href="' + KridiyaAuth.escapeHTML(paymentUrl) + '" target="_blank" rel="noopener noreferrer">Pay securely</a>' : '';
       const receipt = p.receipt_document_id && p.status === "received" ? '<button class="btn btn-outline btn-sm customer-receipt" type="button" data-payment-id="' + KridiyaAuth.escapeHTML(p.id) + '">Receipt</button>' : '';
-      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + proof + (refundStages ? '<small>' + KridiyaAuth.escapeHTML(refundStages) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><div class="account-actions"><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span>' + pay + receipt + upload + '</div></div>';
+      const failed = !isRefund && /^(failed|cancelled)$/.test(String(p.status || ""));
+      const recovery = failed ? '<button class="btn btn-outline btn-sm customer-recovery" type="button" data-recovery-link="booking:' + KridiyaAuth.escapeHTML(p.booking_id || "") + '" data-recovery-subject="Help with failed payment" data-recovery-description="Please help me retry or use another secure payment method for payment reference ' + KridiyaAuth.escapeHTML(p.payment_reference || "") + '.">Get payment help</button>' : '';
+      return '<div class="customer-mini-row customer-payment-row"><div><b>' + (isRefund ? "Refund" : "Payment") + ": " + amount + '</b><span>' + KridiyaAuth.escapeHTML(status) + ' / ' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(p.method)) + '</span>' + (ref ? '<small>Reference: ' + KridiyaAuth.escapeHTML(ref) + '</small>' : '') + proof + (failed ? '<small>No new payment was recorded. Use the help action to request a safe retry method.</small>' : '') + (refundStages ? '<small>' + KridiyaAuth.escapeHTML(refundStages) + '</small>' : '') + (p.refund_reason ? '<small>' + KridiyaAuth.escapeHTML(p.refund_reason) + '</small>' : '') + '</div><div class="account-actions"><span class="customer-row-state">' + KridiyaAuth.escapeHTML(status) + '</span>' + pay + receipt + recovery + upload + '</div></div>';
     }).join("") + "</div>";
   }
 
@@ -1049,6 +1053,20 @@ window.KridiyaAuth = (function () {
       catch (err) { input.disabled = false; input.value = ""; label.firstChild.textContent = old; toast(errorMessage(err, "Could not upload payment proof.")); }
     });
     listEl.addEventListener("click", async function (e) {
+      const recoveryBtn = e.target.closest(".customer-recovery");
+      if (recoveryBtn) {
+        const supportForm = document.getElementById("support-request-form");
+        if (!supportForm) { toast("Please contact Kridiya support for help."); return; }
+        supportForm.category.value = "other";
+        supportForm.urgency.value = "normal";
+        supportForm.linked_item.value = recoveryBtn.dataset.recoveryLink || "";
+        supportForm.subject.value = recoveryBtn.dataset.recoverySubject || "Travel support request";
+        supportForm.description.value = recoveryBtn.dataset.recoveryDescription || "Please help me with this travel request.";
+        supportForm.scrollIntoView({ behavior: "smooth", block: "center" });
+        supportForm.description.focus({ preventScroll: true });
+        toast("Review the prefilled request, then submit it to Kridiya operations.");
+        return;
+      }
       const receiptBtn = e.target.closest(".customer-receipt");
       if (receiptBtn) {
         receiptBtn.disabled = true;
@@ -1314,7 +1332,7 @@ window.KridiyaAuth = (function () {
           return !/submitted|completed|done|closed/i.test(String(r.status || ""));
         });
         const activeQuotes = results[3].filter(function (q) {
-          return !/declined|expired|cancelled/i.test(String(q.status || ""));
+          return !/declined|expired|cancelled/i.test(String(q.status || "")) && (!q.valid_until || new Date(q.valid_until).getTime() > Date.now());
         });
 
         const combined = enquiries.map(function (e) {
