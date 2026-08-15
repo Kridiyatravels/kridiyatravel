@@ -101,6 +101,30 @@
           <div class="account-main">
             <div class="account-section-head">
               <div>
+                <h2>Request help</h2>
+                <p>Send an amendment, cancellation, complaint, privacy, or emergency request directly to our operations team.</p>
+              </div>
+              <a href="https://wa.me/971509413873" target="_blank" rel="noopener">Travel emergency? WhatsApp now</a>
+            </div>
+            <div id="support-request-list"><p class="form-note">Loading support requests...</p></div>
+            <form id="support-request-form" class="form-grid" novalidate>
+              <div class="form-banner error" hidden role="alert"></div>
+              <div class="field-row">
+                <div class="field col-6"><label for="sr-category">REQUEST TYPE</label><select id="sr-category" name="category" required><option value="amendment">Amendment</option><option value="cancellation">Cancellation</option><option value="complaint">Complaint</option><option value="privacy">Privacy request</option><option value="emergency">Travel emergency</option><option value="other">Other</option></select></div>
+                <div class="field col-6"><label for="sr-linked">LINKED TRAVEL</label><select id="sr-linked" name="linked_item"><option value="">Account-level request</option></select></div>
+              </div>
+              <div class="field-row">
+                <div class="field col-6"><label for="sr-urgency">URGENCY</label><select id="sr-urgency" name="urgency" required><option value="normal">Normal</option><option value="urgent">Urgent</option><option value="emergency">Emergency</option></select></div>
+                <div class="field col-6"><label for="sr-subject">SUBJECT</label><input id="sr-subject" name="subject" required minlength="3" maxlength="180"></div>
+              </div>
+              <div class="field"><label for="sr-description">WHAT DO YOU NEED?</label><textarea id="sr-description" name="description" rows="4" required minlength="10" maxlength="4000"></textarea><span class="sub">Submitting creates a tracked request. For immediate danger, contact local emergency services first.</span></div>
+              <div><button class="btn btn-primary" type="submit" data-label="Submit request">Submit request</button></div>
+            </form>
+          </div>
+
+          <div class="account-main">
+            <div class="account-section-head">
+              <div>
                 <h2>Profile</h2>
                 <p>Keep this updated so quotes and booking follow-ups reach the right person.</p>
               </div>
@@ -158,6 +182,6 @@
 </main>
 <footer id="site-footer" class="site-footer"></footer>
 <script src="js/main.js?v=20260814c" defer></script>
-<script src="js/auth.js?v=20260726g" defer></script>
+<script src="js/auth.js?v=20260815a" defer></script>
 </body>
 </html>

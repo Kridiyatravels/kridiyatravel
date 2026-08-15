@@ -377,6 +377,34 @@ window.KridiyaAuth = (function () {
     return result.data === true;
   }
 
+  async function listMySupportRequests() {
+    const sb = await client();
+    const result = await sb.rpc("list_my_support_requests");
+    if (result.error) throw result.error;
+    return result.data || [];
+  }
+
+  async function createMySupportRequest(payload) {
+    const sb = await client();
+    const result = await sb.rpc("create_my_support_request", {
+      p_category: payload.category,
+      p_subject: payload.subject,
+      p_description: payload.description,
+      p_urgency: payload.urgency,
+      p_booking_id: payload.bookingId || null,
+      p_enquiry_id: payload.enquiryId || null
+    });
+    if (result.error) throw result.error;
+    return result.data;
+  }
+
+  async function cancelMySupportRequest(id, expectedUpdatedAt) {
+    const sb = await client();
+    const result = await sb.rpc("cancel_my_support_request", { p_request_id: id, p_expected_updated_at: expectedUpdatedAt });
+    if (result.error) throw result.error;
+    return result.data === true;
+  }
+
   async function listEnquiries() {
     const user = await currentUser();
     if (!user) return [];
@@ -540,6 +568,9 @@ window.KridiyaAuth = (function () {
     listMyTravellers: listMyTravellers,
     saveMyTraveller: saveMyTraveller,
     archiveMyTraveller: archiveMyTraveller,
+    listMySupportRequests: listMySupportRequests,
+    createMySupportRequest: createMySupportRequest,
+    cancelMySupportRequest: cancelMySupportRequest,
     listRequests: listRequests,
     listQuotes: listQuotes,
     respondToTextRequest: respondToTextRequest,
@@ -944,6 +975,45 @@ window.KridiyaAuth = (function () {
     });
   }
 
+  function initCustomerSupport(bookings, enquiries) {
+    const form = document.getElementById("support-request-form");
+    const list = document.getElementById("support-request-list");
+    if (!form || !list) return;
+    const linked = form.linked_item;
+    linked.innerHTML = '<option value="">Account-level request</option>' +
+      bookings.map(function (b) { return '<option value="booking:' + KridiyaAuth.escapeHTML(b.id) + '">Booking ' + KridiyaAuth.escapeHTML(b.booking_reference) + '</option>'; }).join("") +
+      enquiries.map(function (e) { return '<option value="enquiry:' + KridiyaAuth.escapeHTML(e.id) + '">Enquiry ' + KridiyaAuth.escapeHTML(e.reference) + '</option>'; }).join("");
+    let rows = [];
+    function render() {
+      if (!rows.length) { list.innerHTML = '<p class="form-note">No support requests submitted from this account.</p>'; return; }
+      list.innerHTML = '<div class="customer-doc-list">' + rows.map(function (r) {
+        const canCancel = /^(submitted|acknowledged)$/.test(r.status);
+        return '<div class="customer-doc-row"><div><b>' + KridiyaAuth.escapeHTML(r.subject) + '</b><small>' + KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(r.category) + ' · ' + KridiyaAuth.statusLabel(r.status) + ' · ' + new Date(r.created_at).toLocaleDateString("en-GB")) + '</small>' + (r.resolution ? '<small>' + KridiyaAuth.escapeHTML(r.resolution) + '</small>' : '') + '</div>' + (canCancel ? '<button class="btn btn-outline" type="button" data-support-cancel="' + KridiyaAuth.escapeHTML(r.id) + '">Cancel</button>' : '') + '</div>';
+      }).join("") + '</div>';
+    }
+    async function refresh() { rows = await KridiyaAuth.listMySupportRequests(); render(); }
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      if (!validateForm(form)) return;
+      const parts = String(linked.value || "").split(":");
+      banner(form, ""); busy(form, true, "Submitting...");
+      try {
+        await KridiyaAuth.createMySupportRequest({ category: form.category.value, urgency: form.urgency.value, subject: form.subject.value, description: form.description.value, bookingId: parts[0] === "booking" ? parts[1] : null, enquiryId: parts[0] === "enquiry" ? parts[1] : null });
+        form.reset(); banner(form, "Request submitted. Kridiya's operations team can now see it.", "success"); await refresh();
+      } catch (err) { banner(form, errorMessage(err, "Could not submit the request."), "error"); }
+      busy(form, false);
+    });
+    list.addEventListener("click", async function (event) {
+      const button = event.target.closest("[data-support-cancel]"); if (!button) return;
+      const row = rows.find(function (item) { return item.id === button.dataset.supportCancel; }); if (!row) return;
+      if (!window.confirm("Cancel this support request?")) return;
+      button.disabled = true;
+      try { await KridiyaAuth.cancelMySupportRequest(row.id, row.updated_at); await refresh(); toast("Support request cancelled."); }
+      catch (err) { button.disabled = false; toast(errorMessage(err, "Could not cancel the request.")); }
+    });
+    refresh().catch(function () { list.innerHTML = '<div class="form-banner error" role="alert">Could not load support requests.</div>'; });
+  }
+
   if (page === "account") {
     document.addEventListener("DOMContentLoaded", async function () {
       const user = await KridiyaAuth.currentUser();
@@ -1049,6 +1119,7 @@ window.KridiyaAuth = (function () {
         ]);
         const bookings = results[0];
         const enquiries = results[1];
+        initCustomerSupport(bookings, enquiries);
         const docs = results[4] || [];
         const payments = await KridiyaAuth.listCustomerPayments(
           bookings.map(function (b) { return b.id; }),
