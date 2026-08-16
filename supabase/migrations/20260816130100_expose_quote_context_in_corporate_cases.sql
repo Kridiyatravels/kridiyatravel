@@ -1,0 +1,6 @@
+drop function public.list_corporate_desk_cases(text,integer);
+create function public.list_corporate_desk_cases(p_status text default null,p_limit integer default 200)returns table(id uuid,corporate_account_id uuid,company_name text,submitted_by uuid,booking_id uuid,quote_id uuid,quote_title text,category text,urgency text,subject text,description text,status text,assigned_to uuid,staff_response text,task_id uuid,resolved_at timestamptz,created_at timestamptz,updated_at timestamptz)language sql stable security definer set search_path=public,pg_temp as $$
+select c.id,c.corporate_account_id,a.company_name,c.submitted_by,c.booking_id,c.quote_id,q.title,c.category,c.urgency,c.subject,c.description,c.status,c.assigned_to,c.staff_response,c.task_id,c.resolved_at,c.created_at,c.updated_at from public.corporate_desk_cases c join public.corporate_accounts a on a.id=c.corporate_account_id left join public.quotes q on q.id=c.quote_id where public.is_staff()and(p_status is null or c.status=p_status)order by case c.urgency when'emergency'then 0 when'urgent'then 1 else 2 end,c.created_at desc limit least(greatest(coalesce(p_limit,200),1),500);
+$$;
+revoke execute on function public.list_corporate_desk_cases(text,integer) from public,anon,authenticated;
+grant execute on function public.list_corporate_desk_cases(text,integer) to authenticated;
