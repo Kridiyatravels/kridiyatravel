@@ -1,0 +1,49 @@
+create or replace function public.list_my_corporate_travellers(p_corporate_account_id uuid)
+returns table(id uuid,full_name text,date_of_birth date,nationality text,passport_number text,passport_expiry date,notes text,updated_at timestamptz)
+language sql stable security definer set search_path=public,pg_temp as $$
+ select t.id,t.full_name,t.date_of_birth,t.nationality,t.passport_number,t.passport_expiry,t.notes,t.updated_at
+ from public.travellers t
+ where t.corporate_account_id=p_corporate_account_id and t.active and t.archived_at is null
+   and exists(select 1 from public.corporate_portal_members m where m.user_id=auth.uid() and m.corporate_account_id=t.corporate_account_id and m.status='active' and m.can_request)
+ order by t.full_name,t.created_at
+$$;
+
+create or replace function public.save_my_corporate_traveller(p_corporate_account_id uuid,p_traveller_id uuid,p_full_name text,p_date_of_birth date,p_nationality text,p_passport_number text,p_passport_expiry date,p_notes text,p_expected_updated_at timestamptz default null)
+returns uuid language plpgsql security definer set search_path=public,pg_temp as $$
+declare v_user uuid:=auth.uid(); v_id uuid; v_old timestamptz; v_passport text:=nullif(regexp_replace(upper(btrim(coalesce(p_passport_number,''))),'[^A-Z0-9]','','g'),'');
+begin
+ if v_user is null then raise exception 'Authentication required'; end if;
+ if not exists(select 1 from public.corporate_portal_members m join public.corporate_accounts a on a.id=m.corporate_account_id where m.user_id=v_user and m.corporate_account_id=p_corporate_account_id and m.status='active' and m.can_request and a.archived_at is null) then raise exception 'Active company request access required'; end if;
+ if char_length(btrim(coalesce(p_full_name,'')))<2 then raise exception 'Traveller name is required'; end if;
+ if p_date_of_birth is not null and p_date_of_birth>=current_date then raise exception 'Date of birth must be in the past'; end if;
+ if p_passport_expiry is not null and p_passport_expiry<current_date then raise exception 'Passport is expired'; end if;
+  if v_passport is not null and exists(select 1 from public.travellers t where t.corporate_account_id=p_corporate_account_id and t.active and t.archived_at is null and t.id is distinct from p_traveller_id and regexp_replace(upper(coalesce(t.passport_number,'')),'[^A-Z0-9]','','g')=v_passport) then raise exception 'A traveller with this passport already exists for the company'; end if;
+ if p_traveller_id is null then
+   insert into public.travellers(corporate_account_id,full_name,date_of_birth,nationality,passport_number,passport_expiry,notes,created_by) values(p_corporate_account_id,btrim(p_full_name),p_date_of_birth,nullif(btrim(coalesce(p_nationality,'')),''),v_passport,p_passport_expiry,nullif(btrim(coalesce(p_notes,'')),''),v_user) returning id into v_id;
+   insert into public.audit_events(actor_user_id,event_type,entity_type,entity_id,metadata) values(v_user,'corporate_traveller_created','traveller',v_id,jsonb_build_object('corporate_account_id',p_corporate_account_id));
+ else
+   select updated_at into v_old from public.travellers where id=p_traveller_id and corporate_account_id=p_corporate_account_id and active and archived_at is null for update;
+   if not found then raise exception 'Traveller not found for this company'; end if;
+   if p_expected_updated_at is null or v_old<>p_expected_updated_at then raise exception 'Traveller changed since it was loaded; refresh and try again'; end if;
+   update public.travellers set full_name=btrim(p_full_name),date_of_birth=p_date_of_birth,nationality=nullif(btrim(coalesce(p_nationality,'')),''),passport_number=v_passport,passport_expiry=p_passport_expiry,notes=nullif(btrim(coalesce(p_notes,'')),''),updated_at=now() where id=p_traveller_id returning id into v_id;
+   insert into public.audit_events(actor_user_id,event_type,entity_type,entity_id,metadata) values(v_user,'corporate_traveller_updated','traveller',v_id,jsonb_build_object('corporate_account_id',p_corporate_account_id,'previous_updated_at',v_old));
+ end if;
+ return v_id;
+end $$;
+
+create or replace function public.archive_my_corporate_traveller(p_corporate_account_id uuid,p_traveller_id uuid,p_expected_updated_at timestamptz)
+returns void language plpgsql security definer set search_path=public,pg_temp as $$
+declare v_user uuid:=auth.uid();
+begin
+ if v_user is null or not exists(select 1 from public.corporate_portal_members m where m.user_id=v_user and m.corporate_account_id=p_corporate_account_id and m.status='active' and m.can_request) then raise exception 'Active company request access required'; end if;
+ update public.travellers set active=false,archived_at=now(),updated_at=now() where id=p_traveller_id and corporate_account_id=p_corporate_account_id and active and archived_at is null and updated_at=p_expected_updated_at;
+ if not found then raise exception 'Traveller changed or was not found; refresh and try again'; end if;
+ insert into public.audit_events(actor_user_id,event_type,entity_type,entity_id,metadata) values(v_user,'corporate_traveller_archived','traveller',p_traveller_id,jsonb_build_object('corporate_account_id',p_corporate_account_id));
+end $$;
+
+revoke execute on function public.list_my_corporate_travellers(uuid) from public,anon;
+revoke execute on function public.save_my_corporate_traveller(uuid,uuid,text,date,text,text,date,text,timestamptz) from public,anon;
+revoke execute on function public.archive_my_corporate_traveller(uuid,uuid,timestamptz) from public,anon;
+grant execute on function public.list_my_corporate_travellers(uuid) to authenticated;
+grant execute on function public.save_my_corporate_traveller(uuid,uuid,text,date,text,text,date,text,timestamptz) to authenticated;
+grant execute on function public.archive_my_corporate_traveller(uuid,uuid,timestamptz) to authenticated;
