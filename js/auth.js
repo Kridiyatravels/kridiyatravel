@@ -394,6 +394,10 @@ window.KridiyaAuth = (function () {
     const sb = await client(); const result = await sb.rpc("list_my_communication_history", { p_limit: 50 });
     if (result.error) throw result.error; return result.data || [];
   }
+  async function listMyTravelDisruptions() {
+    const sb = await client(); const result = await sb.rpc("list_my_travel_disruptions", { p_limit: 100 });
+    if (result.error) throw result.error; return result.data || [];
+  }
   async function getMyEnquiryDraft(formKey) {
     const sb = await client(); const result = await sb.rpc("get_my_enquiry_draft", { p_form_key: formKey });
     if (result.error) throw result.error; return result.data || null;
@@ -640,6 +644,7 @@ window.KridiyaAuth = (function () {
     getMyNotificationPreferences: getMyNotificationPreferences,
     saveMyNotificationPreferences: saveMyNotificationPreferences,
     listMyCommunicationHistory: listMyCommunicationHistory,
+    listMyTravelDisruptions: listMyTravelDisruptions,
     getMyEnquiryDraft: getMyEnquiryDraft,
     saveMyEnquiryDraft: saveMyEnquiryDraft,
     deleteMyEnquiryDraft: deleteMyEnquiryDraft,
@@ -1444,12 +1449,14 @@ window.KridiyaAuth = (function () {
         }).join("") + '</div>';
       }
       try {
-        const notificationData = await Promise.all([KridiyaAuth.getMyNotificationPreferences(), KridiyaAuth.listMyCommunicationHistory()]);
+        const notificationData = await Promise.all([KridiyaAuth.getMyNotificationPreferences(), KridiyaAuth.listMyCommunicationHistory(), KridiyaAuth.listMyTravelDisruptions()]);
         const prefs = notificationData[0];
         nf.email_enabled.checked = prefs.email_enabled !== false; nf.whatsapp_enabled.checked = prefs.whatsapp_enabled !== false;
         nf.booking_updates.checked = prefs.booking_updates !== false; nf.payment_updates.checked = prefs.payment_updates !== false;
         nf.document_updates.checked = prefs.document_updates !== false; nf.support_updates.checked = prefs.support_updates !== false;
         nf.marketing_email.checked = prefs.marketing_email === true; renderCommunicationHistory(notificationData[1]);
+        const disruptionBox=document.getElementById("travel-disruption-updates"),disruptions=notificationData[2]||[];
+        disruptionBox.innerHTML=disruptions.length?'<div class="customer-doc-list">'+disruptions.map(function(d){return '<div class="customer-doc-row"><div><b>'+KridiyaAuth.escapeHTML(d.title)+' — '+KridiyaAuth.escapeHTML(d.booking_reference)+'</b><small>'+KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(d.severity)+' · '+KridiyaAuth.statusLabel(d.status)+' · Next update '+(d.next_update_at?new Date(d.next_update_at).toLocaleString("en-GB"):"to be confirmed"))+'</small>'+(d.updates||[]).map(function(u){return '<p>'+KridiyaAuth.escapeHTML(u.message)+'</p>';}).join('')+'</div><span class="customer-row-state">'+KridiyaAuth.escapeHTML(KridiyaAuth.statusLabel(d.impact_status))+'</span></div>';}).join('')+'</div>':'<p class="form-note">No active travel disruption affects your bookings.</p>';
       } catch (err) { communicationHistory.innerHTML = '<div class="form-banner error" role="alert">Could not load communication settings.</div>'; }
       nf.addEventListener("submit", async function (event) {
         event.preventDefault(); busy(nf, true, "Saving..."); banner(nf, "");
