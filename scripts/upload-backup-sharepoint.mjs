@@ -131,7 +131,11 @@ const driveId = required("MICROSOFT_DRIVE_ID");
 const root = String(process.env.MICROSOFT_ROOT_FOLDER || "Kridiya Business")
   .trim()
   .replace(/^\/+|\/+$/g, "");
-const folderPath = `${root}/database-backups`;
+const configuredFolder = String(process.env.BACKUP_REMOTE_FOLDER || "database-backups")
+  .trim()
+  .replace(/^\/+|\/+$/g, "");
+if (!configuredFolder) throw new Error("BACKUP_REMOTE_FOLDER must not be empty");
+const folderPath = `${root}/${configuredFolder}`;
 await ensureFolder(token, driveId, folderPath);
 const result = await upload(token, driveId, folderPath, path.resolve(localFile));
 console.log(JSON.stringify({
