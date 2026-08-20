@@ -287,7 +287,7 @@ begin
     'portal_status', v_portal_status
   );
 end;
-$function$
+$function$;
 ;
 
 -- approve_payment_refund(p_payment_id uuid, p_note text)
@@ -333,7 +333,7 @@ begin
 
   return p_payment_id;
 end;
-$function$
+$function$;
 ;
 
 -- booking_profit_summary()
@@ -360,7 +360,7 @@ AS $function$
     and b.archived_at is null
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- can_approve_refunds()
@@ -376,7 +376,7 @@ AS $function$
 
   select public.is_admin() or public.has_staff_permission('approve_refunds')
   ) as guarded(value);
-$function$
+$function$;
 ;
 
 -- complete_payment_refund(p_payment_id uuid, p_refund_method text, p_refund_reference text, p_note text)
@@ -426,7 +426,7 @@ begin
 
   return p_payment_id;
 end;
-$function$
+$function$;
 ;
 
 -- create_operations_booking(p_title text, p_service_type booking_service_type, p_booking_kind text, p_customer_name text, p_customer_email text, p_customer_phone text, p_corporate_account_id uuid, p_route_or_destination text, p_travel_start date, p_travel_end date, p_selling_price numeric, p_supplier_cost numeric, p_supplier_name text, p_portal_id uuid, p_notes text)
@@ -505,7 +505,7 @@ begin
 
   return v_booking_id;
 end;
-$function$
+$function$;
 ;
 
 -- create_operations_booking(p_title text, p_service_type booking_service_type, p_booking_kind text, p_customer_name text, p_customer_email text, p_customer_phone text, p_corporate_account_id uuid, p_route_or_destination text, p_travel_start date, p_travel_end date, p_selling_price numeric, p_supplier_cost numeric, p_supplier_name text, p_portal_id uuid, p_notes text, p_corporate_contact_id uuid)
@@ -620,7 +620,7 @@ begin
 
   return v_booking_id;
 end;
-$function$
+$function$;
 ;
 
 -- delete_staff_profile(target_user_id uuid)
@@ -659,7 +659,7 @@ begin
 
   return 'deleted';
 end;
-$function$
+$function$;
 ;
 
 -- get_booking_quote_context(p_booking_id uuid)
@@ -709,7 +709,7 @@ AS $function$
     )
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- get_booking_workflow(p_booking_id uuid)
@@ -779,7 +779,7 @@ AS $function$
     )
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- get_my_corporate_booking_detail(p_booking_id uuid)
@@ -859,7 +859,7 @@ AS $function$
     and b.booking_kind = 'corporate'
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- get_my_corporate_portal()
@@ -892,7 +892,7 @@ AS $function$
     and ca.archived_at is null
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- get_operations_booking_detail(p_booking_id uuid)
@@ -1055,7 +1055,7 @@ AS $function$
     )
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- get_staff_management_profiles()
@@ -1118,7 +1118,7 @@ begin
     left join public.staff_permissions p on p.user_id = sr.user_id
     order by coalesce(sp.active, true) desc, coalesce(sp.full_name, au.email::text);
 end;
-$function$
+$function$;
 ;
 
 -- grant_staff_by_email(target_email text, target_role staff_role)
@@ -1146,7 +1146,7 @@ begin
   on conflict (user_id) do update set role = excluded.role;
   return 'granted';
 end;
-$function$
+$function$;
 ;
 
 -- has_staff_permission(permission_name text)
@@ -1197,7 +1197,7 @@ begin
 
   return coalesce(allowed, false);
 end;
-$function$
+$function$;
 ;
 
 -- hold_staff(target_user_id uuid, hold_until timestamp with time zone, reason text)
@@ -1246,7 +1246,7 @@ begin
 
   return 'held';
 end;
-$function$
+$function$;
 ;
 
 -- is_admin()
@@ -1271,7 +1271,7 @@ AS $function$
       and (sp.hold_until is null or sp.hold_until <= now())
   )
   ) as guarded(value);
-$function$
+$function$;
 ;
 
 -- is_corporate_portal_member(p_corporate_account_id uuid)
@@ -1296,7 +1296,7 @@ AS $function$
       and ca.status in ('active', 'approved', 'customer', 'prospect')
   )
   ) as guarded(value);
-$function$
+$function$;
 ;
 
 -- is_staff()
@@ -1321,7 +1321,7 @@ AS $function$
       and (sp.hold_until is null or sp.hold_until <= now())
   )
   ) as guarded(value);
-$function$
+$function$;
 ;
 
 -- list_audit_events(limit_count integer)
@@ -1346,7 +1346,7 @@ begin
     order by ae.created_at desc
     limit limit_count;
 end;
-$function$
+$function$;
 ;
 
 -- list_b2b_portals()
@@ -1375,7 +1375,7 @@ AS $function$
   where public.is_staff()
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- list_corporate_accounts()
@@ -1433,7 +1433,7 @@ AS $function$
     and (public.has_staff_permission('view_corporates') or public.has_staff_permission('edit_corporates') or public.has_staff_permission('manage_staff'))
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- list_dashboard_booking_tasks(limit_count integer)
@@ -1494,7 +1494,7 @@ AS $function$
   limit greatest(1, least(limit_count, 200))
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- list_my_corporate_bookings(p_corporate_account_id uuid, p_limit integer)
@@ -1534,7 +1534,7 @@ AS $function$
   limit greatest(1, least(coalesce(p_limit, 100), 200))
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- list_operations_bookings(limit_count integer)
@@ -1588,7 +1588,7 @@ AS $function$
   limit greatest(1, least(limit_count, 500))
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- list_operations_payments(limit_count integer)
@@ -1641,7 +1641,7 @@ AS $function$
   limit greatest(1, least(limit_count, 500))
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- list_staff()
@@ -1667,7 +1667,7 @@ begin
     left join public.staff_profiles sp on sp.user_id = sr.user_id
     order by sr.created_at asc;
 end;
-$function$
+$function$;
 ;
 
 -- reactivate_staff(target_user_id uuid)
@@ -1707,7 +1707,7 @@ begin
 
   return 'reactivated';
 end;
-$function$
+$function$;
 ;
 
 -- record_customer_payment(p_booking_id uuid, p_amount numeric, p_method text, p_status text, p_currency text, p_payment_link text, p_notes text)
@@ -1778,7 +1778,7 @@ begin
 
   return v_payment_id;
 end;
-$function$
+$function$;
 ;
 
 -- record_supplier_payment(p_booking_id uuid, p_supplier_name text, p_amount_payable numeric, p_amount_paid numeric, p_status text, p_currency text, p_supplier_reference text, p_due_date date, p_notes text)
@@ -1843,7 +1843,7 @@ begin
 
   return v_supplier_payment_id;
 end;
-$function$
+$function$;
 ;
 
 -- request_payment_refund(p_payment_id uuid, p_refund_amount numeric, p_reason text)
@@ -1908,7 +1908,7 @@ begin
 
   return p_payment_id;
 end;
-$function$
+$function$;
 ;
 
 -- respond_my_corporate_quote(p_quote_id uuid, p_status text)
@@ -2010,7 +2010,7 @@ begin
     'booking_reference', v_booking.booking_reference
   );
 end;
-$function$
+$function$;
 ;
 
 -- revoke_staff(target_user_id uuid)
@@ -2034,7 +2034,7 @@ begin
   delete from public.staff_roles where user_id = target_user_id;
   return 'revoked';
 end;
-$function$
+$function$;
 ;
 
 -- setup_staff_account_record(target_user_id uuid, full_name text, department text, role staff_role)
@@ -2104,7 +2104,7 @@ begin
 
   return 'created';
 end;
-$function$
+$function$;
 ;
 
 -- staff_dashboard_summary()
@@ -2142,7 +2142,7 @@ AS $function$
   where public.is_staff()
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- staff_monitoring_summary(days_back integer)
@@ -2189,7 +2189,7 @@ AS $function$
   order by sp.active desc, activity_events desc, sp.full_name
   ) as guarded
   where auth.uid() is not null;
-$function$
+$function$;
 ;
 
 -- update_operations_booking_status(p_booking_id uuid, p_status booking_status, p_payment_status text, p_document_status text, p_supplier_reference text, p_staff_notes text)
@@ -2226,7 +2226,7 @@ begin
   insert into public.audit_events (actor_user_id, event_type, entity_type, entity_id, metadata)
   values (auth.uid(), 'booking.status_updated', 'booking', p_booking_id, jsonb_build_object('reference', v_ref, 'status', p_status, 'payment_status', p_payment_status, 'document_status', p_document_status));
 end;
-$function$
+$function$;
 ;
 
 -- update_staff_permissions(target_user_id uuid, permissions jsonb)
@@ -2307,7 +2307,7 @@ begin
 
   return 'updated';
 end;
-$function$
+$function$;
 ;
 
 -- update_staff_profile(target_user_id uuid, full_name text, department text, job_title text, phone text, role staff_role, active boolean, notes text, hold_until timestamp with time zone)
@@ -2365,5 +2365,5 @@ begin
 
   return 'updated';
 end;
-$function$
+$function$;
 ;

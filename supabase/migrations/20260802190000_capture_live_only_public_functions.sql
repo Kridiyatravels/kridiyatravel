@@ -22,7 +22,7 @@ AS $function$
   from public.bookings b
   where public.has_staff_permission('view_profit')
     and b.archived_at is null;
-$function$
+$function$;
 
 revoke execute on function booking_profit_summary() from public, anon, authenticated;
 grant execute on function booking_profit_summary() to authenticated;
@@ -135,7 +135,7 @@ begin
     )
   );
 end;
-$function$
+$function$;
 
 revoke execute on function create_booking_quote_option(uuid,text,text,numeric,text,timestamp with time zone,text,jsonb) from public, anon, authenticated;
 grant execute on function create_booking_quote_option(uuid,text,text,numeric,text,timestamp with time zone,text,jsonb) to authenticated, service_role;
@@ -172,7 +172,7 @@ begin
 
   return 'deleted';
 end;
-$function$
+$function$;
 
 revoke execute on function delete_staff_profile(uuid) from public, anon, authenticated;
 grant execute on function delete_staff_profile(uuid) to authenticated, service_role;
@@ -218,7 +218,7 @@ AS $function$
       or public.has_staff_permission('edit_bookings')
       or public.has_staff_permission('view_reports')
     );
-$function$
+$function$;
 
 revoke execute on function get_booking_quote_context(uuid) from public, anon, authenticated;
 grant execute on function get_booking_quote_context(uuid) to authenticated, service_role;
@@ -279,7 +279,7 @@ begin
     left join public.staff_permissions p on p.user_id = sr.user_id
     order by coalesce(sp.active, true) desc, coalesce(sp.full_name, au.email::text);
 end;
-$function$
+$function$;
 
 revoke execute on function get_staff_management_profiles() from public, anon, authenticated;
 grant execute on function get_staff_management_profiles() to authenticated, service_role;
@@ -328,7 +328,7 @@ begin
 
   return coalesce(allowed, false);
 end;
-$function$
+$function$;
 
 revoke execute on function has_staff_permission(text) from public, anon, authenticated;
 grant execute on function has_staff_permission(text) to authenticated, service_role;
@@ -375,7 +375,7 @@ begin
 
   return 'held';
 end;
-$function$
+$function$;
 
 revoke execute on function hold_staff(uuid,timestamp with time zone,text) from public, anon, authenticated;
 grant execute on function hold_staff(uuid,timestamp with time zone,text) to authenticated, service_role;
@@ -392,7 +392,7 @@ begin
   n := nextval('public.booking_reference_seq');
   return 'KRI-' || to_char(now(), 'YYYY') || '-' || lpad(n::text, 4, '0');
 end;
-$function$
+$function$;
 
 revoke execute on function next_booking_reference() from public, anon, authenticated;
 
@@ -408,7 +408,7 @@ begin
   n := nextval('public.payment_reference_seq');
   return 'PAY-' || to_char(now(), 'YYYY') || '-' || lpad(n::text, 4, '0');
 end;
-$function$
+$function$;
 
 revoke execute on function next_payment_reference() from public, anon, authenticated;
 
@@ -445,7 +445,7 @@ begin
 
   return 'reactivated';
 end;
-$function$
+$function$;
 
 revoke execute on function reactivate_staff(uuid) from public, anon, authenticated;
 grant execute on function reactivate_staff(uuid) to authenticated, service_role;
@@ -514,7 +514,7 @@ begin
 
   return v_payment_id;
 end;
-$function$
+$function$;
 
 revoke execute on function record_customer_payment(uuid,numeric,text,text,text,text,text) from public, anon, authenticated;
 grant execute on function record_customer_payment(uuid,numeric,text,text,text,text,text) to authenticated, service_role;
@@ -577,7 +577,7 @@ begin
 
   return v_supplier_payment_id;
 end;
-$function$
+$function$;
 
 revoke execute on function record_supplier_payment(uuid,text,numeric,numeric,text,text,text,date,text) from public, anon, authenticated;
 grant execute on function record_supplier_payment(uuid,text,numeric,numeric,text,text,text,date,text) to authenticated, service_role;
@@ -610,7 +610,7 @@ BEGIN
      END IF;
   END LOOP;
 END;
-$function$
+$function$;
 
 revoke execute on function rls_auto_enable() from public, anon, authenticated;
 
@@ -628,7 +628,7 @@ AS $function$
     and coalesce(sp.active, true) = true
     and coalesce(sp.deleted_at is null, true)
     and (sp.hold_until is null or sp.hold_until <= now());
-$function$
+$function$;
 
 revoke execute on function staff_management_admin_count(uuid) from public, anon, authenticated;
 grant execute on function staff_management_admin_count(uuid) to service_role;
@@ -663,7 +663,7 @@ begin
   insert into public.audit_events (actor_user_id, event_type, entity_type, entity_id, metadata)
   values (auth.uid(), 'booking.status_updated', 'booking', p_booking_id, jsonb_build_object('reference', v_ref, 'status', p_status, 'payment_status', p_payment_status, 'document_status', p_document_status));
 end;
-$function$
+$function$;
 
 revoke execute on function update_operations_booking_status(uuid,booking_status,text,text,text,text) from public, anon, authenticated;
 grant execute on function update_operations_booking_status(uuid,booking_status,text,text,text,text) to authenticated, service_role;
@@ -742,7 +742,7 @@ begin
 
   return 'updated';
 end;
-$function$
+$function$;
 
 revoke execute on function update_staff_permissions(uuid,jsonb) from public, anon, authenticated;
 grant execute on function update_staff_permissions(uuid,jsonb) to authenticated, service_role;
@@ -798,7 +798,7 @@ begin
 
   return 'updated';
 end;
-$function$
+$function$;
 
 revoke execute on function update_staff_profile(uuid,text,text,text,text,staff_role,boolean,text,timestamp with time zone) from public, anon, authenticated;
 grant execute on function update_staff_profile(uuid,text,text,text,text,staff_role,boolean,text,timestamp with time zone) to authenticated, service_role;
